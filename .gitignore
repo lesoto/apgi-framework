@@ -22,9 +22,10 @@ data/*.h5
 data/*.hdf5
 data/*.mat
 data/*.csv
-figures/output/
+# figures/output/ — generated PDFs are committed for reproducibility
 .ipynb_checkpoints/
-*.ipynb
+# Track notebooks/; ignore only auto-checkpoint copies
+notebooks/.ipynb_checkpoints/
 .DS_Store
 .AppleDouble
 .LSOverride
