@@ -7,12 +7,9 @@ on:
 
 permissions:
   contents: read
-  id-token: write   # required for trusted PyPI publishing
+  id-token: write
 
 jobs:
-  # -----------------------------------------------------------------------
-  # Gate: run the full test suite before publishing anything
-  # -----------------------------------------------------------------------
   test:
     runs-on: ubuntu-latest
     steps:
