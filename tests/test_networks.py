@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from apgi.hierarchical import APGIHierarchy, HierarchicalLevel
-from apgi.liquid_network import LiquidNeuralNetwork
+from apgi.extensions.hierarchical import APGIHierarchy, HierarchicalLevel
+from apgi.extensions.liquid_network import LiquidNeuralNetwork
 
 
 class TestLiquidNeuralNetwork:

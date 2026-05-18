@@ -1,0 +1,12 @@
+# SHA-256 checksums for Zenodo dataset downloads
+# Format: <sha256>  <filename>
+#
+# These are populated automatically by scripts/fetch_data.py after
+# a successful download.  Update the DATASETS registry in
+# src/apgi/scripts/fetch_data.py when new files are deposited.
+#
+# PLACEHOLDER — replace with real checksums after Zenodo deposition.
+PLACEHOLDER_SHA256  sim1_ignition_dynamics.npz
+PLACEHOLDER_SHA256  sim2_parameter_recovery.npz
+PLACEHOLDER_SHA256  sim3_liquid_network.npz
+PLACEHOLDER_SHA256  sim4_hierarchical.npz

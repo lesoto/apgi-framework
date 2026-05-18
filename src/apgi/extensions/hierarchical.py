@@ -18,7 +18,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from apgi.apgi_core import compute_pi_i_eff, compute_S_t
+from apgi.core import compute_pi_i_eff, compute_S_t
 
 
 class HierarchicalLevel:
