@@ -43,6 +43,23 @@ class TestAPGICoreIntegrationStep:
         integ = APGICoreIntegration()
         assert np.isnan(integ.ignition_rate())
 
+    def test_mean_S_t_empty_is_nan(self):
+        integ = APGICoreIntegration()
+        assert np.isnan(integ.mean_S_t())
+
+    def test_mean_theta_empty_is_nan(self):
+        integ = APGICoreIntegration()
+        assert np.isnan(integ.mean_theta())
+
+    def test_mean_metrics_non_empty(self):
+        integ = APGICoreIntegration()
+        integ.step(1.0, 1.0, 1.0, 0.5, 1.0, 0.5)
+        integ.step(1.0, 1.0, 1.0, 0.5, 1.0, 0.5)
+        assert integ.mean_S_t() > 0
+        assert integ.mean_theta() > 0
+
+
+
 
 class TestAPGICoreIntegrationRunSequence:
     def _make_arrays(self, n: int = 50, seed: int = 0):
