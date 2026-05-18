@@ -32,3 +32,13 @@ jobs:
 
       - name: Figure smoke test — Figure 2
         run: python figures/generate_figure2.py --no-show
+
+      - name: Validate protocol JSON schemas
+        run: |
+          python -c "
+          import json, jsonschema, pathlib
+          schema = json.load(open('protocols/schemas/protocol.schema.json'))
+          for f in pathlib.Path('protocols').glob('*.json'):
+              jsonschema.validate(json.load(open(f)), schema)
+          print('All protocols valid')
+          "
