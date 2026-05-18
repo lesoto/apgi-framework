@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(python -c \"import apgi; print\\(apgi.__version__\\)\" --break-system-packages)",
+      "Bash(python -c \"import apgi; print\\(apgi.__version__\\)\")",
+      "Bash(python -m pip install -e \".[dev]\" --break-system-packages)",
+      "Bash(python3 -m venv /tmp/apgi-test-venv)",
+      "Bash(/tmp/apgi-test-venv/bin/pip install *)",
+      "Bash(pip3 --version)",
+      "Bash(python3 -c \"import sys; print\\(sys.version\\)\")",
+      "Bash(which python3.11 2>/dev/null || which python3.12 2>/dev/null || echo \"not found\"; ls /opt/homebrew/bin/python* 2>/dev/null)",
+      "Bash(python3.12 -m venv /tmp/apgi-venv312)",
+      "Bash(/tmp/apgi-venv312/bin/pip install *)",
+      "Bash(/tmp/apgi-venv312/bin/python -c \"import apgi; print\\('version:', apgi.__version__\\)\")",
+      "Bash(/tmp/apgi-venv312/bin/pytest /Users/lesoto/Sites/PYTHON/apgi-framework/tests/test_core_equations.py -v --tb=short)",
+      "Bash(/tmp/apgi-venv312/bin/pytest /Users/lesoto/Sites/PYTHON/apgi-framework/tests/test_parameter_recovery.py -v --tb=short -x)",
+      "Bash(/tmp/apgi-venv312/bin/pytest /Users/lesoto/Sites/PYTHON/apgi-framework/tests/ -v --tb=short)",
+      "Bash(/tmp/apgi-venv312/bin/python figures/generate_figure1.py --no-show)",
+      "Bash(/tmp/apgi-venv312/bin/python figures/generate_figure2.py --no-show --n-sim 10)"
+    ]
+  }
+}

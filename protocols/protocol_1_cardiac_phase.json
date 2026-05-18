@@ -1,0 +1,83 @@
+{
+  "protocol_id": "APGI-P01",
+  "title": "Cardiac Phase Gating Paradigm",
+  "paper": "APGI Paper 1",
+  "osf_url": "https://osf.io/XXXXXX",
+  "version": "1.0.0",
+  "last_updated": "2026-05-16",
+  "description": "This protocol examines how cardiac phase (systole vs. diastole) modulates conscious perception thresholds. Stimuli are time-locked to the R-peak of the electrocardiogram (ECG) to deliver visual targets at defined cardiac phases. APGI predicts a significant cardiac-phase × ignition interaction mediated by interoceptive precision (Πⁱ_eff).",
+  "participants": {
+    "n_target": 40,
+    "n_minimum": 32,
+    "inclusion_criteria": [
+      "Age 18–45 years",
+      "Normal or corrected-to-normal vision",
+      "No history of cardiac arrhythmia",
+      "No psychoactive medication within 30 days"
+    ],
+    "exclusion_criteria": [
+      "Resting heart rate < 50 or > 100 BPM",
+      "Irregular ECG rhythm (assessed by study nurse)",
+      "Prior TMS contraindications (not relevant for this protocol; retained for series consistency)"
+    ]
+  },
+  "apparatus": {
+    "ECG": "BrainAmp ExG (Brain Products GmbH) at 5000 Hz",
+    "display": "VPixx ProPixx at 120 Hz, viewing distance 57 cm",
+    "stimulus_delivery": "Custom Python trigger script (triggers/ directory)"
+  },
+  "trial_structure": {
+    "isi_ms": [1200, 1600],
+    "fixation_duration_ms": 500,
+    "cardiac_phase_window_ms": {
+      "systole": [0, 150],
+      "diastole": [300, 500]
+    },
+    "target": {
+      "type": "Gabor patch",
+      "spatial_frequency_cpd": 3,
+      "contrast_levels": [0.02, 0.04, 0.08, 0.16, 0.32],
+      "duration_ms": 33
+    },
+    "response": "2AFC (seen / not seen), response window 1500 ms"
+  },
+  "blocks": {
+    "practice_trials": 20,
+    "experimental_blocks": 8,
+    "trials_per_block": 60,
+    "total_experimental_trials": 480
+  },
+  "cardiac_phase_algorithm": {
+    "r_peak_detection": "Pan-Tompkins (real-time, latency < 5 ms)",
+    "phase_prediction": "Linear interpolation from R-R interval",
+    "jitter_correction": true,
+    "jitter_tolerance_ms": 10
+  },
+  "dependent_variables": [
+    "Detection rate per cardiac phase",
+    "d-prime (signal detection theory)",
+    "Reaction time",
+    "Estimated Sₜ at trial time (from fitted APGI model)"
+  ],
+  "primary_hypothesis": "Detection rate is higher at diastole than systole, consistent with elevated Πⁱ_eff during cardiac deceleration.",
+  "primary_analysis": "Mixed-effects logistic regression: detection ~ cardiac_phase * contrast + (cardiac_phase | participant)",
+  "power_analysis": {
+    "effect_size_d": 0.4,
+    "alpha": 0.05,
+    "power": 0.9,
+    "n_required": 34,
+    "software": "G*Power 3.1"
+  },
+  "pre_registration": {
+    "platform": "OSF",
+    "url": "https://osf.io/XXXXXX",
+    "date": "2026-05-16"
+  },
+  "apgi_parameters": {
+    "kappa": 100,
+    "alpha": 0.3,
+    "beta_initial_estimate": 0.7,
+    "pi_i_cardiac_systole": 0.6,
+    "pi_i_cardiac_diastole": 1.2
+  }
+}
