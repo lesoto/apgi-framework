@@ -17,7 +17,9 @@
       "Bash(/tmp/apgi-venv312/bin/pytest /Users/lesoto/Sites/PYTHON/apgi-framework/tests/test_parameter_recovery.py -v --tb=short -x)",
       "Bash(/tmp/apgi-venv312/bin/pytest /Users/lesoto/Sites/PYTHON/apgi-framework/tests/ -v --tb=short)",
       "Bash(/tmp/apgi-venv312/bin/python figures/generate_figure1.py --no-show)",
-      "Bash(/tmp/apgi-venv312/bin/python figures/generate_figure2.py --no-show --n-sim 10)"
+      "Bash(/tmp/apgi-venv312/bin/python figures/generate_figure2.py --no-show --n-sim 10)",
+      "Bash(python -m pytest tests/ --collect-only)",
+      "Bash(pytest tests/ -q)"
     ]
   }
 }
