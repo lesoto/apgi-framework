@@ -123,6 +123,11 @@
     "pi_i_cardiac_systole": 0.6,
     "pi_i_cardiac_diastole": 1.2
   },
+  "ethics": {
+    "committee": "Institutional Review Board",
+    "protocol_number": "IRB-2026-EEG-XXX",
+    "approval_date": "2026-05-01"
+  },
   "submission_blocking_issues": [],
   "caveats": []
 }

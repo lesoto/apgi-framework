@@ -19,7 +19,8 @@
     "primary_analysis",
     "power_analysis",
     "pre_registration",
-    "apgi_parameters"
+    "apgi_parameters",
+    "ethics"
   ],
   "properties": {
     "protocol_id": {
@@ -136,7 +137,37 @@
       "type": "object"
     },
     "ethics": {
-      "type": "object"
+      "type": "object",
+      "required": ["committee", "protocol_number", "approval_date"],
+      "properties": {
+        "committee": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Name of the ethics committee or IRB."
+        },
+        "protocol_number": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Assigned IRB/ethics protocol number."
+        },
+        "approval_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date ethics approval was granted (YYYY-MM-DD)."
+        },
+        "exempt_reason": {
+          "type": "string",
+          "description": "If no human subjects are involved, state the exemption reason."
+        },
+        "surrogate_consent": {
+          "type": "string",
+          "description": "Surrogate consent procedure for incapacitated participants."
+        },
+        "data_sharing": {
+          "type": "string",
+          "description": "Data sharing and de-identification plan."
+        }
+      }
     }
   },
   "additionalProperties": true

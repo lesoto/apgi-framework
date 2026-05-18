@@ -25,10 +25,38 @@ class LiquidNeuralNetwork:
         Dimensionality of the readout y.
     tau : float or NDArray
         Neuron time constants (scalar broadcasts to all neurons).
+        Typical physiological range: 5–50 ms.
     spectral_radius : float
         Target spectral radius ρ for the recurrent weight matrix.
+        Values < 1.0 yield stable dynamics; values near 1.0 maximise
+        memory capacity (edge-of-chaos regime).
     seed : int
         RNG seed for reproducible weight initialisation.
+
+    Examples
+    --------
+    Single-step inference:
+
+    >>> import numpy as np
+    >>> lnn = LiquidNeuralNetwork(n_inputs=3, n_hidden=50, n_outputs=2, seed=0)
+    >>> u = np.array([0.5, -0.3, 1.0])
+    >>> y = lnn.step(u, dt=1.0)
+    >>> y.shape
+    (2,)
+
+    Sequence processing (e.g. 100 ms of simulated input at 1 ms resolution):
+
+    >>> rng = np.random.default_rng(42)
+    >>> inputs = rng.uniform(-1.0, 1.0, (100, 3))
+    >>> outputs = lnn.run(inputs, dt=1.0)
+    >>> outputs.shape
+    (100, 2)
+
+    Using per-neuron time constants to model heterogeneous populations:
+
+    >>> tau_vec = np.linspace(5.0, 50.0, 50)
+    >>> lnn_het = LiquidNeuralNetwork(n_inputs=3, n_hidden=50, n_outputs=2,
+    ...                               tau=tau_vec, seed=1)
     """
 
     def __init__(
@@ -81,10 +109,18 @@ class LiquidNeuralNetwork:
 
         Args:
             u: Input vector of shape (n_inputs,).
-            dt: Integration time step (ms).
+            dt: Integration time step (ms). Stability requires dt < min(tau).
 
         Returns:
             Readout y of shape (n_outputs,).
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> lnn = LiquidNeuralNetwork(n_inputs=2, n_hidden=10, n_outputs=1, seed=0)
+        >>> y = lnn.step(np.array([1.0, 0.0]), dt=1.0)
+        >>> y.shape
+        (1,)
         """
         u = np.asarray(u, dtype=float)
         if u.shape != (self.n_inputs,):
@@ -98,12 +134,24 @@ class LiquidNeuralNetwork:
     def run(self, inputs: NDArray, dt: float = 1.0) -> NDArray:
         """Run the network over a sequence of inputs.
 
+        Resets hidden state before processing so results are
+        independent of prior ``step`` calls.
+
         Args:
             inputs: Array of shape (T, n_inputs).
             dt: Integration time step.
 
         Returns:
             Readout array of shape (T, n_outputs).
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> lnn = LiquidNeuralNetwork(n_inputs=3, n_hidden=20, n_outputs=2, seed=0)
+        >>> inputs = np.random.default_rng(0).uniform(-1, 1, (200, 3))
+        >>> outputs = lnn.run(inputs, dt=1.0)
+        >>> outputs.shape
+        (200, 2)
         """
         inputs = np.asarray(inputs, dtype=float)
         T = inputs.shape[0]

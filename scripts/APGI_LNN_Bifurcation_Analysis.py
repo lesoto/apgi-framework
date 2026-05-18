@@ -706,7 +706,6 @@ class APGILNNBifurcationAnalysis:
         )
         logger.info(f"\n{falsification_criterion}")
 
-        # Plot
         plot_path = plot_bifurcation_signatures(sweep, self.ode)
 
         overall_status = "PASS" if passed >= total - 1 else "PARTIAL"

@@ -118,6 +118,12 @@
     "gamma_A": 0.3,
     "pi_i_baseline": 1.0
   },
+  "ethics": {
+    "committee": "N/A — computational simulation study",
+    "protocol_number": "EXEMPT",
+    "approval_date": "2026-05-18",
+    "exempt_reason": "No human participants. All data are synthetic; agents are computational simulations only. Human subjects ethics approval is not required."
+  },
   "submission_blocking_issues": [],
   "caveats": [
     "Somatic marker model M̂(c,a) = γ_V·V(c,a) + γ_A·A(c,a) is one formalisation among several; Damasio's original account does not specify γ_V and γ_A uniquely. The values used here are motivated by interoceptive salience literature but require empirical calibration.",

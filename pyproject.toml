@@ -6,17 +6,40 @@ build-backend = "setuptools.build_meta"
 name = "apgi"
 version = "0.1.0"
 description = "Adaptive Predictive Global Integration (APGI) framework for consciousness research"
-authors = [{ name = "APGI Research Team", email = "uxod.com@gmail.com" }]
+authors = [{ name = "Dimitry Pesochin", email = "uxod.com@gmail.com" }]
 license = { text = "MIT" }
 requires-python = ">=3.11"
 readme = "README.md"
+keywords = [
+    "consciousness",
+    "neuroscience",
+    "predictive-processing",
+    "active-inference",
+    "interoception",
+    "global-workspace-theory",
+    "computational-psychiatry",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
 
 dependencies = [
     "numpy>=1.26.4",
     "scipy>=1.13.0",
     "matplotlib>=3.8.4",
-    "jsonschema>=4.0",
+    "jsonschema>=4.23.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/lesoto/apgi-framework"
+Repository = "https://github.com/lesoto/apgi-framework.git"
+Documentation = "https://github.com/lesoto/apgi-framework#readme"
+"Bug Tracker" = "https://github.com/lesoto/apgi-framework/issues"
 
 [project.optional-dependencies]
 lnn = ["torch>=2.0"]

@@ -15,7 +15,7 @@ The APGI framework implements the core equations from the APGI paper series:
 | Sₜ | Πᵉ·\|zᵉ\| + Πⁱ_eff·\|zⁱ\| | Global integration signal |
 | θₜ | α·C + β·V | Adaptive ignition threshold |
 
-**Paper 1** — core APGI equations, cardiac-phase and TMS-insula protocols  
+**Paper 1** — core APGI equations; EEG interoceptive gating, TMS-insular gating, active inference simulations, DoC biomarkers, fMRI anticipation, and iEEG ignition-dynamics protocols  
 **Paper 2** — Liquid Neural Network extension (`apgi.extensions.liquid_network`)  
 **Paper 3** — Five-level hierarchical architecture (`apgi.extensions.hierarchical`)
 
@@ -29,13 +29,13 @@ apgi-framework/
 │   ├── integration.py     # APGICoreIntegration (stateful session)
 │   ├── clinical.py        # EnhancedClinicalInterpreter
 │   ├── parameter_recovery.py
-│   └── extensions/        # optional — Paper 2 & 3 (heavy deps)
+│   └── extensions/        # optional
 │       ├── liquid_network.py
 │       └── hierarchical.py
 ├── protocols/             # pre-registered experimental protocols
 │   ├── schemas/           # JSON Schema validation
 │   └── *.json
-├── tests/                 # pytest suite (76 tests)
+├── tests/                 # pytest suite
 ├── notebooks/             # worked examples
 ├── figures/               # figure scripts + output PDFs
 ├── scripts/               # standalone CLI helpers
@@ -127,7 +127,7 @@ Output PDFs land in `figures/output/`.
 pytest tests/ -v
 ```
 
-The full suite (76 tests) covers core equations, normaliser, integration,
+The full suite (104 tests) covers core equations, normaliser, integration,
 clinical interpreter, parameter recovery, LNN, and five-level hierarchy.
 
 ## Data
@@ -148,10 +148,14 @@ Checksums are recorded in `data/checksums.sha256`.
 Pre-registered protocols are in `protocols/` and on OSF: [osf.io/XXXXXX](https://osf.io/XXXXXX).
 All protocol files are validated against `protocols/schemas/protocol.schema.json` in CI.
 
-| File | Paradigm |
-|------|---------|
-| `protocol_1_cardiac_phase.json` | Cardiac-phase gating paradigm |
-| `protocol_2_tms_insula.json` | TMS-insula disruption of Πⁱ_eff |
+| File | Paradigm | Status |
+|------|---------|--------|
+| `protocol_1_eeg_interoceptive_gating.json` | EEG interoceptive precision gating (P1a–P1c) | specified |
+| `protocol_2_tms_insular_gating.json` | TMS-insula causal disruption of Πⁱ_eff (P2a–P2c) | specified\_with\_caveat |
+| `protocol_3_active_inference_simulations.json` | Active inference agent simulations — somatic marker advantage (P3a–P3d) | validated |
+| `protocol_4_disorders_of_consciousness.json` | Disorders of consciousness joint biomarker model (P4a–P4d) | specified |
+| `protocol_5_fmri_anticipation.json` | fMRI somatic marker anticipation vs. prediction error (P5a–P5d) | specified |
+| `protocol_6_icEEG_ignition_dynamics.json` | Intracranial EEG all-or-none ignition dynamics (P6a–P6d) | validated |
 
 ## Citation
 

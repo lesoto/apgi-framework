@@ -93,9 +93,35 @@ class APGIHierarchy:
     Parameters
     ----------
     n_sensory : int
-        Number of sensory input units (Level 1 width).
+        Number of sensory input units (Level 1 width). Must be ≥ 16 to
+        avoid degenerate single-unit levels at the top of the hierarchy.
     kappa : float
         Energy-information coupling constant shared across all levels.
+        Typical range: 50–200 ATP/bit (see Paper 1 Appendix A.2).
+
+    Examples
+    --------
+    Single forward pass through the five-level hierarchy:
+
+    >>> import numpy as np
+    >>> hier = APGIHierarchy(n_sensory=64, kappa=100.0)
+    >>> sensory = np.random.default_rng(0).uniform(0.0, 1.0, 64)
+    >>> result = hier.forward(sensory, C_metabolic=1.0)
+    >>> sorted(result.keys())
+    ['S_t_total', 'level_S_t', 'level_errors', 'predictions']
+    >>> len(result["level_S_t"])
+    5
+
+    Simulating 50 trials and collecting total integration signal:
+
+    >>> rng = np.random.default_rng(42)
+    >>> hier.reset()
+    >>> S_t_series = [
+    ...     hier.forward(rng.uniform(0, 1, 64), C_metabolic=rng.uniform(0.5, 2.0))["S_t_total"]
+    ...     for _ in range(50)
+    ... ]
+    >>> len(S_t_series)
+    50
     """
 
     LEVEL_CONFIGS: list[dict] = [
@@ -130,12 +156,32 @@ class APGIHierarchy:
     def forward(self, sensory_input: NDArray, C_metabolic: float) -> dict:
         """Run one forward pass through all five levels.
 
+        Executes a bottom-up then top-down sweep: prediction errors
+        propagate upward, predictions propagate downward, and each level
+        contributes an Sₜ component to the total integration signal.
+
         Args:
-            sensory_input: Array of shape (n_sensory,).
-            C_metabolic: Current metabolic cost signal.
+            sensory_input: Array of shape (n_sensory,). Values outside
+                [−3, 3] will propagate but may saturate tanh activations.
+            C_metabolic: Current metabolic cost signal (≥ 0).
 
         Returns:
-            dict with keys: S_t_total, level_S_t, level_errors, predictions.
+            dict with keys:
+
+            - ``S_t_total`` (float): Sum of Sₜ contributions across all levels.
+            - ``level_S_t`` (list[float]): Per-level Sₜ contributions (L1–L5).
+            - ``level_errors`` (list[NDArray]): Per-level prediction errors.
+            - ``predictions`` (list[NDArray]): Per-level top-down predictions.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> hier = APGIHierarchy(n_sensory=32, kappa=100.0)
+        >>> result = hier.forward(np.ones(32) * 0.5, C_metabolic=1.0)
+        >>> isinstance(result["S_t_total"], float)
+        True
+        >>> len(result["level_errors"])
+        5
         """
         n = len(self.levels)
         bottom_up_signals: list[NDArray] = [None] * n  # type: ignore[list-item]

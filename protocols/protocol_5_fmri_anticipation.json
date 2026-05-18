@@ -153,6 +153,11 @@
     "gamma_V_estimate": 0.6,
     "gamma_A_estimate": 0.3
   },
+  "ethics": {
+    "committee": "Institutional Review Board",
+    "protocol_number": "IRB-2026-fMRI-XXX",
+    "approval_date": "2026-05-01"
+  },
   "submission_blocking_issues": [],
   "caveats": [
     "SCR is a noisy proxy for εⁱ; individual differences in SCR reactivity may reduce power for P5a. Include SCR-reactor subgroup analysis (top 50% SCR amplitude).",
