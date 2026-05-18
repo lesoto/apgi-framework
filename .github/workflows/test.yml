@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches: ["main", "dev", "claude/**"]
   pull_request:
     branches: ["main"]
 
@@ -28,17 +28,18 @@ jobs:
         run: pytest tests/ -v --tb=short
 
       - name: Figure smoke test — Figure 1
-        run: python figures/generate_figure1.py --no-show
+        run: PYTHONPATH=. python figures/generate_figure1.py --no-show
 
       - name: Figure smoke test — Figure 2
-        run: python figures/generate_figure2.py --no-show
+        run: PYTHONPATH=. python figures/generate_figure2.py --no-show
 
       - name: Validate protocol JSON schemas
         run: |
           python -c "
           import json, jsonschema, pathlib
           schema = json.load(open('protocols/schemas/protocol.schema.json'))
-          for f in pathlib.Path('protocols').glob('*.json'):
+          for f in sorted(pathlib.Path('protocols').glob('*.json')):
               jsonschema.validate(json.load(open(f)), schema)
+              print(f'  OK  {f.name}')
           print('All protocols valid')
           "

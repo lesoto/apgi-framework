@@ -11,15 +11,22 @@ import argparse
 import pathlib
 
 import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
 import numpy as np
 
-from apgi.apgi_core import (
+from apgi.core import (
     compute_pi_i_eff,
     compute_S_t,
     compute_theta_t,
     ignition_criterion,
     update_theta,
+)
+from figures.utils import (
+    PALETTE,
+    add_identity_line,
+    label_axes,
+    make_figure,
+    save_figure,
+    vlines_ignition,
 )
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
@@ -63,56 +70,35 @@ def simulate(
 
 
 def plot(data: dict, show: bool = True) -> None:
-    fig, ax = plt.subplots(figsize=(10, 4))
+    fig, (ax,) = make_figure(ncols=1, width=10, height=4)
     t = np.arange(len(data["S_t"]))
 
-    ax.plot(
-        t, data["S_t"], lw=1.5, color="#2166ac", label=r"$S_t$ (global integration)"
-    )
-    ax.plot(
-        t,
-        data["theta"],
-        lw=1.5,
-        color="#d6604d",
-        linestyle="--",
-        label=r"$\theta_t$ (threshold)",
-    )
+    ax.plot(t, data["S_t"], lw=1.5, color=PALETTE["S_t"], label=r"$S_t$ (global integration)")
+    ax.plot(t, data["theta"], lw=1.5, color=PALETTE["theta"], linestyle="--", label=r"$\theta_t$ (threshold)")
 
-    ignition_t = t[data["ignition"]]
-    ax.vlines(
-        ignition_t,
-        ymin=0,
-        ymax=ax.get_ylim()[1] if ax.get_ylim()[1] > 0 else 3,
-        colors="#f4a582",
-        alpha=0.4,
-        linewidth=0.8,
-    )
+    vlines_ignition(ax, t, data["ignition"])
 
-    patch = mpatches.Patch(color="#f4a582", alpha=0.4, label="Ignition events")
+    patch = mpatches.Patch(color=PALETTE["ignition"], alpha=0.4, label="Ignition events")
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles=handles + [patch], fontsize=9, loc="upper right")
 
     ax.set_xlabel("Trial", fontsize=11)
     ax.set_ylabel("Signal", fontsize=11)
     ax.set_title("APGI Ignition Dynamics — Figure 1", fontsize=12)
-    ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = OUTPUT_DIR / "figure1.pdf"
-    fig.savefig(out_path, dpi=300, bbox_inches="tight")
-    print(f"Saved: {out_path}")
+    save_figure(fig, OUTPUT_DIR / "figure1.pdf")
 
     if show:
+        import matplotlib.pyplot as plt
         plt.show()
+    import matplotlib.pyplot as plt
     plt.close(fig)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 1")
-    parser.add_argument(
-        "--no-show", action="store_true", help="Skip plt.show() (CI mode)"
-    )
+    parser.add_argument("--no-show", action="store_true", help="Skip plt.show() (CI mode)")
     args = parser.parse_args()
 
     data = simulate()

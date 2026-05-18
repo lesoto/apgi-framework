@@ -9,7 +9,7 @@ import math
 
 import pytest
 
-from apgi.apgi_core import (
+from apgi.core import (
     compute_pi_i_eff,
     compute_S_t,
     compute_theta_t,

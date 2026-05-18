@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from scipy.optimize import minimize
 from scipy.stats import pearsonr
 
-from apgi.apgi_core import compute_pi_i_eff, compute_S_t, compute_theta_t
+from apgi.core import compute_pi_i_eff, compute_S_t, compute_theta_t
 
 
 def generate_synthetic_data(
