@@ -104,8 +104,16 @@ def test_download_failure(mock_datasets, temp_data_dir):
 
 def test_script_execution_main(mock_datasets):
     import runpy
-    with patch("sys.argv", ["fetch_data.py", "--list"]):
-        runpy.run_module("apgi.scripts.fetch_data", run_name="__main__")
+    # Temporarily remove from sys.modules to suppress the runpy RuntimeWarning
+    sys_modules_backup = sys.modules.get("apgi.scripts.fetch_data")
+    if "apgi.scripts.fetch_data" in sys.modules:
+        del sys.modules["apgi.scripts.fetch_data"]
+    try:
+        with patch("sys.argv", ["fetch_data.py", "--list"]):
+            runpy.run_module("apgi.scripts.fetch_data", run_name="__main__")
+    finally:
+        if sys_modules_backup is not None:
+            sys.modules["apgi.scripts.fetch_data"] = sys_modules_backup
 
 
 def test_download_post_checksum_mismatch(mock_datasets, temp_data_dir):

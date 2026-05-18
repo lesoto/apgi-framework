@@ -19,7 +19,8 @@
       "Bash(/tmp/apgi-venv312/bin/python figures/generate_figure1.py --no-show)",
       "Bash(/tmp/apgi-venv312/bin/python figures/generate_figure2.py --no-show --n-sim 10)",
       "Bash(python -m pytest tests/ --collect-only)",
-      "Bash(pytest tests/ -q)"
+      "Bash(pytest tests/ -q)",
+      "Bash(jq '.ethics' /Users/lesoto/Sites/PYTHON/apgi-framework/protocols/protocol_*.json)"
     ]
   }
 }
