@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -113,7 +113,9 @@ class APGICoreIntegration:
             V_information=V_information,
         )
         self._records.append(record)
-        self._theta = update_theta(theta_t, C_metabolic, V_information, self.alpha, self.beta, self.gamma)
+        self._theta = update_theta(
+            theta_t, C_metabolic, V_information, self.alpha, self.beta, self.gamma
+        )
         return record
 
     def run_sequence(

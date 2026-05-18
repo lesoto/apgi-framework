@@ -7,6 +7,11 @@ Run:
     python figures/generate_figure2.py --no-show   # CI mode
 """
 
+import sys as _sys
+import pathlib as _pathlib
+
+_sys.path.insert(0, str(_pathlib.Path(__file__).parent.parent))
+
 import argparse
 import pathlib
 
@@ -41,7 +46,15 @@ def plot(results: dict, show: bool = True) -> None:
         hat_arr = np.asarray(hat_vals)
         r, _ = pearsonr(true_arr, hat_arr)
 
-        ax.scatter(true_arr, hat_arr, s=30, alpha=0.7, color=color, edgecolors="white", linewidths=0.4)
+        ax.scatter(
+            true_arr,
+            hat_arr,
+            s=30,
+            alpha=0.7,
+            color=color,
+            edgecolors="white",
+            linewidths=0.4,
+        )
 
         lo = min(true_arr.min(), hat_arr.min()) * 0.95
         hi = max(true_arr.max(), hat_arr.max()) * 1.05
@@ -60,19 +73,25 @@ def plot(results: dict, show: bool = True) -> None:
 
     if show:
         import matplotlib.pyplot as plt
+
         plt.show()
     import matplotlib.pyplot as plt
+
     plt.close(fig)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 2")
-    parser.add_argument("--no-show", action="store_true", help="Skip plt.show() (CI mode)")
+    parser.add_argument(
+        "--no-show", action="store_true", help="Skip plt.show() (CI mode)"
+    )
     parser.add_argument("--n-sim", type=int, default=40, help="Number of simulations")
     args = parser.parse_args()
 
     print(f"Running recovery simulation ({args.n_sim} simulations)…")
-    results = run_recovery_simulation(n_simulations=args.n_sim, n_trials_per_sim=150, seed=2024)
+    results = run_recovery_simulation(
+        n_simulations=args.n_sim, n_trials_per_sim=150, seed=2024
+    )
     print(f"  r_beta = {results['r_beta']:.3f}  |  r_pi_i = {results['r_pi_i']:.3f}")
     plot(results, show=not args.no_show)
 

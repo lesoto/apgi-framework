@@ -27,11 +27,16 @@ jobs:
       - name: Run test suite
         run: pytest tests/ -v --tb=short
 
-      - name: Figure smoke test — Figure 1
-        run: PYTHONPATH=. python figures/generate_figure1.py --no-show
-
-      - name: Figure smoke test — Figure 2
-        run: PYTHONPATH=. python figures/generate_figure2.py --no-show
+      - name: Figure smoke tests
+        run: |
+          python figures/generate_figure1.py --no-show
+          python figures/generate_figure2.py --no-show
+          python figures/generate_figure3.py --no-show
+          python figures/generate_figure4.py --no-show
+          python figures/generate_figure5.py --no-show
+          python figures/generate_figure6.py --no-show
+          python figures/generate_figure7.py --no-show
+          python figures/generate_figure8.py --no-show
 
       - name: Validate protocol JSON schemas
         run: |

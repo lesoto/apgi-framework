@@ -1,9 +1,6 @@
 """Tests for parameter recovery simulation (Appendix A.4).
-
-The journal-mandated criterion: Pearson r > 0.75 for both β and Πⁱ.
+Pearson r > 0.75 for both β and Πⁱ.
 """
-
-import pytest
 
 from apgi.parameter_recovery import (
     generate_synthetic_data,
@@ -42,8 +39,6 @@ class TestGenerateSyntheticData:
     def test_reproducibility(self):
         d1 = generate_synthetic_data(n_trials=20, beta_true=0.7, pi_i_true=1.0, seed=42)
         d2 = generate_synthetic_data(n_trials=20, beta_true=0.7, pi_i_true=1.0, seed=42)
-        import numpy as np
-
         assert (d1["S_t_observed"] == d2["S_t_observed"]).all()
 
 

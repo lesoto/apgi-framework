@@ -23,8 +23,10 @@ class TestAPGICoreIntegrationStep:
 
     def test_theta_adapts_across_trials(self):
         integ = APGICoreIntegration(alpha=0.3, beta=0.7, gamma=0.9)
-        thetas = [integ.step(1.0, 1.0, 1.0, 0.5, float(c), 0.5).theta_t for c in np.linspace(0.5, 2.0, 20)]
-        # Threshold should vary as metabolic cost changes
+        thetas = [
+            integ.step(1.0, 1.0, 1.0, 0.5, float(c), 0.5).theta_t
+            for c in np.linspace(0.5, 2.0, 20)
+        ]
         assert not all(t == thetas[0] for t in thetas)
 
     def test_records_accumulate(self):
@@ -57,8 +59,6 @@ class TestAPGICoreIntegrationStep:
         integ.step(1.0, 1.0, 1.0, 0.5, 1.0, 0.5)
         assert integ.mean_S_t() > 0
         assert integ.mean_theta() > 0
-
-
 
 
 class TestAPGICoreIntegrationRunSequence:
@@ -106,8 +106,9 @@ class TestSomaticModulation:
         integ_high = APGICoreIntegration(alpha=0.3, beta=0.7)
 
         r_low = integ_low.step(1.0, 1.0, 1.0, 0.5, C_metabolic=0.5, V_information=0.5)
-        r_high = integ_high.step(1.0, 1.0, 1.0, 0.5, C_metabolic=200.0, V_information=0.5)
+        r_high = integ_high.step(
+            1.0, 1.0, 1.0, 0.5, C_metabolic=200.0, V_information=0.5
+        )
 
-        # Higher metabolic cost → lower Πⁱ_eff → lower Sₜ
         assert r_high.pi_i_eff < r_low.pi_i_eff
         assert r_high.S_t < r_low.S_t

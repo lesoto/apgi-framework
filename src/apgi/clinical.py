@@ -23,11 +23,11 @@ class ClinicalReport:
     """Summary clinical report for a single observation window."""
 
     level: ConsciousnessLevel
-    ignition_index: float      # mean S_t / mean theta_t
-    ignition_rate: float       # fraction of windows with ignition
+    ignition_index: float  # mean S_t / mean theta_t
+    ignition_rate: float  # fraction of windows with ignition
     mean_S_t: float
     mean_theta_t: float
-    somatic_load: float        # mean C_metabolic
+    somatic_load: float  # mean C_metabolic
 
 
 class EnhancedClinicalInterpreter:
@@ -126,7 +126,9 @@ class EnhancedClinicalInterpreter:
         for start in range(0, n - self.window_size + 1, self.window_size):
             end = start + self.window_size
             reports.append(
-                self.interpret(S_t[start:end], theta_t[start:end], C_metabolic[start:end])
+                self.interpret(
+                    S_t[start:end], theta_t[start:end], C_metabolic[start:end]
+                )
             )
         return reports
 

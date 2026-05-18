@@ -59,3 +59,20 @@ apgi-fetch = "apgi.scripts.fetch_data:main"
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "--cov=apgi --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "figures/*", "notebooks/*", "setup.py"]
+
+[tool.coverage.report]
+omit = ["tests/*", "figures/*", "notebooks/*", "setup.py"]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.mypy]
+explicit_package_bases = true
+ignore_missing_imports = true

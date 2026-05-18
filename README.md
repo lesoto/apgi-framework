@@ -106,7 +106,12 @@ Interactive walkthroughs are in `notebooks/`:
 | Notebook | Content |
 |----------|---------|
 | `01_quick_start.ipynb` | Core equations, `APGICoreIntegration`, signal normalisation |
-| `02_protocol1_windowing.ipynb` | Cardiac-phase windowing matching Protocol 1 parameters |
+| `02_protocol1_windowing.ipynb` | Protocol 1 — EEG interoceptive precision gating (P1a–P1c) |
+| `03_protocol2_tms_insular_gating.ipynb` | Protocol 2 — TMS insular gating of Πⁱ_eff (P2a–P2c) |
+| `04_protocol3_active_inference.ipynb` | Protocol 3 — Active inference agent simulations (P3a–P3d) |
+| `05_protocol4_disorders_of_consciousness.ipynb` | Protocol 4 — DoC joint biomarker model (P4a–P4d) |
+| `06_protocol5_fmri_anticipation.ipynb` | Protocol 5 — fMRI anticipation vs. prediction error (P5a–P5d) |
+| `07_protocol6_ieeg_ignition.ipynb` | Protocol 6 — iEEG all-or-none ignition dynamics (P6a–P6d) |
 
 ```bash
 jupyter lab notebooks/
@@ -115,8 +120,14 @@ jupyter lab notebooks/
 ## Reproducing figures
 
 ```bash
-PYTHONPATH=. python figures/generate_figure1.py   # ignition dynamics
-PYTHONPATH=. python figures/generate_figure2.py   # parameter recovery scatter
+python figures/generate_figure1.py   # ignition dynamics
+python figures/generate_figure2.py   # parameter recovery scatter
+python figures/generate_figure3.py   # Protocol 1: HEP cardiac-phase detection
+python figures/generate_figure4.py   # Protocol 2: TMS-induced PCI reduction
+python figures/generate_figure5.py   # Protocol 3: somatic marker agent advantage
+python figures/generate_figure6.py   # Protocol 4: DoC joint biomarker model
+python figures/generate_figure7.py   # Protocol 5: vmPFC–insula anticipatory coupling
+python figures/generate_figure8.py   # Protocol 6: iEEG bimodality + AC1 slowing
 ```
 
 Output PDFs land in `figures/output/`.

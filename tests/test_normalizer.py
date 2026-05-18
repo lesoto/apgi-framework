@@ -46,7 +46,6 @@ class TestAPGINormalizerMinMax:
         data = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
         n = APGINormalizer(method="minmax")
         out = n.fit_transform(data)
-        # min → ~0, max → ~1 (epsilon prevents exact 1)
         assert out[0] < 1e-6
         assert out[-1] == pytest.approx(1.0, abs=1e-6)
 

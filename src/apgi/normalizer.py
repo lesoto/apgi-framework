@@ -92,5 +92,9 @@ class APGINormalizer:
         return self._loc is not None and self._scale is not None
 
     def __repr__(self) -> str:
-        status = f"loc={self._loc:.4g}, scale={self._scale:.4g}" if self.is_fitted else "unfitted"
+        status = (
+            f"loc={self._loc:.4g}, scale={self._scale:.4g}"
+            if self.is_fitted
+            else "unfitted"
+        )
         return f"APGINormalizer(method={self.method!r}, {status})"

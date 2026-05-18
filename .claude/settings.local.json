@@ -22,7 +22,15 @@
       "Bash(pytest tests/ -q)",
       "Bash(jq '.ethics' /Users/lesoto/Sites/PYTHON/apgi-framework/protocols/protocol_*.json)",
       "Bash(python -m pytest tests/ --tb=short -q)",
-      "Bash(python -m pytest tests/ -q --tb=short)"
+      "Bash(python -m pytest tests/ -q --tb=short)",
+      "Bash(PYTHONPATH=. python figures/generate_figure3.py --no-show)",
+      "Bash(PYTHONPATH=. python figures/generate_figure4.py --no-show)",
+      "Bash(PYTHONPATH=. python figures/generate_figure5.py --no-show)",
+      "Bash(PYTHONPATH=. python figures/generate_figure6.py --no-show)",
+      "Bash(PYTHONPATH=. python figures/generate_figure7.py --no-show)",
+      "Bash(PYTHONPATH=. python figures/generate_figure8.py --no-show)",
+      "Bash(wait)",
+      "Bash(pytest tests/ --cov=. --cov-report=html)"
     ]
   }
 }

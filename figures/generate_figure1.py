@@ -7,6 +7,11 @@ Run:
     python figures/generate_figure1.py --no-show   # CI mode
 """
 
+import sys as _sys
+import pathlib as _pathlib
+
+_sys.path.insert(0, str(_pathlib.Path(__file__).parent.parent))
+
 import argparse
 import pathlib
 
@@ -73,12 +78,27 @@ def plot(data: dict, show: bool = True) -> None:
     fig, (ax,) = make_figure(ncols=1, width=10, height=4)
     t = np.arange(len(data["S_t"]))
 
-    ax.plot(t, data["S_t"], lw=1.5, color=PALETTE["S_t"], label=r"$S_t$ (global integration)")
-    ax.plot(t, data["theta"], lw=1.5, color=PALETTE["theta"], linestyle="--", label=r"$\theta_t$ (threshold)")
+    ax.plot(
+        t,
+        data["S_t"],
+        lw=1.5,
+        color=PALETTE["S_t"],
+        label=r"$S_t$ (global integration)",
+    )
+    ax.plot(
+        t,
+        data["theta"],
+        lw=1.5,
+        color=PALETTE["theta"],
+        linestyle="--",
+        label=r"$\theta_t$ (threshold)",
+    )
 
     vlines_ignition(ax, t, data["ignition"])
 
-    patch = mpatches.Patch(color=PALETTE["ignition"], alpha=0.4, label="Ignition events")
+    patch = mpatches.Patch(
+        color=PALETTE["ignition"], alpha=0.4, label="Ignition events"
+    )
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles=handles + [patch], fontsize=9, loc="upper right")
 
@@ -91,14 +111,18 @@ def plot(data: dict, show: bool = True) -> None:
 
     if show:
         import matplotlib.pyplot as plt
+
         plt.show()
     import matplotlib.pyplot as plt
+
     plt.close(fig)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 1")
-    parser.add_argument("--no-show", action="store_true", help="Skip plt.show() (CI mode)")
+    parser.add_argument(
+        "--no-show", action="store_true", help="Skip plt.show() (CI mode)"
+    )
     args = parser.parse_args()
 
     data = simulate()

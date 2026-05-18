@@ -126,7 +126,7 @@ def run_trial(
     Returns:
         dict with keys: pi_i_eff, S_t, theta_t, ignition.
     """
-    pi_i_eff = compute_pi_i_eff(pi_i, C_metabolic, kappa)
+    pi_i_eff = float(compute_pi_i_eff(pi_i, C_metabolic, kappa))
     S_t = compute_S_t(pi_e, z_e, pi_i_eff, z_i)
     theta_t = compute_theta_t(C_metabolic, V_information, alpha, beta)
     return {
