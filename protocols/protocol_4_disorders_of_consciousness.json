@@ -81,7 +81,7 @@
     "isi_ms": null,
     "target": {
       "type": "TMS pulse for PCI; auditory heartbeat for interoceptive stimulation condition",
-      "duration_ms": null
+      "duration_ms": 0
     },
     "response": "Passive EEG recording; no behavioural response required from patients. Controls perform auditory detection task."
   },

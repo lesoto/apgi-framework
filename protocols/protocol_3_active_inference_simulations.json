@@ -67,7 +67,7 @@
     "isi_ms": null,
     "target": {
       "type": "Computational trial: agent selects action from {1, 2, 3}, receives stochastic reward signal",
-      "duration_ms": null
+      "duration_ms": 0
     },
     "response": "Agent selects action via softmax policy over precision-weighted prediction errors"
   },
