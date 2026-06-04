@@ -7,6 +7,12 @@ try:
 except PackageNotFoundError:
     __version__ = "0.0.0+dev"
 
+from apgi import parameter_recovery
+from apgi.clinical import (
+    ClinicalReport,
+    ConsciousnessLevel,
+    EnhancedClinicalInterpreter,
+)
 from apgi.core import (
     compute_pi_i_eff,
     compute_S_t,
@@ -17,12 +23,6 @@ from apgi.core import (
 )
 from apgi.integration import APGICoreIntegration, TrialRecord
 from apgi.normalizer import APGINormalizer
-from apgi.clinical import (
-    ConsciousnessLevel,
-    ClinicalReport,
-    EnhancedClinicalInterpreter,
-)
-from apgi import parameter_recovery
 
 # Paper 2 / Paper 3 extensions are NOT imported here.
 # Use: from apgi.extensions.liquid_network import LiquidNeuralNetwork

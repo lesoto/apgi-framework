@@ -1,18 +1,18 @@
 {
-  "protocol_id": "APGI-P04",
-  "registry_ep": "EP-4",
-  "registry_protocol_label": "Protocol 4 — Clinical",
+  "protocol_id": "APGI-P06",
+  "registry_ep": "EP-6",
+  "registry_protocol_label": "Protocol 6 — DoC-Biomarker",
   "title": "Disorders of Consciousness Assessment: Joint Roles of Ignition and Interoception",
   "paper": "APGI Paper 1",
   "osf_url": "https://osf.io/XXXXXX",
   "version": "2.0.0",
   "last_updated": "2026-06-04",
-  "description": "This clinical biomarker study examines whether interoceptive precision (indexed by HEP amplitude) and ignition capacity (indexed by the Perturbational Complexity Index, PCI) jointly predict clinical recovery outcomes across disorders of consciousness (DoC) better than either biomarker alone. Four sub-predictions are tested: (Pred 4.A) HEP + PCI joint models outperform univariate predictors of DoC recovery, with ΔR² ≥ 0.05 as the primary confirmatory threshold and AUC > 0.80 as an aspirational secondary metric only; (Pred 4.B) HEP amplitude confirms a four-group ordinal gradient (VS/UWS < MCS < EMCS < controls) with DMN connectivity criteria; (Pred 4.C) interoceptive perturbation increases PCI ≥ 10% in MCS patients but not VS/UWS, with perturbation-evoked ΔPCI exceeding arousal-matched control by ≥ 5%, and PCI change correlated with HEP change; (Pred 4.D) HEP amplitude correlates with GCS-S score at 3-month follow-up (confirmatory; 6-month is exploratory pending OSF amendment) with PPV ≥ 70% and NPV ≥ 70% for 6-month recovery status. Directly supported by Paper 3 Appendix DoC Table.",
-  "prediction_cluster": "Pred 4.A–4.D",
-  "prediction_cluster_label": "Joint Roles of Ignition and Interoception in Disorders of Consciousness",
+  "description": "This clinical biomarker study examines whether interoceptive precision (indexed by HEP amplitude) and ignition capacity (indexed by the Perturbational Complexity Index, PCI) jointly predict clinical recovery outcomes across disorders of consciousness (DoC) better than either biomarker alone. Four sub-predictions are tested: (Pred 6.a) HEP + PCI joint models outperform univariate predictors of DoC recovery, with ΔR² ≥ 0.05 as the primary confirmatory threshold and AUC > 0.80 as an aspirational secondary metric only; (Pred 6.b) HEP amplitude confirms a four-group ordinal gradient (VS/UWS < MCS < EMCS < controls) with DMN connectivity criteria; (Pred 6.c) interoceptive perturbation increases PCI ≥ 10% in MCS patients but not VS/UWS, with perturbation-evoked ΔPCI exceeding arousal-matched control by ≥ 5%, and PCI change correlated with HEP change; (Pred 6.d) HEP amplitude correlates with GCS-S score at 3-month follow-up (confirmatory; 6-month is exploratory pending OSF amendment) with PPV ≥ 70% and NPV ≥ 70% for 6-month recovery status. Directly supported by Paper 3 Appendix DoC Table.",
+  "prediction_cluster": "Pred 6.a–6.d, 6.S",
+  "prediction_cluster_label": "Joint Roles of Ignition and Interoception in Disorders of Consciousness (+ Secondary: Somatic Bias → Phenomenal Quality)",
   "sub_predictions": [
     {
-      "id": "Pred 4.A",
+      "id": "Pred 6.a",
       "claim": "Joint HEP + PCI model explains significantly more variance in 3-month GCS-S outcome than either biomarker alone.",
       "confirming_evidence": "ΔR² ≥ 0.05 over best univariate model (primary confirmatory threshold); LRT p < 0.05; AUC > 0.80 (aspirational secondary metric only).",
       "falsifying_evidence": "Joint model R² ≤ max(univariate HEP R², univariate PCI R²); or ΔR² < 0.05 in primary analysis.",
@@ -29,7 +29,7 @@
       }
     },
     {
-      "id": "Pred 4.B",
+      "id": "Pred 6.b",
       "claim": "HEP amplitude discriminates MCS from VS/UWS at group level; four-group gradient (VS/UWS < MCS < EMCS < controls) confirmed for both HEP and PCI.",
       "confirming_evidence": "HEP amplitude MCS > VS/UWS (Mann–Whitney p < 0.05, d > 0.5); four-group ordinal gradient confirmed for both HEP and PCI; DMN–PCI r > 0.5; DMN–HEP partial correlation below DMN–PCI.",
       "falsifying_evidence": "No significant HEP difference between MCS and VS/UWS; four-group gradient absent for HEP or PCI.",
@@ -47,7 +47,7 @@
       }
     },
     {
-      "id": "Pred 4.C",
+      "id": "Pred 6.c",
       "claim": "Interoceptive perturbation increases PCI in MCS patients but not VS/UWS; perturbation-evoked ΔPCI exceeds arousal-matched control.",
       "confirming_evidence": "PCI increase ≥ 10% in MCS post-perturbation (paired t p < 0.05); VS/UWS group shows no significant change; ΔPCI_perturbation > ΔPCI_control + 5% (paired t p < 0.05); PCI change correlates with HEP change (r > 0.4).",
       "falsifying_evidence": "No significant PCI change post-perturbation in MCS (ΔPCI < 5%, p > 0.10); or equivalent PCI change in VS/UWS and MCS; or perturbation-evoked PCI change statistically indistinguishable from arousal-matched control (p > 0.10).",
@@ -66,7 +66,7 @@
       }
     },
     {
-      "id": "Pred 4.D",
+      "id": "Pred 6.d",
       "claim": "HEP amplitude correlates with GCS-S score at 3-month follow-up (primary confirmatory); 6-month follow-up is exploratory pending OSF amendment.",
       "confirming_evidence": "Within-participant Spearman r(HEP, GCS-S) > 0.4 at 3-month follow-up (confirmatory); 6-month follow-up reported as exploratory pending OSF amendment. Joint baseline model PPV ≥ 70% and NPV ≥ 70% for 6-month recovery status.",
       "falsifying_evidence": "HEP shows no significant longitudinal correlation with GCS-S (r < 0.2) at 3-month follow-up; or joint model predictive values do not exceed clinical benchmarks.",
@@ -82,10 +82,28 @@
         "spearman_r_threshold": 0.2,
         "condition": "No significant correlation at 3-month follow-up"
       }
+    },
+    {
+      "id": "Pred 6.S",
+      "status": "secondary",
+      "claim": "Somatic bias (elevated HEP amplitude relative to PCI at baseline) predicts phenomenal quality ratings — specifically, participants/patients with higher somatic bias show richer qualitative experience reports on the PCI trials, controlling for consciousness level (MCS vs. EMCS).",
+      "confirming_evidence": "Somatic bias index (HEP/PCI ratio z-score) positively predicts phenomenal quality scale score (PQS or equivalent) across participants (Spearman r > 0.35, p < 0.05); effect survives control for consciousness level group (MCS vs. EMCS partial correlation r > 0.25); effect absent in VS/UWS group (specificity to conscious states).",
+      "falsifying_evidence": "Somatic bias index shows no significant correlation with phenomenal quality ratings across MCS/EMCS participants (r < 0.15); or somatic bias predicts motor/behavioral outcome but not phenomenal quality specifically.",
+      "confirming_thresholds": {
+        "somatic_bias_pqs_r_minimum": 0.35,
+        "partial_r_controlling_consciousness_level": 0.25,
+        "specificity": "Effect absent in VS/UWS (confirms consciousness-level dependence)",
+        "somatic_bias_index": "HEP amplitude / PCI (z-scored per participant)"
+      },
+      "falsifying_thresholds": {
+        "condition_1": "r < 0.15 across MCS/EMCS participants",
+        "condition_2": "Somatic bias predicts motor/behavioral outcome equivalently to phenomenal quality"
+      },
+      "secondary_note": "This is a secondary exploratory prediction. Confirmation is not required for the primary DoC-Biomarker claims (Pred 6.a–6.d). A positive result would support APGI's claim that interoceptive weighting shapes the qualitative character of conscious experience, not only its presence/absence."
     }
   ],
   "validation_status": "specified",
-  "validation_notes": "Formally specified. Directly supported by Paper 3 Appendix (Disorders of Consciousness Table). EMCS group added to n_per_group, four-group gradient added to Pred 4.B, DMN criteria added, Pred 4.C three-criterion structure added, and Pred 4.D 6-month exploratory flag and PPV/NPV added to match registry EP-4 requirements.",
+  "validation_notes": "Formally specified. Directly supported by Paper 3 Appendix (Disorders of Consciousness Table). EMCS group added to n_per_group, four-group gradient added to Pred 6.b, DMN criteria added, Pred 6.c three-criterion structure added, and Pred 6.d 6-month exploratory flag and PPV/NPV added to match registry EP-6 requirements.",
   "participants": {
     "n_target": 60,
     "n_minimum": 45,
@@ -96,7 +114,7 @@
       "emerging_minimally_conscious_state_EMCS": 5,
       "healthy_controls": 15
     },
-    "emcs_note": "EMCS group required for four-group gradient confirmation (Pred 4.B). If insufficient EMCS patients are recruited (n < 5), Pred 4.B four-group gradient is reported as exploratory with ≥ 3 groups confirmatory.",
+    "emcs_note": "EMCS group required for four-group gradient confirmation (Pred 6.b). If insufficient EMCS patients are recruited (n < 5), Pred 6.b four-group gradient is reported as exploratory with ≥ 3 groups confirmatory.",
     "inclusion_criteria": [
       "Clinical DoC diagnosis by certified neurologist using CRS-R and GCS-S",
       "Age 18–70 years",
@@ -128,8 +146,8 @@
       "Disorder of Consciousness Score (DoCS)"
     ],
     "interoceptive_stimulation": "Heartbeat attention task: auditory feedback of participant's own heartbeat via stethoscope and speaker, 5-minute block",
-    "arousal_matched_control": "Auditory noise stimulation (matched duration and intensity to interoceptive condition, non-heartbeat-synchronised) for Pred 4.C ΔPCI_control",
-    "dmn_connectivity": "Resting-state EEG source analysis (sLORETA or beamforming) for DMN proxy; or resting fMRI if clinically feasible (Pred 4.B DMN criteria)"
+    "arousal_matched_control": "Auditory noise stimulation (matched duration and intensity to interoceptive condition, non-heartbeat-synchronised) for Pred 6.c ΔPCI_control",
+    "dmn_connectivity": "Resting-state EEG source analysis (sLORETA or beamforming) for DMN proxy; or resting fMRI if clinically feasible (Pred 6.b DMN criteria)"
   },
   "trial_structure": {
     "isi_ms": null,
@@ -147,7 +165,7 @@
     "sessions": {
       "baseline": "Enrolment (week 0): EEG resting state + PCI + CRS-R + GCS-S + DMN proxy",
       "stimulation": "Week 1: Interoceptive stimulation block + post-stimulation PCI + arousal-matched control block + post-control PCI",
-      "followup_3mo": "Month 3: EEG + PCI + CRS-R + GCS-S (PRIMARY CONFIRMATORY for Pred 4.D)",
+      "followup_3mo": "Month 3: EEG + PCI + CRS-R + GCS-S (PRIMARY CONFIRMATORY for Pred 6.d)",
       "followup_6mo": "Month 6: EEG + PCI + CRS-R + GCS-S (EXPLORATORY — requires OSF amendment before analysis)"
     }
   },
@@ -164,24 +182,24 @@
     "dmn_analysis": "Resting-state connectivity: ICA-derived DMN component or seed-based connectivity (PCC seed); correlation with HEP amplitude and PCI per participant"
   },
   "dependent_variables": [
-    "HEP amplitude (250–400 ms, Cz) per DoC group and time point — primary (Pred 4.A, 6.B, 6.D)",
-    "PCI per DoC group and time point — primary (Pred 4.A, 6.B)",
-    "ΔR² (joint HEP + PCI model vs. best univariate model) for 3-month GCS-S — PRIMARY Pred 4.A",
-    "AUC (joint model) for binary recovery outcome — aspirational secondary Pred 4.A only",
-    "Univariate model R² for HEP alone and PCI alone (comparison benchmarks for Pred 4.A)",
-    "Four-group ordinal gradient: HEP and PCI across VS/UWS, MCS, EMCS, controls — Pred 4.B",
-    "DMN–PCI correlation (r) — Pred 4.B",
-    "DMN–HEP partial correlation (r, controlling for PCI) — Pred 4.B",
-    "ΔPCI post-interoceptive perturbation: MCS group (% change from baseline) — Pred 4.C",
-    "ΔPCI post-arousal-matched control: MCS group (% change) — Pred 4.C comparison",
-    "ΔPCI_perturbation minus ΔPCI_control (paired t) — Pred 4.C",
-    "PCI–HEP change correlation (r) post-perturbation — Pred 4.C",
-    "Spearman r(HEP amplitude, GCS-S) at 3-month follow-up within-participant — confirmatory Pred 4.D",
-    "PPV and NPV: joint model prediction of 6-month recovery status — exploratory Pred 4.D",
-    "Spearman r(HEP amplitude, GCS-S) at 6-month follow-up — exploratory Pred 4.D only"
+    "HEP amplitude (250–400 ms, Cz) per DoC group and time point — primary (Pred 6.a, 5.b, 5.d)",
+    "PCI per DoC group and time point — primary (Pred 6.a, 5.b)",
+    "ΔR² (joint HEP + PCI model vs. best univariate model) for 3-month GCS-S — PRIMARY Pred 6.a",
+    "AUC (joint model) for binary recovery outcome — aspirational secondary Pred 6.a only",
+    "Univariate model R² for HEP alone and PCI alone (comparison benchmarks for Pred 6.a)",
+    "Four-group ordinal gradient: HEP and PCI across VS/UWS, MCS, EMCS, controls — Pred 6.b",
+    "DMN–PCI correlation (r) — Pred 6.b",
+    "DMN–HEP partial correlation (r, controlling for PCI) — Pred 6.b",
+    "ΔPCI post-interoceptive perturbation: MCS group (% change from baseline) — Pred 6.c",
+    "ΔPCI post-arousal-matched control: MCS group (% change) — Pred 6.c comparison",
+    "ΔPCI_perturbation minus ΔPCI_control (paired t) — Pred 6.c",
+    "PCI–HEP change correlation (r) post-perturbation — Pred 6.c",
+    "Spearman r(HEP amplitude, GCS-S) at 3-month follow-up within-participant — confirmatory Pred 6.d",
+    "PPV and NPV: joint model prediction of 6-month recovery status — exploratory Pred 6.d",
+    "Spearman r(HEP amplitude, GCS-S) at 6-month follow-up — exploratory Pred 6.d only"
   ],
   "primary_hypothesis": "A linear model including both HEP amplitude and PCI at enrolment explains ΔR² ≥ 0.05 more variance in 3-month GCS-S outcome than either biomarker alone. HEP amplitude and PCI show a four-group gradient (VS/UWS < MCS < EMCS < controls), interoceptive perturbation increases PCI ≥ 10% in MCS but not VS/UWS with ΔPCI exceeding arousal-matched control by ≥ 5%, and HEP amplitude correlates with 3-month GCS-S (Spearman r > 0.4).",
-  "primary_analysis": "Pred 4.A: Multiple linear regression GCS-S_3mo ~ HEP + PCI + age + etiology; LRT vs. univariate models; ΔR² as primary metric. Pred 4.B: Mann–Whitney U (MCS vs. VS/UWS); ordinal trend test across four groups (Jonckheere–Terpstra); DMN–PCI and DMN–HEP correlations. Pred 4.C: paired t-tests for ΔPCI (perturbation vs. baseline; perturbation vs. control); Pearson r for PCI–HEP change. Pred 4.D: Wilcoxon signed-rank for longitudinal HEP–GCS-S correlation; PPV/NPV from binary recovery classification.",
+  "primary_analysis": "Pred 6.a: Multiple linear regression GCS-S_3mo ~ HEP + PCI + age + etiology; LRT vs. univariate models; ΔR² as primary metric. Pred 6.b: Mann–Whitney U (MCS vs. VS/UWS); ordinal trend test across four groups (Jonckheere–Terpstra); DMN–PCI and DMN–HEP correlations. Pred 6.c: paired t-tests for ΔPCI (perturbation vs. baseline; perturbation vs. control); Pearson r for PCI–HEP change. Pred 6.d: Wilcoxon signed-rank for longitudinal HEP–GCS-S correlation; PPV/NPV from binary recovery classification.",
   "power_analysis": {
     "effect_size_d": 0.6,
     "alpha": 0.05,
@@ -194,7 +212,7 @@
     "platform": "OSF",
     "url": "https://osf.io/XXXXXX",
     "date": "2026-05-18",
-    "amendment_required_for_6mo": "OSF amendment must be submitted and time-stamped before 6-month data are analysed for Pred 4.D exploratory analysis"
+    "amendment_required_for_6mo": "OSF amendment must be submitted and time-stamped before 6-month data are analysed for Pred 6.d exploratory analysis"
   },
   "apgi_parameters": {
     "kappa": 100,
@@ -216,7 +234,7 @@
     "PCI requires TMS, which cannot be applied to patients with metallic implants or unstable hemodynamics; PCI subsample may be smaller than full cohort.",
     "HEP reliability in DoC populations is lower than in healthy controls due to cardiac artifact overlap; minimum 20 clean epochs per participant required; participants below this threshold excluded from HEP analyses.",
     "Etiology (traumatic vs. hypoxic-ischemic) is a known moderator of recovery trajectory and is included as covariate in all models.",
-    "EMCS group (Pred 4.B four-group gradient) may be undersampled; if n < 5 EMCS, four-group confirmatory test is downgraded to exploratory and three-group (VS/UWS, MCS, controls) is primary.",
-    "Pred 4.D 6-month follow-up is EXPLORATORY: analysis must not begin until OSF amendment is submitted and time-stamped. PPV/NPV reported for this window only."
+    "EMCS group (Pred 6.b four-group gradient) may be undersampled; if n < 5 EMCS, four-group confirmatory test is downgraded to exploratory and three-group (VS/UWS, MCS, controls) is primary.",
+    "Pred 6.d 6-month follow-up is EXPLORATORY: analysis must not begin until OSF amendment is submitted and time-stamped. PPV/NPV reported for this window only."
   ]
 }

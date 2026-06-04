@@ -58,14 +58,13 @@ apgi-fetch = "apgi.scripts.fetch_data:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "--cov=apgi --cov-report=term-missing"
+addopts = "--cov=src/apgi --cov=scripts --cov=figures --cov-report=term-missing"
 
 [tool.coverage.run]
-source = ["src"]
-omit = ["tests/*", "figures/*", "notebooks/*", "setup.py"]
+omit = ["tests/*", "figures/generate_figure*.py", "notebooks/*", "setup.py"]
 
 [tool.coverage.report]
-omit = ["tests/*", "figures/*", "notebooks/*", "setup.py"]
+omit = ["tests/*", "figures/generate_figure*.py", "notebooks/*", "setup.py"]
 exclude_lines = [
     "pragma: no cover",
     "if __name__ == .__main__.:",

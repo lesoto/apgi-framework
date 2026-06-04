@@ -106,12 +106,12 @@ Interactive walkthroughs are in `notebooks/`:
 | Notebook | Content |
 |----------|---------|
 | `01_quick_start.ipynb` | Core equations, `APGICoreIntegration`, signal normalisation |
-| `02_protocol1_windowing.ipynb` | Protocol 1 — EEG interoceptive precision gating (Pred 1.A–Pred 1.C) |
-| `03_protocol2_tms_insular_gating.ipynb` | Protocol 2 — TMS insular gating of Πⁱ_eff (Pred 2.A–Pred 2.C) |
-| `04_protocol3_active_inference.ipynb` | Protocol 3 — Active inference agent simulations (Pred 3.A–Pred 3.D) |
-| `05_protocol4_disorders_of_consciousness.ipynb` | Protocol 4 — DoC joint biomarker model (Pred 4.A–Pred 4.D) |
-| `06_protocol5_fmri_anticipation.ipynb` | Protocol 5 — fMRI anticipation vs. prediction error (Pred 5.A–Pred 5.D) |
-| `07_protocol6_ieeg_ignition.ipynb` | Protocol 6 — iEEG all-or-none ignition dynamics (Pred 6.A–Pred 6.D) |
+| `02_protocol1_cardiac_eeg.ipynb` | Protocol 1 — Cardiac-EEG: interoceptive precision gating (Pred 1.a–Pred 1.c) |
+| `03_protocol2_somatic_agent_sim.ipynb` | Protocol 2 — Somatic-AgentSim: active inference agent simulations (Pred 2.a–Pred 2.e) |
+| `04_protocol4_insula_tms.ipynb` | Protocol 4 — Insula-TMS: causal disruption of Πⁱ_eff (Pred 4.a–Pred 4.c) |
+| `05_protocol3_anticipation_fmri.ipynb` | Protocol 3 — Anticipation-fMRI: somatic marker vs. prediction error (Pred 3.a–Pred 3.d) |
+| `06_protocol6_doc_biomarker.ipynb` | Protocol 6 — DoC-Biomarker: joint HEP+PCI model (Pred 6.a–Pred 6.d, 6.S) |
+| `07_protocol5_ignition_ieeg.ipynb` | Protocol 5 — Ignition-iEEG: all-or-none dynamics + pharmacology (Pred 5.a–Pred 5.g) |
 
 ```bash
 jupyter lab notebooks/
@@ -122,12 +122,12 @@ jupyter lab notebooks/
 ```bash
 python figures/generate_figure1.py   # ignition dynamics
 python figures/generate_figure2.py   # parameter recovery scatter
-python figures/generate_figure3.py   # Protocol 1: HEP cardiac-phase detection
-python figures/generate_figure4.py   # Protocol 2: TMS-induced PCI reduction
-python figures/generate_figure5.py   # Protocol 3: somatic marker agent advantage
-python figures/generate_figure6.py   # Protocol 4: DoC joint biomarker model
-python figures/generate_figure7.py   # Protocol 5: vmPFC–insula anticipatory coupling
-python figures/generate_figure8.py   # Protocol 6: iEEG bimodality + AC1 slowing
+python figures/generate_figure3.py   # Protocol 1 — Cardiac-EEG: HEP cardiac-phase detection
+python figures/generate_figure4.py   # Protocol 4 — Insula-TMS: TMS-induced PCI reduction
+python figures/generate_figure5.py   # Protocol 2 — Somatic-AgentSim: somatic marker agent advantage
+python figures/generate_figure6.py   # Protocol 6 — DoC-Biomarker: DoC joint biomarker model
+python figures/generate_figure7.py   # Protocol 3 — Anticipation-fMRI: vmPFC–insula anticipatory coupling
+python figures/generate_figure8.py   # Protocol 5 — Ignition-iEEG: iEEG bimodality + AC1 slowing
 ```
 
 Output PDFs land in `figures/output/`.
@@ -161,12 +161,12 @@ All protocol files are validated against `protocols/schemas/protocol.schema.json
 
 | File | Paradigm | Status |
 |------|---------|--------|
-| `protocol_1_eeg_interoceptive_gating.json` | EEG interoceptive precision gating (Pred 1.A–Pred 1.C) | specified |
-| `protocol_2_tms_insular_gating.json` | TMS-insula causal disruption of Πⁱ_eff (Pred 2.A–Pred 2.C) | specified\_with\_caveat |
-| `protocol_3_active_inference_simulations.json` | Active inference agent simulations — somatic marker advantage (Pred 3.A–Pred 3.D) | validated |
-| `protocol_4_disorders_of_consciousness.json` | Disorders of consciousness joint biomarker model (Pred 4.A–Pred 4.D) | specified |
-| `protocol_5_fmri_anticipation.json` | fMRI somatic marker anticipation vs. prediction error (Pred 5.A–Pred 5.D) | specified |
-| `protocol_6_icEEG_ignition_dynamics.json` | Intracranial EEG all-or-none ignition dynamics (Pred 6.A–Pred 6.D) | validated |
+| `protocol_1_cardiac_eeg.json` | Protocol 1 — Cardiac-EEG: interoceptive precision gating (Pred 1.a–Pred 1.c) | specified |
+| `protocol_2_somatic_agent_sim.json` | Protocol 2 — Somatic-AgentSim: somatic marker advantage (Pred 2.a–Pred 2.e) | validated |
+| `protocol_3_anticipation_fmri.json` | Protocol 3 — Anticipation-fMRI: somatic marker vs. prediction error (Pred 3.a–Pred 3.d) | specified |
+| `protocol_4_insula_tms.json` | Protocol 4 — Insula-TMS: causal disruption of Πⁱ_eff (Pred 4.a–Pred 4.c) | specified\_with\_caveat |
+| `protocol_5_ignition_ieeg.json` | Protocol 5 — Ignition-iEEG: all-or-none dynamics + pharmacology (Pred 5.a–Pred 5.g) | validated |
+| `protocol_6_doc_biomarker.json` | Protocol 6 — DoC-Biomarker: joint HEP+PCI model (Pred 6.a–Pred 6.d, 6.S) | specified |
 
 ## Citation
 

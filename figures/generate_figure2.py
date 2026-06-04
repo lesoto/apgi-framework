@@ -7,8 +7,8 @@ Run:
     python figures/generate_figure2.py --no-show   # CI mode
 """
 
-import sys as _sys
 import pathlib as _pathlib
+import sys as _sys
 
 _sys.path.insert(0, str(_pathlib.Path(__file__).parent.parent))
 
@@ -20,8 +20,8 @@ from scipy.stats import pearsonr
 
 from apgi.parameter_recovery import run_recovery_simulation
 from figures.utils import (
-    PALETTE,
     HALF_WIDTH,
+    PALETTE,
     PANEL_HEIGHT,
     add_identity_line,
     annotate_pearson_r,

@@ -1,6 +1,6 @@
-"""Figure 3 — Protocol 1: HEP-modulated detection by cardiac phase (Pred 1.A–Pred 1.C).
+"""Figure 3 — Protocol 1: HEP-modulated detection by cardiac phase (Pred 1.a–Pred 1.c).
 
-Simulates the key prediction of protocol_1_eeg_interoceptive_gating.json:
+Simulates the key prediction of protocol_1_cardiac_eeg.json:
 HEP amplitude (Πⁱ proxy) predicts P3b amplitude trial-by-trial, and
 detection rate is higher at diastole than systole.
 
@@ -9,8 +9,8 @@ Run:
     python figures/generate_figure3.py --no-show   # CI mode
 """
 
-import sys as _sys
 import pathlib as _pathlib
+import sys as _sys
 
 _sys.path.insert(0, str(_pathlib.Path(__file__).parent.parent))
 
@@ -22,8 +22,8 @@ from scipy.stats import pearsonr
 
 from apgi.core import compute_pi_i_eff, compute_S_t, compute_theta_t, ignition_criterion
 from figures.utils import (
-    PALETTE,
     HALF_WIDTH,
+    PALETTE,
     PANEL_HEIGHT,
     label_axes,
     make_figure,
@@ -32,7 +32,7 @@ from figures.utils import (
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
-# Protocol 1 APGI parameters (from protocol_1_eeg_interoceptive_gating.json)
+# Protocol 1 APGI parameters (from protocol_1_cardiac_eeg.json)
 KAPPA = 100.0
 ALPHA = 0.3
 BETA = 0.7
@@ -50,7 +50,7 @@ def simulate(seed: int = 2025) -> dict:
     pi_i = np.where(cardiac_phase == "systole", PI_I_SYSTOLE, PI_I_DIASTOLE)
     C_metabolic = rng.uniform(0.5, 2.0, N_TRIALS)
 
-    # HEP amplitude is a noisy proxy for Πⁱ_eff (Pred 1.A); compute per-trial (pi_i varies by phase)
+    # HEP amplitude is a noisy proxy for Πⁱ_eff (Pred 1.a); compute per-trial (pi_i varies by phase)
     pi_i_eff = np.array(
         [
             compute_pi_i_eff(float(pi_i[i]), float(C_metabolic[i]), kappa=KAPPA)
@@ -112,7 +112,7 @@ def plot(data: dict, show: bool = True) -> None:
         width=0.5,
     )
     ax.set_ylabel("Detection rate", fontsize=10)
-    ax.set_title("Pred 1.B — Cardiac phase\n× detection rate", fontsize=10)
+    ax.set_title("Pred 1.b — Cardiac phase\n× detection rate", fontsize=10)
     ax.set_ylim(0, 1)
     for bar, rate in zip(bars, rates):
         ax.text(
@@ -124,7 +124,7 @@ def plot(data: dict, show: bool = True) -> None:
             fontsize=9,
         )
 
-    # Panel B: HEP–P3b coupling (Pred 1.A)
+    # Panel B: HEP–P3b coupling (Pred 1.a)
     ax = axes[1]
     r, _ = pearsonr(data["hep_amplitude"], data["p3b_amplitude"])
     ax.scatter(
@@ -141,7 +141,7 @@ def plot(data: dict, show: bool = True) -> None:
     ax.annotate(f"r = {r:.3f}", xy=(0.05, 0.92), xycoords="axes fraction", fontsize=9)
     ax.set_xlabel(r"HEP amplitude ($\Pi^i$ proxy)", fontsize=9)
     ax.set_ylabel(r"P3b amplitude (ignition proxy)", fontsize=9)
-    ax.set_title("Pred 1.A — HEP → P3b\ncoupling", fontsize=10)
+    ax.set_title("Pred 1.a — HEP → P3b\ncoupling", fontsize=10)
 
     # Panel C: S_t distributions by phase
     ax = axes[2]
@@ -169,9 +169,7 @@ def plot(data: dict, show: bool = True) -> None:
     ax.legend(fontsize=8)
 
     label_axes(axes)
-    fig.suptitle(
-        "Figure 3 — Protocol 1: EEG Interoceptive Precision Gating", fontsize=11, y=1.02
-    )
+    fig.suptitle("Figure 3 — Protocol 1 — Cardiac-EEG", fontsize=11, y=1.02)
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure3.pdf")
     if show:

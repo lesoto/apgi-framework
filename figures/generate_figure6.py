@@ -1,18 +1,17 @@
-"""Figure 6 — Protocol 4: DoC joint biomarker model (Pred 4.A–Pred 4.B).
+"""Figure 6 — Protocol 4 — TMS-induced disruption of Πⁱ_eff and PCI (Pred 4.a–Pred 4.c).
 
-Simulates HEP amplitude and PCI scores for four DoC groups from
-protocol_4_disorders_of_consciousness.json and shows:
-  A — HEP amplitude by DoC group (Pred 4.B)
-  B — PCI by DoC group
-  C — Joint model R² vs univariate R² for 3-month GCS-S recovery (Pred 4.A)
+Simulates three TMS conditions from protocol_4_insula_tms.json:
+pIC_active, dlPFC_PPC_active, vertex_sham. Shows predicted PCI reduction
+via dissociable mechanisms: pIC abolishes HEP–PCI coupling; dlPFC/PPC reduces
+PCI globally without affecting HEP.
 
 Run:
     python figures/generate_figure6.py
     python figures/generate_figure6.py --no-show   # CI mode
 """
 
-import sys as _sys
 import pathlib as _pathlib
+import sys as _sys
 
 _sys.path.insert(0, str(_pathlib.Path(__file__).parent.parent))
 
@@ -22,10 +21,10 @@ import pathlib
 import numpy as np
 from scipy.stats import pearsonr
 
-from apgi.core import compute_pi_i_eff
+from apgi.core import compute_pi_i_eff, compute_S_t, compute_theta_t, ignition_criterion
 from figures.utils import (
-    PALETTE,
     HALF_WIDTH,
+    PALETTE,
     PANEL_HEIGHT,
     label_axes,
     make_figure,
@@ -34,144 +33,154 @@ from figures.utils import (
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
-# Protocol 4 APGI parameters
-PI_I_BY_GROUP = {
-    "VS/UWS": 0.3,
-    "MCS": 0.8,
-    "Controls": 1.2,
-}
-N_PER_GROUP = {"VS/UWS": 15, "MCS": 20, "Controls": 15}
-GROUP_COLORS = {
-    "VS/UWS": PALETTE["theta"],
-    "MCS": "#FFCC00",
-    "Controls": PALETTE["S_t"],
-}
+# Protocol 4 APGI parameters (from protocol_4_insula_tms.json)
+KAPPA = 100.0
+ALPHA = 0.3
+BETA = 0.7
+DELTA_PI_INSULA = -0.4  # pIC TMS reduces Πⁱ_eff (interoceptive gating disrupted)
+DELTA_PI_DLPFC_PPC = -0.2  # dlPFC/PPC TMS reduces PCI globally, HEP unaffected
+DELTA_PI_SHAM = 0.0
+N_TRIALS = 480
 
 
-def simulate(seed: int = 7) -> dict:
+def simulate_condition(
+    pi_i_base: float,
+    delta_pi: float,
+    seed: int,
+    n: int = N_TRIALS,
+    hep_p3b_coupling: float = 0.8,
+) -> dict:
+    """Simulate one TMS condition.
+
+    hep_p3b_coupling controls the HEP→P3b link strength:
+      - Vertex sham  : 0.80  (strong interoceptive coupling, baseline)
+      - pIC active   : 0.05  (abolished; Pred 4.b threshold < 0.15)
+      - dlPFC active : 0.45  (globally reduced but not abolished; BF₀₁ ≥ 6)
+
+    P3b is generated as a weighted sum of the interoceptive HEP signal and
+    the full exteroceptive S_t component, so that the Pearson r(HEP, P3b)
+    reflects only the *interoceptive* coupling that pIC TMS disrupts.
+    """
     rng = np.random.default_rng(seed)
-    hep_by_group, pci_by_group = {}, {}
+    pi_i = max(0.01, pi_i_base + delta_pi)
+    C_metabolic = rng.uniform(0.5, 2.0, n)
+    pi_i_eff = compute_pi_i_eff(pi_i, C_metabolic, kappa=KAPPA)
+    pi_e = rng.uniform(0.8, 1.5, n)
+    z_e = rng.uniform(0.2, 1.0, n)
+    z_i = rng.uniform(0.1, 0.8, n)
+    V_info = rng.uniform(0.1, 1.0, n)
+    S_t = np.array(
+        [
+            compute_S_t(
+                float(pi_e[i]), float(z_e[i]), float(pi_i_eff[i]), float(z_i[i])
+            )
+            for i in range(n)
+        ]
+    )
+    theta_t = np.array(
+        [
+            compute_theta_t(float(C_metabolic[i]), float(V_info[i]), ALPHA, BETA)
+            for i in range(n)
+        ]
+    )
+    detected = np.array([ignition_criterion(S_t[i], theta_t[i]) for i in range(n)])
+    hep = pi_i_eff + rng.normal(0, 0.08, n)
 
-    for group, pi_i in PI_I_BY_GROUP.items():
-        n = N_PER_GROUP[group]
-        C = rng.uniform(0.5, 2.0, n)
-        pi_i_eff = compute_pi_i_eff(pi_i, C, kappa=100.0)
-        # HEP amplitude ~ Πⁱ_eff + noise
-        hep_by_group[group] = pi_i_eff + rng.normal(0, 0.07, n)
-        # PCI ~ ignition capacity (higher in MCS/controls)
-        pci_base = {"VS/UWS": 0.18, "MCS": 0.35, "Controls": 0.52}[group]
-        pci_by_group[group] = rng.normal(pci_base, 0.06, n)
+    # Construct P3b so that r(HEP, P3b) ≈ hep_p3b_coupling exactly (large-n limit).
+    # Model: p3b = coupling * z_hep + sqrt(1 - coupling²) * z_indep,
+    # where z_hep is hep standardised and z_indep is independent unit-normal noise.
+    # Both are then rescaled back to hep units so the axis is interpretable.
+    # Under pIC TMS coupling → 0.05 (abolished, < 0.15 threshold);
+    # under dlPFC TMS coupling → 0.45 (reduced but not abolished, BF₀₁ ≥ 6).
+    hep_mean, hep_std = float(np.mean(hep)), float(np.std(hep)) + 1e-9
+    z_hep = (hep - hep_mean) / hep_std
+    z_indep = rng.standard_normal(n)
+    p3b = (
+        hep_p3b_coupling * z_hep
+        + np.sqrt(max(0.0, 1.0 - hep_p3b_coupling**2)) * z_indep
+    ) * hep_std + hep_mean
 
-    # Simulate 3-month GCS-S outcomes for regression (Pred 4.A)
-    all_hep_list: list[float] = []
-    all_pci_list: list[float] = []
-    all_gcs_list: list[float] = []
-    for group in PI_I_BY_GROUP:
-        n = N_PER_GROUP[group]
-        base_gcs = {"VS/UWS": 4.0, "MCS": 9.0, "Controls": 14.5}[group]
-        gcs = base_gcs + 2.0 * hep_by_group[group] + 3.0 * pci_by_group[group]
-        gcs += rng.normal(0, 1.2, n)
-        all_hep_list.extend(hep_by_group[group])
-        all_pci_list.extend(pci_by_group[group])
-        all_gcs_list.extend(gcs)
+    # PCI ~ ignition rate scaled to 0–1 (simplified proxy)
+    pci = detected.mean() * 0.8 + rng.uniform(0, 0.05)
+    return {"S_t": S_t, "detected": detected, "hep": hep, "p3b": p3b, "pci": float(pci)}
 
-    all_hep = np.array(all_hep_list)
-    all_pci = np.array(all_pci_list)
-    all_gcs = np.array(all_gcs_list)
 
-    return {
-        "hep_by_group": hep_by_group,
-        "pci_by_group": pci_by_group,
-        "all_hep": all_hep,
-        "all_pci": all_pci,
-        "all_gcs": all_gcs,
+def plot(show: bool = True) -> None:
+    pi_i_base = 1.0
+    conditions = {
+        "Vertex\n(sham)": simulate_condition(
+            pi_i_base, DELTA_PI_SHAM, seed=1, hep_p3b_coupling=0.40
+        ),
+        "pIC\n(active)": simulate_condition(
+            pi_i_base, DELTA_PI_INSULA, seed=2, hep_p3b_coupling=0.08
+        ),
+        "dlPFC/PPC\n(active)": simulate_condition(
+            pi_i_base, DELTA_PI_DLPFC_PPC, seed=3, hep_p3b_coupling=0.28
+        ),
     }
 
-
-def r_squared(y_true: np.ndarray, predictors: list[np.ndarray]) -> float:
-    X = np.column_stack([np.ones(len(y_true))] + predictors)
-    beta, *_ = np.linalg.lstsq(X, y_true, rcond=None)
-    y_hat = X @ beta
-    ss_res = np.sum((y_true - y_hat) ** 2)
-    ss_tot = np.sum((y_true - y_true.mean()) ** 2)
-    return float(1 - ss_res / ss_tot)
-
-
-def plot(data: dict, show: bool = True) -> None:
     fig, axes = make_figure(ncols=3, width=HALF_WIDTH * 3, height=PANEL_HEIGHT)
 
-    groups = list(PI_I_BY_GROUP.keys())
-    x = np.arange(len(groups))
+    labels = list(conditions.keys())
+    colors = [PALETTE["S_t"], PALETTE["theta"], "#9966FF"]
 
-    # Panel A: HEP amplitude by DoC group (Pred 4.B)
+    # Panel A: PCI by TMS condition (Pred 4.a)
     ax = axes[0]
-    means = [data["hep_by_group"][g].mean() for g in groups]
-    sems = [data["hep_by_group"][g].std() / np.sqrt(N_PER_GROUP[g]) for g in groups]
-    ax.bar(
-        x,
-        means,
-        yerr=sems,
-        color=[GROUP_COLORS[g] for g in groups],
-        alpha=0.85,
-        edgecolor="white",
-        width=0.5,
-        capsize=4,
-    )
-    ax.set_xticks(x)
-    ax.set_xticklabels(groups, fontsize=9)
-    ax.set_ylabel("HEP amplitude (a.u.)", fontsize=10)
-    ax.set_title("Pred 4.B — HEP discriminates\nMCS from VS/UWS", fontsize=10)
-
-    # Panel B: PCI by DoC group
-    ax = axes[1]
-    means_pci = [data["pci_by_group"][g].mean() for g in groups]
-    sems_pci = [data["pci_by_group"][g].std() / np.sqrt(N_PER_GROUP[g]) for g in groups]
-    ax.bar(
-        x,
-        means_pci,
-        yerr=sems_pci,
-        color=[GROUP_COLORS[g] for g in groups],
-        alpha=0.85,
-        edgecolor="white",
-        width=0.5,
-        capsize=4,
-    )
+    pcis = [conditions[k]["pci"] for k in labels]
+    bars = ax.bar(labels, pcis, color=colors, alpha=0.85, edgecolor="white", width=0.5)
     ax.axhline(
-        0.31, ls="--", lw=1, color="black", alpha=0.5, label="PCI threshold = 0.31"
+        0.31,
+        ls="--",
+        lw=1,
+        color="black",
+        alpha=0.6,
+        label="PCI consciousness threshold",
     )
-    ax.set_xticks(x)
-    ax.set_xticklabels(groups, fontsize=9)
-    ax.set_ylabel("PCI", fontsize=10)
-    ax.set_title("PCI by DoC group", fontsize=10)
+    ax.set_ylabel("PCI (ignition proxy)", fontsize=10)
+    ax.set_title(
+        "Pred 4.a — PCI reduction\nby TMS site (pIC ~20%, dlPFC 15–25%)", fontsize=10
+    )
+    ax.set_ylim(0, 0.8)
     ax.legend(fontsize=7)
 
-    # Panel C: Joint vs univariate R² (Pred 4.A)
-    ax = axes[2]
-    r2_hep = r_squared(data["all_gcs"], [data["all_hep"]])
-    r2_pci = r_squared(data["all_gcs"], [data["all_pci"]])
-    r2_joint = r_squared(data["all_gcs"], [data["all_hep"], data["all_pci"]])
-    model_names = ["HEP only", "PCI only", "HEP + PCI\n(joint)"]
-    r2_vals = [r2_hep, r2_pci, r2_joint]
-    bar_colors = [PALETTE["S_t"], "#9966FF", "#00CC99"]
-    bars = ax.bar(
-        model_names, r2_vals, color=bar_colors, alpha=0.85, edgecolor="white", width=0.5
+    # Panel B: Ignition rate by TMS condition
+    ax = axes[1]
+    rates = [conditions[k]["detected"].mean() for k in labels]
+    ax.bar(labels, rates, color=colors, alpha=0.85, edgecolor="white", width=0.5)
+    ax.set_ylabel("Ignition rate", fontsize=10)
+    ax.set_title(
+        "Pred 4.b — Threshold elevation\nunder pIC TMS (stream-specific)", fontsize=10
     )
-    for bar, val in zip(bars, r2_vals):
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,
-            val + 0.01,
-            f"{val:.3f}",
-            ha="center",
-            va="bottom",
-            fontsize=9,
-        )
-    ax.set_ylabel(r"$R^2$ for GCS-S recovery", fontsize=10)
-    ax.set_title("Pred 4.A — Joint model\noutperforms univariate", fontsize=10)
     ax.set_ylim(0, 1)
+
+    # Panel C: HEP–P3b coupling by condition (Pred 4.b: abolished under insula TMS)
+    ax = axes[2]
+    r_vals, r_labels = [], []
+    for (lbl, cond), col in zip(conditions.items(), colors):
+        r, _ = pearsonr(cond["hep"], cond["p3b"])
+        r_vals.append(r)
+        r_labels.append(lbl.replace("\n", " "))
+    ax.bar(r_labels, r_vals, color=colors, alpha=0.85, edgecolor="white", width=0.5)
+    ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
+    ax.axhline(
+        0.15,
+        ls=":",
+        lw=1.0,
+        color="#D6604D",
+        alpha=0.7,
+        label="abolished threshold (< 0.15)",
+    )
+    ax.legend(fontsize=7)
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel(r"HEP–P3b coupling (r)", fontsize=10)
+    ax.set_title(
+        "Pred 4.b — HEP–P3b coupling\nabolished by pIC TMS (< 0.15); dlPFC BF₀₁≥6",
+        fontsize=10,
+    )
 
     label_axes(axes)
     fig.suptitle(
-        "Figure 6 — Protocol 4: Disorders of Consciousness Biomarker Model",
+        "Figure 6 — Protocol 4 — pIC/dlPFC TMS Dissociable Gating of Πⁱ_eff (Pred 4.a–Pred 4.c)",
         fontsize=11,
         y=1.02,
     )
@@ -190,7 +199,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 6")
     parser.add_argument("--no-show", action="store_true")
     args = parser.parse_args()
-    plot(simulate(), show=not args.no_show)
+    plot(show=not args.no_show)
 
 
 if __name__ == "__main__":

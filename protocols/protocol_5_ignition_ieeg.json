@@ -1,18 +1,18 @@
 {
-  "protocol_id": "APGI-P06",
-  "registry_ep": "EP-6",
-  "registry_protocol_label": "Protocol 6 — Clinical-Empirical",
+  "protocol_id": "APGI-P05",
+  "registry_ep": "EP-5",
+  "registry_protocol_label": "Protocol 5 — Ignition-iEEG",
   "title": "Intracranial EEG During Near-Threshold Detection: All-or-None Ignition Dynamics",
   "paper": "APGI Paper 1",
   "osf_url": "https://osf.io/XXXXXX",
   "version": "2.0.0",
   "last_updated": "2026-06-04",
-  "description": "Intracranial EEG (iEEG) recordings in epilepsy patients performing a near-threshold visual detection task test whether conscious access produces all-or-none (bistable) firing rate distributions in the frontoparietal network, as predicted by APGI's ignition criterion Bₜ. Four sub-predictions are tested: (Pred 6.A) frontoparietal cortex shows bimodal high-gamma power distributions with Hartigan's dip p < 0.05 AND 2-component Gaussian BIC substantially lower than 1-component (ΔBIC > 10); (Pred 6.B) bimodality is specific to the frontoparietal ignition network with occipital units showing graded responses, and intermediate-state bouts show a mean duration < 100 ms (sharp transitions) with prevalence < 15% of trial duration; (Pred 6.C, bifurcation falsification criterion) AC1 of pre-ignition high-gamma power increases monotonically in the 500 ms preceding detected stimuli, with RT showing a U-shape with maximum at ~50% detection threshold; (Pred 6.D, APGI-specific over GNW) long-range gamma coherence (15–80 Hz) between frontoparietal sites predicts seen vs. unseen trials (r > 0.4, peaking 200–400 ms), with a pre-specified three-tier confirmation structure: criteria (1+2) = GNW-consistent; criteria (1+2+3) including HEP–coherence correlation r > 0.25 in seen trials = APGI-specific. Fully validated via APGI_LNN_Bifurcation_Analysis.py.",
-  "prediction_cluster": "Pred 6.A–6.D",
-  "prediction_cluster_label": "All-or-None Ignition Dynamics (Bifurcation + Coherence + APGI-Specific Interoceptive Tier)",
+  "description": "Intracranial EEG (iEEG) recordings in epilepsy patients performing a near-threshold visual detection task test whether conscious access produces all-or-none (bistable) firing rate distributions in the frontoparietal network, as predicted by APGI's ignition criterion Bₜ. Four sub-predictions are tested: (Pred 5.a) frontoparietal cortex shows bimodal high-gamma power distributions with Hartigan's dip p < 0.05 AND 2-component Gaussian BIC substantially lower than 1-component (ΔBIC > 10); (Pred 5.b) bimodality is specific to the frontoparietal ignition network with occipital units showing graded responses, and intermediate-state bouts show a mean duration < 100 ms (sharp transitions) with prevalence < 15% of trial duration; (Pred 5.c, bifurcation falsification criterion) AC1 of pre-ignition high-gamma power increases monotonically in the 500 ms preceding detected stimuli, with RT showing a U-shape with maximum at ~50% detection threshold; (Pred 5.d, APGI-specific over GNW) long-range gamma coherence (15–80 Hz) between frontoparietal sites predicts seen vs. unseen trials (r > 0.4, peaking 200–400 ms), with a pre-specified three-tier confirmation structure: criteria (1+2) = GNW-consistent; criteria (1+2+3) including HEP–coherence correlation r > 0.25 in seen trials = APGI-specific. Fully validated via APGI_LNN_Bifurcation_Analysis.py.",
+  "prediction_cluster": "Pred 5.a–5.g",
+  "prediction_cluster_label": "All-or-None Ignition Dynamics (Bifurcation + Coherence + Pharmacological Dissociation)",
   "sub_predictions": [
     {
-      "id": "Pred 6.A",
+      "id": "Pred 5.a",
       "claim": "Frontoparietal cortex shows bimodal (not graded) high-gamma power distributions at near-threshold contrast.",
       "confirming_evidence": "Hartigan's dip test p < 0.05; 2-component Gaussian BIC substantially lower than 1-component (ΔBIC > 10); clear separation between low-gamma mode (~5–10 Hz equivalent) and high-gamma mode (~40–60 Hz equivalent).",
       "falsifying_evidence": "Unimodal continuous distribution of high-gamma power across all contrast levels; dip test p > 0.20; no evidence of bistability.",
@@ -30,7 +30,7 @@
       }
     },
     {
-      "id": "Pred 6.B",
+      "id": "Pred 5.b",
       "claim": "Bimodality is specific to the frontoparietal ignition network; occipital/early visual cortex shows graded continuous responses. Individual intermediate-state bouts < 100 ms mean duration (sharp not gradual transitions).",
       "confirming_evidence": "Region × bimodality-index interaction significant (p < 0.05, mixed-effects); dip statistic significantly larger for frontoparietal than occipital clusters; mean intermediate-state bout duration < 100 ms (prevalence < 15% of trial duration).",
       "falsifying_evidence": "Uniform bimodality across all recorded regions; or intermediate-state bouts > 150 ms in ≥ 50% of trials; or prevalence > 30% of trial duration (inconsistent with sharp bifurcation).",
@@ -47,7 +47,7 @@
       }
     },
     {
-      "id": "Pred 6.C",
+      "id": "Pred 5.c",
       "claim": "AC1 of pre-ignition high-gamma power (70–150 Hz envelope) increases monotonically in 500 ms preceding detected stimuli (critical slowing / bifurcation signature); effect absent in non-detected trials. RT shows U-shape maximum at ~50% detection threshold.",
       "critical_note": "THIS IS THE BIFURCATION FALSIFICATION CRITERION distinguishing APGI from standard Global Workspace Theory. Must appear verbatim in Appendix C.3 of Paper 2. GWT predicts threshold-crossing without critical slowing; APGI predicts AC1 increase reflecting approach to bifurcation point.",
       "confirming_evidence": "AC1 Kendall τ > 0.3 in detected trials (permutation test 10,000 permutations, p < 0.05); AC1 trend absent or reversed in non-detected trials; RT maximum at ~50% detection threshold (quadratic RT fit, p < 0.01).",
@@ -67,11 +67,11 @@
       }
     },
     {
-      "id": "Pred 6.D",
+      "id": "Pred 5.d",
       "claim": "Long-range gamma coherence (15–80 Hz) between frontoparietal sites predicts seen vs. unseen trials trial-by-trial (r > 0.4, peaking 200–400 ms). APGI-specific extension: coherence magnitude correlates with same-trial HEP amplitude (interoceptive precision).",
-      "critical_note": "Three-tier pre-specified confirmation structure: Criterion (1) = frontoparietal coherence–detection r > 0.4, peaking 200–400 ms. Criterion (2) = occipital coherence–detection r < 0.20 (frontoparietal specificity). Criterion (1+2) = GNW-consistent result. Criterion (3) = HEP–coherence correlation r > 0.25 in seen trials (APGI-specific tier). Criterion (1+2+3) = APGI-specific confirmation. Failure of criterion (3) alone reclassifies result as GNW-consistent only — does NOT falsify Pred 6.D but removes APGI-specific confirmation. Pre-specified reclassification: no amendment required.",
+      "critical_note": "Three-tier pre-specified confirmation structure: Criterion (1) = frontoparietal coherence–detection r > 0.4, peaking 200–400 ms. Criterion (2) = occipital coherence–detection r < 0.20 (frontoparietal specificity). Criterion (1+2) = GNW-consistent result. Criterion (3) = HEP–coherence correlation r > 0.25 in seen trials (APGI-specific tier). Criterion (1+2+3) = APGI-specific confirmation. Failure of criterion (3) alone reclassifies result as GNW-consistent only — does NOT falsify Pred 5.d but removes APGI-specific confirmation. Pre-specified reclassification: no amendment required.",
       "confirming_evidence": "(1) Point-biserial r > 0.4 for frontoparietal beta/gamma coherence vs. detection, peaking 200–400 ms post-stimulus. (2) Occipital sites: coherence–detection r < 0.20 (frontoparietal specificity). (3) HEP–coherence correlation r > 0.25 in seen trials (APGI-specific tier). Criterion (1+2) = GNW-consistent. Criterion (1+2+3) = APGI-specific.",
-      "falsifying_evidence": "r < 0.20 for frontoparietal coherence vs. detection; or coherence peak outside 200–400 ms window; or occipital coherence statistically equivalent to frontoparietal coherence. Failure of criterion (3) alone reclassifies result as GNW-consistent only — does not falsify Pred 6.D but removes APGI-specific confirmation (pre-specified reclassification, no amendment required).",
+      "falsifying_evidence": "r < 0.20 for frontoparietal coherence vs. detection; or coherence peak outside 200–400 ms window; or occipital coherence statistically equivalent to frontoparietal coherence. Failure of criterion (3) alone reclassifies result as GNW-consistent only — does not falsify Pred 5.d but removes APGI-specific confirmation (pre-specified reclassification, no amendment required).",
       "confirming_thresholds": {
         "criterion_1": {
           "frontoparietal_coherence_r_minimum": 0.4,
@@ -99,17 +99,75 @@
         "condition_3": "Occipital coherence statistically equivalent to frontoparietal coherence",
         "criterion_3_failure_note": "Failure of criterion (3) alone does NOT falsify — pre-specified reclassification to GNW-consistent"
       }
+    },
+    {
+      "id": "Pred 5.e",
+      "claim": "Propofol (GABA-A agonist) produces a P3b:MMN suppression ratio ≥ 3.5:1 relative to wakefulness, reflecting selective disruption of frontoparietal ignition with relative sparing of early sensory prediction-error signals.",
+      "confirming_evidence": "P3b amplitude reduction ≥ 70% from wakefulness baseline under propofol sedation (loss-of-consciousness dose); MMN amplitude reduction ≤ 20%; P3b:MMN suppression ratio ≥ 3.5:1 (bootstrap 95% CI lower bound > 3.0).",
+      "falsifying_evidence": "P3b:MMN ratio < 2.0; or MMN suppression ≥ 50% (indicating early cortical suppression inconsistent with APGI ignition-specific account); or P3b suppression < 50% at confirmed LOC dose.",
+      "confirming_thresholds": {
+        "p3b_suppression_percent_minimum": 70,
+        "mmn_suppression_percent_maximum": 20,
+        "p3b_mmn_ratio_minimum": 3.5,
+        "ratio_ci_lower_bound": 3.0,
+        "drug": "Propofol (GABA-A agonist)",
+        "dose_criterion": "Loss-of-consciousness dose (confirmed by OAA/S ≤ 2)"
+      },
+      "falsifying_thresholds": {
+        "condition_1": "P3b:MMN ratio < 2.0",
+        "condition_2": "MMN suppression ≥ 50%",
+        "condition_3": "P3b suppression < 50% at confirmed LOC dose"
+      }
+    },
+    {
+      "id": "Pred 5.f",
+      "claim": "Ketamine (NMDA antagonist) produces an MMN:HEP suppression ratio ≈ 1:1, reflecting equivalent disruption of sensory prediction-error and interoceptive precision signals — dissociating the ketamine dissociative state from propofol LOC.",
+      "confirming_evidence": "MMN amplitude reduction and HEP amplitude reduction both in the range 30–60% from wakefulness baseline; MMN:HEP ratio in range [0.75, 1.33] (equivalence band); ratio dissociates from propofol P3b:MMN ratio (non-overlapping 95% CIs).",
+      "falsifying_evidence": "MMN:HEP ratio < 0.5 or > 2.0 (selective suppression of one signal); or ketamine and propofol profiles are statistically indistinguishable on the P3b:MMN vs. MMN:HEP dissociation.",
+      "confirming_thresholds": {
+        "mmn_suppression_range_percent": [30, 60],
+        "hep_suppression_range_percent": [30, 60],
+        "mmn_hep_ratio_equivalence_band": [0.75, 1.33],
+        "dissociation_from_propofol": "Non-overlapping 95% CIs on P3b:MMN (propofol) vs. MMN:HEP (ketamine)",
+        "drug": "Ketamine (NMDA antagonist)",
+        "dose_criterion": "Sub-anaesthetic dissociative dose (confirmed by CADSS score ≥ 15)"
+      },
+      "falsifying_thresholds": {
+        "condition_1": "MMN:HEP ratio < 0.5 or > 2.0",
+        "condition_2": "Ketamine and propofol profiles statistically indistinguishable"
+      }
+    },
+    {
+      "id": "Pred 5.g",
+      "claim": "Psilocybin (5-HT2A agonist) produces a P3b amplitude increase ≥ 30% above placebo baseline for subthreshold stimuli, reflecting enhanced interoceptive precision gain and lowered ignition threshold without sedation.",
+      "confirming_evidence": "P3b amplitude in subthreshold contrast condition ≥ 130% of placebo baseline (paired t p < 0.05, Cohen's d ≥ 0.5); detection rate for subthreshold stimuli increases ≥ 15% from placebo; HEP amplitude increases ≥ 20% (interoceptive precision gain). Suprathreshold P3b shows no significant change (specificity to near-threshold stimuli).",
+      "falsifying_evidence": "P3b increase < 10% for subthreshold stimuli; or P3b increase equivalent at suprathreshold contrast (non-specific enhancement); or HEP amplitude does not increase (interoceptive precision gain not supported).",
+      "confirming_thresholds": {
+        "p3b_subthreshold_increase_percent_minimum": 30,
+        "p3b_increase_p_threshold": 0.05,
+        "cohens_d_minimum": 0.5,
+        "detection_rate_increase_minimum_percent": 15,
+        "hep_increase_minimum_percent": 20,
+        "suprathreshold_specificity": "P3b increase absent or < 10% at suprathreshold contrast",
+        "drug": "Psilocybin (5-HT2A agonist)",
+        "dose_criterion": "Moderate psychedelic dose (0.2–0.3 mg/kg); confirmed by 5D-ASC score"
+      },
+      "falsifying_thresholds": {
+        "condition_1": "P3b increase < 10% for subthreshold stimuli",
+        "condition_2": "P3b increase equivalent at suprathreshold contrast",
+        "condition_3": "HEP amplitude does not increase"
+      }
     }
   ],
   "validation_status": "validated",
-  "validation_notes": "Fully validated. The APGI_LNN_Bifurcation_Analysis.py script is built, integrated, and passes all benchmarks for automated clinical iEEG state detection, Hartigan's dip bimodality tests, and lag-1 autocorrelation (AC1) pre-ignition slowing indicators, validating saddle-node bifurcation precursors verbatim for Paper 2 Appendix C.3. ΔBIC > 10 Gaussian criterion added to Pred 6.A, bout duration and prevalence criteria added to Pred 6.B, RT U-shape criterion added to Pred 6.C, Pred 6.D replaced with registry-specified long-range coherence prediction including three-tier APGI-specific confirmation structure.",
+  "validation_notes": "Fully validated. The APGI_LNN_Bifurcation_Analysis.py script is built, integrated, and passes all benchmarks for automated clinical iEEG state detection, Hartigan's dip bimodality tests, and lag-1 autocorrelation (AC1) pre-ignition slowing indicators, validating saddle-node bifurcation precursors verbatim for Paper 2 Appendix C.3. ΔBIC > 10 Gaussian criterion added to Pred 5.a, bout duration and prevalence criteria added to Pred 5.b, RT U-shape criterion added to Pred 5.c, Pred 5.d replaced with registry-specified long-range coherence prediction including three-tier APGI-specific confirmation structure.",
   "participants": {
     "n_target": 20,
     "n_minimum": 12,
     "inclusion_criteria": [
       "Adult epilepsy patients (age 18–65) with clinically indicated intracranial electrode implantation for seizure localisation",
       "Electrode coverage of frontoparietal cortex (required: at least 4 electrodes in prefrontal and parietal cortex bilaterally)",
-      "Electrode coverage of occipital/early visual cortex (required for Pred 6.B regional comparison: at least 2 occipital/V1/V2 electrodes)",
+      "Electrode coverage of occipital/early visual cortex (required for Pred 5.b regional comparison: at least 2 occipital/V1/V2 electrodes)",
       "Cognitive capacity to perform 2AFC near-threshold detection task (verified by neuropsychologist)",
       "Seizure-free period of ≥ 48 hours at time of testing",
       "Written informed consent from patient"
@@ -131,12 +189,12 @@
     "target_regions_required": [
       "Prefrontal cortex (dlPFC, vlPFC): bilateral coverage preferred",
       "Posterior parietal cortex (IPS, SPL)",
-      "Occipital/early visual cortex (V1/V2 for regional comparison, Pred 6.B and coherence specificity Pred 6.D)"
+      "Occipital/early visual cortex (V1/V2 for regional comparison, Pred 5.b and coherence specificity Pred 5.d)"
     ],
     "display": "Laptop screen at 60 cm viewing distance, 120 Hz refresh rate, gamma-corrected",
     "stimulus_delivery": "Psychtoolbox-3 with photodiode verification; TTL trigger to iEEG system; TTL accuracy < 5 ms mandatory",
     "eye_tracking": "Eyelink 1000 Plus (monocular, 500 Hz) for fixation verification",
-    "ecg_for_hep": "Bipolar ECG lead-II synchronised to iEEG clock for HEP extraction (Pred 6.D criterion 3)"
+    "ecg_for_hep": "Bipolar ECG lead-II synchronised to iEEG clock for HEP extraction (Pred 5.d criterion 3)"
   },
   "trial_structure": {
     "isi_ms": [1000, 1500],
@@ -175,7 +233,7 @@
     "baseline_window_ms": [-500, -200],
     "bimodality_test": {
       "primary": "Hartigan's dip test on single-trial high-gamma amplitude distribution at near-threshold contrast; significance threshold p < 0.05",
-      "secondary": "2-component vs. 1-component Gaussian mixture model; ΔBIC > 10 required for confirmation (Pred 6.A)",
+      "secondary": "2-component vs. 1-component Gaussian mixture model; ΔBIC > 10 required for confirmation (Pred 5.a)",
       "mode_characterisation": "Report modes in Hz-equivalent units; expected low mode ~5–10 Hz, high mode ~40–60 Hz"
     },
     "ac1_analysis": {
@@ -188,49 +246,49 @@
     "intermediate_state_detection": {
       "definition": "Single trial high-gamma amplitude between 25% and 75% of bimodal peak separation",
       "analysis_window_ms": [0, 400],
-      "bout_duration_measurement": "Mean duration of intermediate-state bouts per trial; must be < 100 ms for Pred 6.B confirmation",
-      "prevalence_measurement": "Proportion of trial duration spent in intermediate state; must be < 15% for Pred 6.B confirmation"
+      "bout_duration_measurement": "Mean duration of intermediate-state bouts per trial; must be < 100 ms for Pred 5.b confirmation",
+      "prevalence_measurement": "Proportion of trial duration spent in intermediate state; must be < 15% for Pred 5.b confirmation"
     },
     "rt_analysis": {
-      "description": "Reaction time as function of proximity to detection threshold (Pred 6.C)",
+      "description": "Reaction time as function of proximity to detection threshold (Pred 5.c)",
       "model": "Quadratic regression: RT ~ (contrast_level − individual_threshold)² + (contrast_level − individual_threshold)",
       "prediction": "Quadratic term significant (p < 0.01); RT maximum at ~50% detection threshold"
     },
     "coherence_analysis": {
-      "description": "Long-range gamma coherence between frontoparietal electrode pairs (Pred 6.D)",
+      "description": "Long-range gamma coherence between frontoparietal electrode pairs (Pred 5.d)",
       "frequency_band_hz": [15, 80],
       "epoch_window_ms": [-200, 800],
       "method": "Multitaper coherence estimation (DPSS, time-bandwidth product 4); imaginary coherence to avoid volume conduction",
       "frontoparietal_pairs": "All pairs between prefrontal and parietal electrode clusters",
-      "occipital_pairs": "All pairs involving occipital/V1/V2 electrodes (regional comparison, Pred 6.D criterion 2)",
+      "occipital_pairs": "All pairs involving occipital/V1/V2 electrodes (regional comparison, Pred 5.d criterion 2)",
       "peak_window_ms": [200, 400],
       "detection_correlation": "Point-biserial r between coherence magnitude and binary detection outcome",
-      "hep_coherence_correlation": "Pearson r between single-trial HEP amplitude (250–400 ms, bipolar ECG-referenced) and single-trial frontoparietal coherence in seen trials (Pred 6.D criterion 3, APGI-specific)"
+      "hep_coherence_correlation": "Pearson r between single-trial HEP amplitude (250–400 ms, bipolar ECG-referenced) and single-trial frontoparietal coherence in seen trials (Pred 5.d criterion 3, APGI-specific)"
     },
     "regional_comparison": "Mixed-effects model: bimodality index (dip statistic) ~ region (frontoparietal vs. occipital) + contrast + (region | participant)"
   },
   "dependent_variables": [
-    "Hartigan's dip statistic: frontoparietal high-gamma distribution per contrast level — Pred 6.A primary",
-    "ΔBIC (2-component vs. 1-component Gaussian): frontoparietal high-gamma — Pred 6.A secondary required",
-    "Modal separation: low mode and high mode frequencies (Hz equivalent) — Pred 6.A characterisation",
-    "Hartigan's dip statistic: occipital high-gamma distribution (regional comparison) — Pred 6.B",
-    "Region × bimodality-index interaction — Pred 6.B",
-    "Mean intermediate-state bout duration (ms) — Pred 6.B",
-    "Intermediate-state prevalence (% trial duration) — Pred 6.B",
-    "AC1 time series: high-gamma envelope in 500 ms pre-ignition window — Pred 6.C",
-    "Kendall τ for AC1 trend: detected vs. non-detected trials — Pred 6.C",
-    "RT quadratic regression: coefficient and p-value for quadratic term — Pred 6.C",
-    "RT maximum location relative to individual detection threshold — Pred 6.C",
-    "Frontoparietal coherence (15–80 Hz): point-biserial r vs. detection, peak window 200–400 ms — Pred 6.D criterion 1",
-    "Occipital coherence (15–80 Hz): point-biserial r vs. detection — Pred 6.D criterion 2 (specificity)",
-    "HEP amplitude (250–400 ms, ECG-referenced): seen trials — Pred 6.D criterion 3",
-    "HEP–frontoparietal coherence correlation (r) in seen trials — Pred 6.D criterion 3 (APGI-specific)",
-    "Confirmation tier classification: GNW-consistent (1+2) or APGI-specific (1+2+3) — Pred 6.D",
+    "Hartigan's dip statistic: frontoparietal high-gamma distribution per contrast level — Pred 5.a primary",
+    "ΔBIC (2-component vs. 1-component Gaussian): frontoparietal high-gamma — Pred 5.a secondary required",
+    "Modal separation: low mode and high mode frequencies (Hz equivalent) — Pred 5.a characterisation",
+    "Hartigan's dip statistic: occipital high-gamma distribution (regional comparison) — Pred 5.b",
+    "Region × bimodality-index interaction — Pred 5.b",
+    "Mean intermediate-state bout duration (ms) — Pred 5.b",
+    "Intermediate-state prevalence (% trial duration) — Pred 5.b",
+    "AC1 time series: high-gamma envelope in 500 ms pre-ignition window — Pred 5.c",
+    "Kendall τ for AC1 trend: detected vs. non-detected trials — Pred 5.c",
+    "RT quadratic regression: coefficient and p-value for quadratic term — Pred 5.c",
+    "RT maximum location relative to individual detection threshold — Pred 5.c",
+    "Frontoparietal coherence (15–80 Hz): point-biserial r vs. detection, peak window 200–400 ms — Pred 5.d criterion 1",
+    "Occipital coherence (15–80 Hz): point-biserial r vs. detection — Pred 5.d criterion 2 (specificity)",
+    "HEP amplitude (250–400 ms, ECG-referenced): seen trials — Pred 5.d criterion 3",
+    "HEP–frontoparietal coherence correlation (r) in seen trials — Pred 5.d criterion 3 (APGI-specific)",
+    "Confirmation tier classification: GNW-consistent (1+2) or APGI-specific (1+2+3) — Pred 5.d",
     "Hit rate and d-prime per contrast level (behavioural)",
     "High-gamma onset latency: detected vs. non-detected trials per region"
   ],
   "primary_hypothesis": "High-gamma power in frontoparietal iEEG shows a bimodal distribution (Hartigan's dip p < 0.05 AND ΔBIC > 10), AC1 increases monotonically in the 500 ms preceding detected stimuli (Kendall τ > 0.3) with RT showing a U-shape maximum at ~50% threshold, and frontoparietal gamma coherence (15–80 Hz) predicts detection (r > 0.4, peaking 200–400 ms) with HEP–coherence correlation r > 0.25 in seen trials (APGI-specific confirmation tier).",
-  "primary_analysis": "Pred 6.A: Hartigan's dip test + Gaussian BIC comparison. Pred 6.B: mixed-effects region × bimodality interaction; bout duration and prevalence statistics. Pred 6.C: Kendall τ AC1 trend (permutation, 10,000 permutations); quadratic RT regression. Pred 6.D: multitaper coherence; point-biserial r vs. detection for frontoparietal and occipital pairs; Pearson r (HEP–coherence); tier classification applied pre-analysis as pre-specified reclassification rule.",
+  "primary_analysis": "Pred 5.a: Hartigan's dip test + Gaussian BIC comparison. Pred 5.b: mixed-effects region × bimodality interaction; bout duration and prevalence statistics. Pred 5.c: Kendall τ AC1 trend (permutation, 10,000 permutations); quadratic RT regression. Pred 5.d: multitaper coherence; point-biserial r vs. detection for frontoparietal and occipital pairs; Pearson r (HEP–coherence); tier classification applied pre-analysis as pre-specified reclassification rule.",
   "power_analysis": {
     "effect_size_d": 0.7,
     "alpha": 0.05,
@@ -253,9 +311,9 @@
   },
   "paper_2_appendix_requirement": {
     "section": "Appendix C.3",
-    "verbatim_text": "Prediction Pred 6.C (AC1 increase in pre-ignition high-gamma) constitutes the bifurcation falsification criterion distinguishing APGI from standard Global Workspace Theory. Standard GWT predicts threshold-crossing as a deterministic event without precursor dynamics. APGI additionally predicts that approach to the ignition bifurcation produces measurable critical slowing, indexed by increased autocorrelation (AC1) in the pre-stimulus high-gamma band. Failure of Pred 6.C would not falsify APGI's core threshold-crossing account but would eliminate the bifurcation interpretation of ignition dynamics.",
+    "verbatim_text": "Prediction Pred 5.c (AC1 increase in pre-ignition high-gamma) constitutes the bifurcation falsification criterion distinguishing APGI from standard Global Workspace Theory. Standard GWT predicts threshold-crossing as a deterministic event without precursor dynamics. APGI additionally predicts that approach to the ignition bifurcation produces measurable critical slowing, indexed by increased autocorrelation (AC1) in the pre-stimulus high-gamma band. Failure of Pred 5.c would not falsify APGI's core threshold-crossing account but would eliminate the bifurcation interpretation of ignition dynamics.",
     "status": "completed",
-    "pred_5d_tier_note": "Pred 6.D pre-specified reclassification rule must also be stated in Appendix C.3: failure of criterion (3) alone (HEP–coherence r < 0.25) reclassifies the result as GNW-consistent only, without requiring a protocol amendment. This reclassification is pre-specified and does not constitute a negative result for the frontoparietal coherence finding."
+    "pred_5d_tier_note": "Pred 5.d pre-specified reclassification rule must also be stated in Appendix C.3: failure of criterion (3) alone (HEP–coherence r < 0.25) reclassifies the result as GNW-consistent only, without requiring a protocol amendment. This reclassification is pre-specified and does not constitute a negative result for the frontoparietal coherence finding."
   },
   "ethics": {
     "committee": "Institutional Review Board (clinical neurosurgery protocol)",
@@ -267,9 +325,9 @@
   "caveats": [
     "iEEG patient populations have limited sample sizes; statistical power is constrained. Single-participant case series may supplement group analysis.",
     "Anti-epileptic drugs (AEDs) may suppress high-gamma activity; AED type and dose should be reported as covariates.",
-    "Electrode placement is determined by clinical need, not experimental design; frontoparietal AND occipital coverage cannot be guaranteed for all participants. Pred 6.B regional comparison requires occipital coverage; participants without occipital electrodes contribute to Pred 6.A and 5.C only.",
-    "Pred 6.D criterion 3 (HEP–coherence) requires simultaneous cardiac ECG recording synchronised to iEEG clock; this must be verified during electrode implantation setup.",
-    "Pred 6.D three-tier reclassification rule must be locked in pre-registration before any analysis; post-hoc application of tier structure would not satisfy registry criteria.",
+    "Electrode placement is determined by clinical need, not experimental design; frontoparietal AND occipital coverage cannot be guaranteed for all participants. Pred 5.b regional comparison requires occipital coverage; participants without occipital electrodes contribute to Pred 5.a and 5.C only.",
+    "Pred 5.d criterion 3 (HEP–coherence) requires simultaneous cardiac ECG recording synchronised to iEEG clock; this must be verified during electrode implantation setup.",
+    "Pred 5.d three-tier reclassification rule must be locked in pre-registration before any analysis; post-hoc application of tier structure would not satisfy registry criteria.",
     "TTL trigger accuracy < 5 ms is mandatory for all temporal analyses; photodiode verification required at session start."
   ]
 }

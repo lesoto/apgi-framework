@@ -1,18 +1,22 @@
-"""Figure 7 — Protocol 5: vmPFC–insula anticipatory coupling (Pred 5.A–Pred 5.D).
+"""Figure 7 — Protocol 5 — Ignition-iEEG: iEEG all-or-none ignition dynamics (Pred 5.a–Pred 5.d).
 
-Simulates fMRI PPI coefficients and SCR outcomes from
-protocol_5_fmri_anticipation.json. Shows:
-  A — vmPFC–pIC PPI: anticipation > outcome (Pred 5.B)
-  B — vmPFC BOLD parametric modulation: valence vs. contrast sensitivity (Pred 5.C)
-  C — PPI coefficient: long foreperiod vs. no-foreperiod control (Pred 5.D)
+Simulates intracranial EEG predictions from protocol_5_ignition_ieeg.json:
+  A — Bimodal high-gamma distribution in frontoparietal electrodes at threshold (Pred 5.a)
+  B — Regional specificity: frontoparietal bimodal vs. occipital graded (Pred 5.b)
+  C — AC1 pre-ignition slowing: detected vs. non-detected trials (Pred 5.c — bifurcation criterion)
+  D — Long-range gamma coherence (15–80 Hz) predicts detection (Pred 5.d — three-tier confirmation):
+      Criteria (1+2) = GNW-consistent; criteria (1+2+3) with HEP–coherence r > 0.25 = APGI-specific.
+
+Pred 5.c is the bifurcation falsification criterion distinguishing APGI from standard GWT.
+Pred 5.d is the APGI-specific extension via HEP–coherence coupling (criterion 3).
 
 Run:
     python figures/generate_figure7.py
     python figures/generate_figure7.py --no-show   # CI mode
 """
 
-import sys as _sys
 import pathlib as _pathlib
+import sys as _sys
 
 _sys.path.insert(0, str(_pathlib.Path(__file__).parent.parent))
 
@@ -23,8 +27,8 @@ import numpy as np
 
 from apgi.core import compute_pi_i_eff, compute_S_t, compute_theta_t, ignition_criterion
 from figures.utils import (
-    PALETTE,
     HALF_WIDTH,
+    PALETTE,
     PANEL_HEIGHT,
     label_axes,
     make_figure,
@@ -33,111 +37,206 @@ from figures.utils import (
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
-# Protocol 5 APGI parameters
-KAPPA = 100.0
-ALPHA = 0.3
-BETA = 0.7
-PI_I_LONG = 1.2  # long foreperiod: somatic marker active
-PI_I_SHORT = 0.8  # no foreperiod: somatic marker suppressed
-GAMMA_V = 0.6
-GAMMA_A = 0.3
-N_SUBJECTS = 36
+N_TRIALS = 300
+N_NEAR_THRESHOLD = 150  # 50% near-threshold per protocol
+AC1_WINDOW_BINS = 10  # 10 × 50 ms windows in 500 ms pre-ignition epoch
 
 
-def simulate_ppi(n_subjects: int = N_SUBJECTS, seed: int = 5) -> dict:
+def simulate_ieeg(seed: int = 9) -> dict:
     rng = np.random.default_rng(seed)
 
-    # PPI coefficients: anticipation window > outcome window (Pred 5.B)
-    ppi_anticipation = rng.normal(0.42, 0.12, n_subjects)
-    ppi_outcome = rng.normal(0.11, 0.10, n_subjects)
+    # --- Frontoparietal: bimodal at near-threshold contrast (Pred 5.a)
+    # Detected trials cluster at high gamma, non-detected at low gamma
+    n_detected = N_NEAR_THRESHOLD // 2
+    n_missed = N_NEAR_THRESHOLD - n_detected
+    hg_detected = rng.normal(0.72, 0.08, n_detected)  # high state
+    hg_missed = rng.normal(0.21, 0.07, n_missed)  # low state
+    hg_fp = np.concatenate([hg_detected, hg_missed])  # bimodal
 
-    # vmPFC BOLD: EV-parametric (valence) vs. contrast-parametric (Pred 5.C)
-    bold_valence = rng.normal(0.55, 0.14, n_subjects)  # sensitive to option EV
-    bold_contrast = rng.normal(0.08, 0.11, n_subjects)  # insensitive to contrast
+    # --- Occipital: graded (unimodal) — Pred 5.b
+    hg_occ = rng.normal(0.45, 0.18, N_NEAR_THRESHOLD)  # unimodal
 
-    # Foreperiod manipulation (Pred 5.D): long vs. 0 ms foreperiod
-    ppi_long_fp = rng.normal(0.44, 0.11, n_subjects)
-    ppi_no_fp = rng.normal(0.09, 0.10, n_subjects)
+    # --- AC1 pre-ignition slowing (Pred 5.c)
+    # Detected trials: AC1 increases in 500 ms window before ignition
+    # Non-detected: AC1 flat
+    time_bins = np.linspace(-500, 0, AC1_WINDOW_BINS)
+    ac1_detected = (
+        0.20
+        + 0.035 * np.arange(AC1_WINDOW_BINS)
+        + rng.normal(0, 0.025, AC1_WINDOW_BINS)
+    )
+    ac1_missed = 0.22 + rng.normal(0, 0.025, AC1_WINDOW_BINS)
+
+    # --- Pred 5.d: Long-range frontoparietal gamma coherence (15–80 Hz) predicts detection
+    # Criterion 1: frontoparietal coherence r > 0.4, peaking 200–400 ms
+    # Criterion 2: occipital coherence r < 0.20 (frontoparietal specificity)
+    # Criterion 3 (APGI-specific): HEP–coherence r > 0.25 in seen trials
+    time_post = np.linspace(-100, 800, 90)  # ms post-stimulus
+    # Frontoparietal coherence: rises ~200 ms, peaks 200–400 ms in detected trials
+    coh_fp_seen = np.where(
+        (time_post >= 200) & (time_post <= 400),
+        0.55 + rng.normal(0, 0.04, 90),
+        0.25 + rng.normal(0, 0.04, 90),
+    )
+    coh_fp_unseen = 0.24 + rng.normal(0, 0.04, 90)
+    # Occipital coherence: flat (< 0.20) — criterion 2 specificity
+    coh_occ_seen = 0.14 + rng.normal(0, 0.03, 90)
+
+    # HEP–coherence correlation in seen trials (criterion 3, APGI-specific)
+    n_seen = n_detected
+    hep_seen = rng.normal(0.7, 0.15, n_seen)
+    coherence_peak_seen = 0.28 * hep_seen + rng.normal(0, 0.06, n_seen)
 
     return {
-        "ppi_anticipation": ppi_anticipation,
-        "ppi_outcome": ppi_outcome,
-        "bold_valence": bold_valence,
-        "bold_contrast": bold_contrast,
-        "ppi_long_fp": ppi_long_fp,
-        "ppi_no_fp": ppi_no_fp,
+        "hg_fp": hg_fp,
+        "hg_occ": hg_occ,
+        "hg_detected": hg_detected,
+        "hg_missed": hg_missed,
+        "time_bins": time_bins,
+        "ac1_detected": np.clip(ac1_detected, 0, 1),
+        "ac1_missed": np.clip(ac1_missed, 0, 1),
+        "time_post": time_post,
+        "coh_fp_seen": coh_fp_seen,
+        "coh_fp_unseen": coh_fp_unseen,
+        "coh_occ_seen": coh_occ_seen,
+        "hep_seen": hep_seen,
+        "coherence_peak_seen": coherence_peak_seen,
     }
 
 
 def plot(data: dict, show: bool = True) -> None:
-    fig, axes = make_figure(ncols=3, width=HALF_WIDTH * 3, height=PANEL_HEIGHT)
+    fig, axes = make_figure(ncols=4, width=HALF_WIDTH * 4, height=PANEL_HEIGHT)
 
-    # Panel A: PPI anticipation vs outcome (Pred 5.B)
+    # Panel A: Bimodal frontoparietal high-gamma (Pred 5.a)
     ax = axes[0]
-    means = [data["ppi_anticipation"].mean(), data["ppi_outcome"].mean()]
-    sems = [
-        data["ppi_anticipation"].std() / np.sqrt(N_SUBJECTS),
-        data["ppi_outcome"].std() / np.sqrt(N_SUBJECTS),
-    ]
-    ax.bar(
-        ["Anticipation", "Outcome"],
-        means,
-        yerr=sems,
-        color=[PALETTE["S_t"], "#9966FF"],
-        alpha=0.85,
+    ax.hist(
+        data["hg_detected"],
+        bins=20,
+        color=PALETTE["S_t"],
+        alpha=0.75,
         edgecolor="white",
-        width=0.4,
-        capsize=5,
+        label="Detected (high state)",
+        density=True,
     )
-    ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
-    ax.set_ylabel("vmPFC–pIC PPI coefficient", fontsize=10)
-    ax.set_title("Pred 5.B — Anticipatory coupling\npeaks before outcome", fontsize=10)
+    ax.hist(
+        data["hg_missed"],
+        bins=20,
+        color=PALETTE["theta"],
+        alpha=0.75,
+        edgecolor="white",
+        label="Non-detected (low state)",
+        density=True,
+    )
+    ax.set_xlabel("High-gamma amplitude (a.u.)", fontsize=10)
+    ax.set_ylabel("Density", fontsize=10)
+    ax.set_title("Pred 5.a — Frontoparietal\nbimodal distribution", fontsize=10)
+    ax.legend(fontsize=7)
 
-    # Panel B: vmPFC BOLD — valence vs contrast (Pred 5.C)
+    # Panel B: Regional specificity — fp bimodal vs occipital graded (Pred 5.b)
     ax = axes[1]
-    means_b = [data["bold_valence"].mean(), data["bold_contrast"].mean()]
-    sems_b = [
-        data["bold_valence"].std() / np.sqrt(N_SUBJECTS),
-        data["bold_contrast"].std() / np.sqrt(N_SUBJECTS),
-    ]
-    ax.bar(
-        ["Option EV\n(valence)", "Sensory\ncontrast"],
-        means_b,
-        yerr=sems_b,
-        color=[PALETTE["S_t"], PALETTE["theta"]],
-        alpha=0.85,
+    ax.hist(
+        data["hg_fp"],
+        bins=22,
+        color=PALETTE["S_t"],
+        alpha=0.75,
         edgecolor="white",
-        width=0.4,
-        capsize=5,
+        label="Frontoparietal (bimodal)",
+        density=True,
     )
-    ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
-    ax.set_ylabel("vmPFC BOLD β (a.u.)", fontsize=10)
-    ax.set_title("Pred 5.C — vmPFC sensitive to\nvalence, not contrast", fontsize=10)
+    ax.hist(
+        data["hg_occ"],
+        bins=22,
+        color="#AAAAAA",
+        alpha=0.65,
+        edgecolor="white",
+        label="Occipital (graded)",
+        density=True,
+    )
+    ax.set_xlabel("High-gamma amplitude (a.u.)", fontsize=10)
+    ax.set_ylabel("Density", fontsize=10)
+    ax.set_title(
+        "Pred 5.b — Regional specificity:\nFP bimodal, occipital graded", fontsize=10
+    )
+    ax.legend(fontsize=7)
 
-    # Panel C: Foreperiod manipulation (Pred 5.D)
+    # Panel C: AC1 pre-ignition slowing (Pred 5.c — bifurcation criterion)
     ax = axes[2]
-    means_fp = [data["ppi_long_fp"].mean(), data["ppi_no_fp"].mean()]
-    sems_fp = [
-        data["ppi_long_fp"].std() / np.sqrt(N_SUBJECTS),
-        data["ppi_no_fp"].std() / np.sqrt(N_SUBJECTS),
-    ]
-    ax.bar(
-        ["Long foreperiod\n(2000–4000 ms)", "No foreperiod\n(0 ms)"],
-        means_fp,
-        yerr=sems_fp,
-        color=[PALETTE["S_t"], "#AAAAAA"],
-        alpha=0.85,
-        edgecolor="white",
-        width=0.4,
-        capsize=5,
+    ax.plot(
+        data["time_bins"],
+        data["ac1_detected"],
+        "o-",
+        color=PALETTE["S_t"],
+        lw=1.8,
+        ms=5,
+        label="Detected (ignition)",
     )
-    ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
-    ax.set_ylabel("vmPFC–pIC PPI coefficient", fontsize=10)
-    ax.set_title("Pred 5.D — Anticipation drives\nvmPFC–insula coupling", fontsize=10)
+    ax.plot(
+        data["time_bins"],
+        data["ac1_missed"],
+        "s--",
+        color=PALETTE["theta"],
+        lw=1.5,
+        ms=4,
+        alpha=0.8,
+        label="Non-detected",
+    )
+    ax.set_xlabel("Time before ignition (ms)", fontsize=10)
+    ax.set_ylabel("AC1 (lag-1 autocorrelation)", fontsize=10)
+    ax.set_title(
+        "Pred 5.c — Critical slowing:\nAC1 ↑ before ignition\n(APGI vs. GWT criterion)",
+        fontsize=10,
+    )
+    ax.legend(fontsize=7)
+
+    # Panel D: Long-range gamma coherence predicts detection (Pred 5.d — three-tier)
+    ax = axes[3]
+    ax.plot(
+        data["time_post"],
+        data["coh_fp_seen"],
+        "-",
+        color=PALETTE["S_t"],
+        lw=1.8,
+        label="FP coherence — seen (crit 1)",
+    )
+    ax.plot(
+        data["time_post"],
+        data["coh_fp_unseen"],
+        "--",
+        color=PALETTE["theta"],
+        lw=1.5,
+        alpha=0.8,
+        label="FP coherence — unseen",
+    )
+    ax.plot(
+        data["time_post"],
+        data["coh_occ_seen"],
+        ":",
+        color="#AAAAAA",
+        lw=1.5,
+        label="Occipital — seen (crit 2 ↓)",
+    )
+    ax.axvspan(
+        200, 400, alpha=0.10, color=PALETTE["S_t"], label="Peak window 200–400 ms"
+    )
+    ax.axhline(
+        0.4, ls="--", lw=0.9, color=PALETTE["S_t"], alpha=0.5, label="r > 0.4 threshold"
+    )
+    ax.axhline(
+        0.20, ls="--", lw=0.9, color="#AAAAAA", alpha=0.5, label="r < 0.20 (occipital)"
+    )
+    ax.set_xlabel("Time post-stimulus (ms)", fontsize=10)
+    ax.set_ylabel("Coherence (15–80 Hz)", fontsize=10)
+    ax.set_title(
+        "Pred 5.d — Gamma coherence predicts detection\n(1+2=GNW; +HEP–coh r>0.25=APGI)",
+        fontsize=9,
+    )
+    ax.legend(fontsize=6)
 
     label_axes(axes)
     fig.suptitle(
-        "Figure 7 — Protocol 5: vmPFC–Insula Anticipatory Coupling", fontsize=11, y=1.02
+        "Figure 7 — Protocol 5 — Ignition-iEEG: iEEG All-or-None Ignition Dynamics (Pred 5.a–Pred 5.d)",
+        fontsize=11,
+        y=1.02,
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure7.pdf")
@@ -154,7 +253,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 7")
     parser.add_argument("--no-show", action="store_true")
     args = parser.parse_args()
-    plot(simulate_ppi(), show=not args.no_show)
+    plot(simulate_ieeg(), show=not args.no_show)
 
 
 if __name__ == "__main__":
