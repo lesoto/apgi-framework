@@ -1,10 +1,10 @@
-"""Figure 6 — Protocol 4: DoC joint biomarker model (P4a–P4b).
+"""Figure 6 — Protocol 4: DoC joint biomarker model (Pred 4.A–Pred 4.B).
 
 Simulates HEP amplitude and PCI scores for four DoC groups from
 protocol_4_disorders_of_consciousness.json and shows:
-  A — HEP amplitude by DoC group (P4b)
+  A — HEP amplitude by DoC group (Pred 4.B)
   B — PCI by DoC group
-  C — Joint model R² vs univariate R² for 3-month GCS-S recovery (P4a)
+  C — Joint model R² vs univariate R² for 3-month GCS-S recovery (Pred 4.A)
 
 Run:
     python figures/generate_figure6.py
@@ -62,7 +62,7 @@ def simulate(seed: int = 7) -> dict:
         pci_base = {"VS/UWS": 0.18, "MCS": 0.35, "Controls": 0.52}[group]
         pci_by_group[group] = rng.normal(pci_base, 0.06, n)
 
-    # Simulate 3-month GCS-S outcomes for regression (P4a)
+    # Simulate 3-month GCS-S outcomes for regression (Pred 4.A)
     all_hep_list: list[float] = []
     all_pci_list: list[float] = []
     all_gcs_list: list[float] = []
@@ -103,7 +103,7 @@ def plot(data: dict, show: bool = True) -> None:
     groups = list(PI_I_BY_GROUP.keys())
     x = np.arange(len(groups))
 
-    # Panel A: HEP amplitude by DoC group (P4b)
+    # Panel A: HEP amplitude by DoC group (Pred 4.B)
     ax = axes[0]
     means = [data["hep_by_group"][g].mean() for g in groups]
     sems = [data["hep_by_group"][g].std() / np.sqrt(N_PER_GROUP[g]) for g in groups]
@@ -120,7 +120,7 @@ def plot(data: dict, show: bool = True) -> None:
     ax.set_xticks(x)
     ax.set_xticklabels(groups, fontsize=9)
     ax.set_ylabel("HEP amplitude (a.u.)", fontsize=10)
-    ax.set_title("P4b — HEP discriminates\nMCS from VS/UWS", fontsize=10)
+    ax.set_title("Pred 4.B — HEP discriminates\nMCS from VS/UWS", fontsize=10)
 
     # Panel B: PCI by DoC group
     ax = axes[1]
@@ -145,7 +145,7 @@ def plot(data: dict, show: bool = True) -> None:
     ax.set_title("PCI by DoC group", fontsize=10)
     ax.legend(fontsize=7)
 
-    # Panel C: Joint vs univariate R² (P4a)
+    # Panel C: Joint vs univariate R² (Pred 4.A)
     ax = axes[2]
     r2_hep = r_squared(data["all_gcs"], [data["all_hep"]])
     r2_pci = r_squared(data["all_gcs"], [data["all_pci"]])
@@ -166,7 +166,7 @@ def plot(data: dict, show: bool = True) -> None:
             fontsize=9,
         )
     ax.set_ylabel(r"$R^2$ for GCS-S recovery", fontsize=10)
-    ax.set_title("P4a — Joint model\noutperforms univariate", fontsize=10)
+    ax.set_title("Pred 4.A — Joint model\noutperforms univariate", fontsize=10)
     ax.set_ylim(0, 1)
 
     label_axes(axes)

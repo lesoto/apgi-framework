@@ -1,8 +1,10 @@
-"""Figure 5 — Protocol 3: Somatic marker agent performance advantage (P3a–P3d).
+"""Figure 5 — Protocol 3: Somatic marker agent performance advantage (Pred 3.A–Pred 3.E).
 
 Simulates five agent types from protocol_3_active_inference_simulations.json
 under three volatility levels and shows reward advantage of the full APGI
-agent with somatic marker M̂ over β-lesion and other-lesion agents.
+agent with somatic marker M̂ over β-lesion and other-lesion agents (Pred 3.A–Pred 3.D).
+Pred 3.E: full APGI generative model achieves lower BIC than GNWT-only and Standard PP
+when fit to human IGT trial-by-trial choice sequences (ΔBIC ≥ 10).
 
 Run:
     python figures/generate_figure5.py
@@ -146,7 +148,7 @@ def plot(results: dict, show: bool = True) -> None:
 
     label_axes(axes)
     fig.suptitle(
-        "Figure 5 — Protocol 3: Somatic Marker Advantage (P3a)", fontsize=11, y=1.02
+        "Figure 5 — Protocol 3: Somatic Marker Advantage (Pred 3.A)", fontsize=11, y=1.02
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure5.pdf")

@@ -106,12 +106,12 @@ Interactive walkthroughs are in `notebooks/`:
 | Notebook | Content |
 |----------|---------|
 | `01_quick_start.ipynb` | Core equations, `APGICoreIntegration`, signal normalisation |
-| `02_protocol1_windowing.ipynb` | Protocol 1 — EEG interoceptive precision gating (P1a–P1c) |
-| `03_protocol2_tms_insular_gating.ipynb` | Protocol 2 — TMS insular gating of Πⁱ_eff (P2a–P2c) |
-| `04_protocol3_active_inference.ipynb` | Protocol 3 — Active inference agent simulations (P3a–P3d) |
-| `05_protocol4_disorders_of_consciousness.ipynb` | Protocol 4 — DoC joint biomarker model (P4a–P4d) |
-| `06_protocol5_fmri_anticipation.ipynb` | Protocol 5 — fMRI anticipation vs. prediction error (P5a–P5d) |
-| `07_protocol6_ieeg_ignition.ipynb` | Protocol 6 — iEEG all-or-none ignition dynamics (P6a–P6d) |
+| `02_protocol1_windowing.ipynb` | Protocol 1 — EEG interoceptive precision gating (Pred 1.A–Pred 1.C) |
+| `03_protocol2_tms_insular_gating.ipynb` | Protocol 2 — TMS insular gating of Πⁱ_eff (Pred 2.A–Pred 2.C) |
+| `04_protocol3_active_inference.ipynb` | Protocol 3 — Active inference agent simulations (Pred 3.A–Pred 3.D) |
+| `05_protocol4_disorders_of_consciousness.ipynb` | Protocol 4 — DoC joint biomarker model (Pred 4.A–Pred 4.D) |
+| `06_protocol5_fmri_anticipation.ipynb` | Protocol 5 — fMRI anticipation vs. prediction error (Pred 5.A–Pred 5.D) |
+| `07_protocol6_ieeg_ignition.ipynb` | Protocol 6 — iEEG all-or-none ignition dynamics (Pred 6.A–Pred 6.D) |
 
 ```bash
 jupyter lab notebooks/
@@ -161,12 +161,12 @@ All protocol files are validated against `protocols/schemas/protocol.schema.json
 
 | File | Paradigm | Status |
 |------|---------|--------|
-| `protocol_1_eeg_interoceptive_gating.json` | EEG interoceptive precision gating (P1a–P1c) | specified |
-| `protocol_2_tms_insular_gating.json` | TMS-insula causal disruption of Πⁱ_eff (P2a–P2c) | specified\_with\_caveat |
-| `protocol_3_active_inference_simulations.json` | Active inference agent simulations — somatic marker advantage (P3a–P3d) | validated |
-| `protocol_4_disorders_of_consciousness.json` | Disorders of consciousness joint biomarker model (P4a–P4d) | specified |
-| `protocol_5_fmri_anticipation.json` | fMRI somatic marker anticipation vs. prediction error (P5a–P5d) | specified |
-| `protocol_6_icEEG_ignition_dynamics.json` | Intracranial EEG all-or-none ignition dynamics (P6a–P6d) | validated |
+| `protocol_1_eeg_interoceptive_gating.json` | EEG interoceptive precision gating (Pred 1.A–Pred 1.C) | specified |
+| `protocol_2_tms_insular_gating.json` | TMS-insula causal disruption of Πⁱ_eff (Pred 2.A–Pred 2.C) | specified\_with\_caveat |
+| `protocol_3_active_inference_simulations.json` | Active inference agent simulations — somatic marker advantage (Pred 3.A–Pred 3.D) | validated |
+| `protocol_4_disorders_of_consciousness.json` | Disorders of consciousness joint biomarker model (Pred 4.A–Pred 4.D) | specified |
+| `protocol_5_fmri_anticipation.json` | fMRI somatic marker anticipation vs. prediction error (Pred 5.A–Pred 5.D) | specified |
+| `protocol_6_icEEG_ignition_dynamics.json` | Intracranial EEG all-or-none ignition dynamics (Pred 6.A–Pred 6.D) | validated |
 
 ## Citation
 

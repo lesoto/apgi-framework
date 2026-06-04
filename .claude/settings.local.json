@@ -30,7 +30,8 @@
       "Bash(PYTHONPATH=. python figures/generate_figure7.py --no-show)",
       "Bash(PYTHONPATH=. python figures/generate_figure8.py --no-show)",
       "Bash(wait)",
-      "Bash(pytest tests/ --cov=. --cov-report=html)"
+      "Bash(pytest tests/ --cov=. --cov-report=html)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

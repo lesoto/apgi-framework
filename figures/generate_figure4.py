@@ -1,8 +1,9 @@
-"""Figure 4 — Protocol 2: TMS-induced disruption of Πⁱ_eff and PCI (P2a–P2c).
+"""Figure 4 — Protocol 2: TMS-induced disruption of Πⁱ_eff and PCI (Pred 2.A–Pred 2.C).
 
 Simulates three TMS conditions from protocol_2_tms_insular_gating.json:
-insula_active, thalamus_active, vertex_sham. Shows predicted PCI reduction
-and HEP–P3b coupling abolition under insula TMS.
+pIC_active, dlPFC_PPC_active, vertex_sham. Shows predicted PCI reduction
+via dissociable mechanisms: pIC abolishes HEP–PCI coupling; dlPFC/PPC reduces
+PCI globally without affecting HEP.
 
 Run:
     python figures/generate_figure4.py
@@ -36,8 +37,8 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 KAPPA = 100.0
 ALPHA = 0.3
 BETA = 0.7
-DELTA_PI_INSULA = -0.4  # insula TMS reduces Πⁱ
-DELTA_PI_THALAMUS = -0.3  # thalamic TMS reduces globally
+DELTA_PI_INSULA = -0.4   # pIC TMS reduces Πⁱ_eff (interoceptive gating disrupted)
+DELTA_PI_DLPFC_PPC = -0.2  # dlPFC/PPC TMS reduces PCI globally, HEP unaffected
 DELTA_PI_SHAM = 0.0
 N_TRIALS = 480
 
@@ -79,8 +80,8 @@ def plot(show: bool = True) -> None:
     pi_i_base = 1.0
     conditions = {
         "Vertex\n(sham)": simulate_condition(pi_i_base, DELTA_PI_SHAM, seed=1),
-        "Insula\n(active)": simulate_condition(pi_i_base, DELTA_PI_INSULA, seed=2),
-        "Thalamus\n(active)": simulate_condition(pi_i_base, DELTA_PI_THALAMUS, seed=3),
+        "pIC\n(active)": simulate_condition(pi_i_base, DELTA_PI_INSULA, seed=2),
+        "dlPFC/PPC\n(active)": simulate_condition(pi_i_base, DELTA_PI_DLPFC_PPC, seed=3),
     }
 
     fig, axes = make_figure(ncols=3, width=HALF_WIDTH * 3, height=PANEL_HEIGHT)
@@ -88,7 +89,7 @@ def plot(show: bool = True) -> None:
     labels = list(conditions.keys())
     colors = [PALETTE["S_t"], PALETTE["theta"], "#9966FF"]
 
-    # Panel A: PCI by TMS condition (P2a)
+    # Panel A: PCI by TMS condition (Pred 2.A)
     ax = axes[0]
     pcis = [conditions[k]["pci"] for k in labels]
     bars = ax.bar(labels, pcis, color=colors, alpha=0.85, edgecolor="white", width=0.5)
@@ -101,7 +102,7 @@ def plot(show: bool = True) -> None:
         label="PCI consciousness threshold",
     )
     ax.set_ylabel("PCI (ignition proxy)", fontsize=10)
-    ax.set_title("P2a — PCI reduction\nby TMS site", fontsize=10)
+    ax.set_title("Pred 2.A — PCI reduction\nby TMS site (pIC ~20%, dlPFC 15–25%)", fontsize=10)
     ax.set_ylim(0, 0.8)
     ax.legend(fontsize=7)
 
@@ -110,10 +111,10 @@ def plot(show: bool = True) -> None:
     rates = [conditions[k]["detected"].mean() for k in labels]
     ax.bar(labels, rates, color=colors, alpha=0.85, edgecolor="white", width=0.5)
     ax.set_ylabel("Ignition rate", fontsize=10)
-    ax.set_title("P2b — Threshold elevation\nunder insula TMS", fontsize=10)
+    ax.set_title("Pred 2.B — Threshold elevation\nunder pIC TMS (stream-specific)", fontsize=10)
     ax.set_ylim(0, 1)
 
-    # Panel C: HEP–P3b coupling by condition (P2b: abolished under insula TMS)
+    # Panel C: HEP–P3b coupling by condition (Pred 2.B: abolished under insula TMS)
     ax = axes[2]
     r_vals, r_labels = [], []
     for (lbl, cond), col in zip(conditions.items(), colors):
@@ -123,11 +124,11 @@ def plot(show: bool = True) -> None:
     ax.bar(r_labels, r_vals, color=colors, alpha=0.85, edgecolor="white", width=0.5)
     ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
     ax.set_ylabel(r"HEP–P3b coupling (r)", fontsize=10)
-    ax.set_title("P2b — HEP–P3b coupling\nabolished by insula TMS", fontsize=10)
+    ax.set_title("Pred 2.B — HEP–P3b coupling\nabolished by pIC TMS (< 0.15); dlPFC BF₀₁≥6", fontsize=10)
 
     label_axes(axes)
     fig.suptitle(
-        "Figure 4 — Protocol 2: TMS Insular Gating of Πⁱ_eff", fontsize=11, y=1.02
+        "Figure 4 — Protocol 2: pIC/dlPFC TMS Dissociable Gating of Πⁱ_eff (Pred 2.A–Pred 2.C)", fontsize=11, y=1.02
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure4.pdf")

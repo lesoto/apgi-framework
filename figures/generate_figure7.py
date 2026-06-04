@@ -1,10 +1,10 @@
-"""Figure 7 — Protocol 5: vmPFC–insula anticipatory coupling (P5a–P5d).
+"""Figure 7 — Protocol 5: vmPFC–insula anticipatory coupling (Pred 5.A–Pred 5.D).
 
 Simulates fMRI PPI coefficients and SCR outcomes from
 protocol_5_fmri_anticipation.json. Shows:
-  A — vmPFC–pIC PPI: anticipation > outcome (P5b)
-  B — vmPFC BOLD parametric modulation: valence vs. contrast sensitivity (P5c)
-  C — PPI coefficient: long foreperiod vs. no-foreperiod control (P5d)
+  A — vmPFC–pIC PPI: anticipation > outcome (Pred 5.B)
+  B — vmPFC BOLD parametric modulation: valence vs. contrast sensitivity (Pred 5.C)
+  C — PPI coefficient: long foreperiod vs. no-foreperiod control (Pred 5.D)
 
 Run:
     python figures/generate_figure7.py
@@ -47,15 +47,15 @@ N_SUBJECTS = 36
 def simulate_ppi(n_subjects: int = N_SUBJECTS, seed: int = 5) -> dict:
     rng = np.random.default_rng(seed)
 
-    # PPI coefficients: anticipation window > outcome window (P5b)
+    # PPI coefficients: anticipation window > outcome window (Pred 5.B)
     ppi_anticipation = rng.normal(0.42, 0.12, n_subjects)
     ppi_outcome = rng.normal(0.11, 0.10, n_subjects)
 
-    # vmPFC BOLD: EV-parametric (valence) vs. contrast-parametric (P5c)
+    # vmPFC BOLD: EV-parametric (valence) vs. contrast-parametric (Pred 5.C)
     bold_valence = rng.normal(0.55, 0.14, n_subjects)  # sensitive to option EV
     bold_contrast = rng.normal(0.08, 0.11, n_subjects)  # insensitive to contrast
 
-    # Foreperiod manipulation (P5d): long vs. 0 ms foreperiod
+    # Foreperiod manipulation (Pred 5.D): long vs. 0 ms foreperiod
     ppi_long_fp = rng.normal(0.44, 0.11, n_subjects)
     ppi_no_fp = rng.normal(0.09, 0.10, n_subjects)
 
@@ -72,7 +72,7 @@ def simulate_ppi(n_subjects: int = N_SUBJECTS, seed: int = 5) -> dict:
 def plot(data: dict, show: bool = True) -> None:
     fig, axes = make_figure(ncols=3, width=HALF_WIDTH * 3, height=PANEL_HEIGHT)
 
-    # Panel A: PPI anticipation vs outcome (P5b)
+    # Panel A: PPI anticipation vs outcome (Pred 5.B)
     ax = axes[0]
     means = [data["ppi_anticipation"].mean(), data["ppi_outcome"].mean()]
     sems = [
@@ -91,9 +91,9 @@ def plot(data: dict, show: bool = True) -> None:
     )
     ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
     ax.set_ylabel("vmPFC–pIC PPI coefficient", fontsize=10)
-    ax.set_title("P5b — Anticipatory coupling\npeaks before outcome", fontsize=10)
+    ax.set_title("Pred 5.B — Anticipatory coupling\npeaks before outcome", fontsize=10)
 
-    # Panel B: vmPFC BOLD — valence vs contrast (P5c)
+    # Panel B: vmPFC BOLD — valence vs contrast (Pred 5.C)
     ax = axes[1]
     means_b = [data["bold_valence"].mean(), data["bold_contrast"].mean()]
     sems_b = [
@@ -112,9 +112,9 @@ def plot(data: dict, show: bool = True) -> None:
     )
     ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
     ax.set_ylabel("vmPFC BOLD β (a.u.)", fontsize=10)
-    ax.set_title("P5c — vmPFC sensitive to\nvalence, not contrast", fontsize=10)
+    ax.set_title("Pred 5.C — vmPFC sensitive to\nvalence, not contrast", fontsize=10)
 
-    # Panel C: Foreperiod manipulation (P5d)
+    # Panel C: Foreperiod manipulation (Pred 5.D)
     ax = axes[2]
     means_fp = [data["ppi_long_fp"].mean(), data["ppi_no_fp"].mean()]
     sems_fp = [
@@ -133,7 +133,7 @@ def plot(data: dict, show: bool = True) -> None:
     )
     ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
     ax.set_ylabel("vmPFC–pIC PPI coefficient", fontsize=10)
-    ax.set_title("P5d — Anticipation drives\nvmPFC–insula coupling", fontsize=10)
+    ax.set_title("Pred 5.D — Anticipation drives\nvmPFC–insula coupling", fontsize=10)
 
     label_axes(axes)
     fig.suptitle(
