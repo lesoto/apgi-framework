@@ -245,7 +245,9 @@ def test_verify_cached_specific_dataset(mock_datasets, temp_data_dir, capsys):
     dest = temp_data_dir / "sim_placeholder.npz"
     dest.write_bytes(b"content")
 
-    with patch("sys.argv", ["fetch_data.py", "--verify", "--dataset", "sim_placeholder"]):
+    with patch(
+        "sys.argv", ["fetch_data.py", "--verify", "--dataset", "sim_placeholder"]
+    ):
         result = fetch_data._verify_cached(["sim_placeholder"])
         assert result is True
     captured = capsys.readouterr()
@@ -290,7 +292,9 @@ def test_main_verify_specific_dataset(mock_datasets, temp_data_dir, capsys):
     dest = temp_data_dir / "sim_placeholder.npz"
     dest.write_bytes(b"content")
 
-    with patch("sys.argv", ["fetch_data.py", "--verify", "--dataset", "sim_placeholder"]):
+    with patch(
+        "sys.argv", ["fetch_data.py", "--verify", "--dataset", "sim_placeholder"]
+    ):
         with pytest.raises(SystemExit) as excinfo:
             fetch_data.main()
         assert excinfo.value.code == 0

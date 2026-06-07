@@ -1,6 +1,6 @@
 # APGI Framework
 
-**Adaptive Predictive Global Integration** — a computational framework for consciousness research.
+**Allostatic Predictive Gating Ignition** — a computational framework for consciousness research.
 
 [![CI](https://github.com/lesoto/apgi-framework/actions/workflows/test.yml/badge.svg)](https://github.com/lesoto/apgi-framework/actions/workflows/test.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
@@ -10,7 +10,7 @@
 
 ## Manuscript
 
-> **Pesochin, D. (2026).** Adaptive Predictive Global Integration: A Computational Framework for Consciousness. *Manuscript under review.*  
+> **Pesochin, D. (2026).** Allostatic Predictive Gating Ignition: A Computational Framework for Consciousness. *Manuscript under review.*  
 > Preprint: [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) — **replace with real arXiv ID before submission**
 
 This repository is the companion code release for the paper series above.
@@ -57,7 +57,11 @@ apgi-framework/
 ├── notebooks/             # worked examples
 ├── figures/               # figure scripts + output PDFs
 ├── scripts/               # standalone CLI helpers
-└── data/                  # local data cache (Zenodo downloads)
+├── data/                  # local data cache + seed datasets
+│   ├── seeds/             # .npz + .csv + .h5 (sim3) seed files
+│   └── checksums.sha256
+├── DATA_DICTIONARY.md     # full variable codebook for all seed datasets
+└── POWER_ANALYSIS.md      # sample-size and power justifications
 ```
 
 ## Installation
@@ -169,7 +173,24 @@ apgi-fetch --list     # list available datasets
 apgi-fetch --dataset sim1_ignition_dynamics
 ```
 
-Checksums are recorded in `data/checksums.sha256`.
+Checksums are recorded in [`data/checksums.sha256`](data/checksums.sha256).
+Full variable codebook: [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md).
+Sample-size justifications: [`POWER_ANALYSIS.md`](POWER_ANALYSIS.md).
+
+The LNN trajectory dataset (`sim3_liquid_network`) is also deposited as
+`sim3_liquid_network.h5` (HDF5, gzip-compressed) for direct use in
+MNE-Python, NWB tools, MATLAB (`h5read`), and Julia (`HDF5.jl`):
+
+```matlab
+states = h5read('sim3_liquid_network.h5', '/data/states');  % (20, 500, 100)
+```
+
+```julia
+using HDF5
+fid = h5open("sim3_liquid_network.h5", "r")
+states = read(fid["data/states"])
+close(fid)
+```
 
 ## Experimental protocols
 

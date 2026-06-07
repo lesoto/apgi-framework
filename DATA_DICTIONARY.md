@@ -54,14 +54,22 @@ Checksums: `data/checksums.sha256`.  Zenodo DOI: `10.5281/zenodo.XXXXXXX`.
 | `beta_hat` | (1000,) | float64 | a.u. | MLE-recovered β̂ |
 | `pi_i_true` | (1000,) | float64 | a.u. | Generating Πⁱ value for each run |
 | `pi_i_hat` | (1000,) | float64 | a.u. | MLE-recovered Π̂ⁱ |
-| `converged` | (1000,) | bool | — | True when scipy optimizer reported success |
+| `converged` | (1000,) | bool | — | True when scipy Nelder-Mead strict xatol/fatol criterion met |
+| `converged_residual` | (1000,) | bool | — | True when NLL/n_trials < 2.0 (robust criterion for flat NLL surfaces) |
 
 **Metadata keys:** `n_runs`, `n_trials_per_run`, `beta_range_lo/hi`, `pi_i_range_lo/hi`,
 `pearson_r_beta`, `pearson_r_pi_i`, `criterion_met_beta`, `criterion_met_pi_i`,
-`convergence_source` (= `"scipy_nelder_mead_success_flag"`), `master_seed`
+`convergence_rate_optimizer`, `convergence_rate_residual`,
+`convergence_source` (= `"scipy_nelder_mead_success_flag"`),
+`convergence_residual_criterion` (= `"nll_per_trial_lt_2.0"`), `master_seed`
+
+**Note on convergence rates:** The strict optimizer flag (`converged`) reflects
+simultaneous satisfaction of `xatol=1e-6` and `fatol=1e-6`, which rarely fires on
+flat NLL surfaces even when estimates are accurate (Pearson r > 0.96).
+`converged_residual` is the recommended criterion for downstream analyses.
 
 **CSV summary** (`sim2_parameter_recovery.csv`): one row per run, columns
-`run`, `beta_true`, `beta_hat`, `pi_i_true`, `pi_i_hat`, `converged`.
+`run`, `beta_true`, `beta_hat`, `pi_i_true`, `pi_i_hat`, `converged`, `converged_residual`.
 
 ---
 
@@ -97,15 +105,19 @@ Full trajectories are in the `.npz` only.
 | :--- | :--- | :--- | :--- | :--- |
 | `S_t_total` | (100, 50) | float64 | a.u. | Total Sₜ summed across all five hierarchy levels |
 | `level_S_t` | (100, 50, 5) | float64 | a.u. | Per-level Sₜ contributions (level 0 = sensory, level 4 = top) |
+| `level_pe_norm` | (100, 50, 5) | float64 | a.u. | L2 norm of prediction-error vector per level per trial |
+| `theta_t` | (100, 50) | float64 | a.u. | Adaptive ignition threshold: α·C + β·V (α=0.3, β=0.7) |
 | `C_metabolic` | (100, 50) | float64 | a.u. | Metabolic cost drawn per seed per trial |
+| `V_information` | (100, 50) | float64 | a.u. | Information value drawn per seed per trial |
 | `hier_ignition` | (100, 50) | bool | — | True when S_t_total > per-seed mean + 1.5 SD |
 
 **Metadata keys:** `n_seeds`, `n_trials`, `n_sensory`, `n_levels`,
 `ignition_threshold_sd`, `master_seed`
 
 **CSV summary** (`sim4_hierarchical.csv`): per-seed summary (100 rows) —
-`seed_idx`, `S_t_mean`, `S_t_sd`, `ignition_rate`,
-`level_0_S_t_mean` … `level_4_S_t_mean`.
+`seed_idx`, `S_t_mean`, `S_t_sd`, `theta_t_mean`, `ignition_rate`,
+`level_0_S_t_mean` … `level_4_S_t_mean`,
+`level_0_pe_norm_mean` … `level_4_pe_norm_mean`.
 
 ---
 

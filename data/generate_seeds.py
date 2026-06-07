@@ -94,6 +94,51 @@ def _save_csv(dest_npz: pathlib.Path, rows: list[dict]) -> None:
     print(f"  wrote {dest_csv.name}  ({dest_csv.stat().st_size // 1024} KB, CSV)")
 
 
+def _save_hdf5(
+    dest_npz: pathlib.Path,
+    arrays: dict[str, np.ndarray],
+    metadata: dict | None = None,
+) -> pathlib.Path:
+    """Write an HDF5 companion for NWB/MNE/MATLAB/Julia readers.
+
+    The file mirrors the .npz exactly: data arrays go into /data/<key>,
+    metadata scalars into /metadata/<key>.  Datasets are gzip-compressed
+    (level 4) and chunked for efficient partial reads.
+    """
+    try:
+        import h5py
+    except ImportError:
+        print("  h5py not installed — skipping HDF5 export (pip install h5py)")
+        return dest_npz
+
+    dest_h5 = dest_npz.with_suffix(".h5")
+    with h5py.File(dest_h5, "w") as f:
+        f.attrs["apgi_version"] = "0.2.0"
+        f.attrs["master_seed"] = int(metadata.get("master_seed", 0)) if metadata else 0
+        f.attrs["source_npz"] = dest_npz.name
+
+        grp_data = f.create_group("data")
+        for k, v in arrays.items():
+            arr = np.asarray(v)
+            # Choose chunk shape: first axis chunked in blocks of min(64, n)
+            chunks = None
+            if arr.ndim >= 1 and arr.size > 0:
+                chunk0 = min(64, arr.shape[0])
+                chunks = (chunk0,) + arr.shape[1:]
+            grp_data.create_dataset(
+                k, data=arr, compression="gzip", compression_opts=4, chunks=chunks
+            )
+
+        if metadata:
+            grp_meta = f.create_group("metadata")
+            for k, v in metadata.items():
+                grp_meta.attrs[k] = v
+
+    size_kb = dest_h5.stat().st_size // 1024
+    print(f"  wrote {dest_h5.name}  ({size_kb} KB, HDF5)")
+    return dest_h5
+
+
 def _save(
     name: str, arrays: dict[str, np.ndarray], metadata: dict | None = None
 ) -> pathlib.Path:
@@ -248,14 +293,19 @@ def _gen_sim2_parameter_recovery(seed: int) -> pathlib.Path:
     pi_i_true = np.array(result["pi_i_true"])
     pi_i_hat = np.array(result["pi_i_hat"])
     # Convergence flags come directly from scipy optimizer success field,
-    # not from a hardcoded noise threshold.
+    # not from a hardcoded noise threshold.  converged_residual uses the
+    # nll-per-trial < 2.0 criterion which is robust to flat NLL surfaces.
     converged = np.array(result["converged"], dtype=bool)
+    converged_residual = np.array(
+        result.get("converged_residual", converged), dtype=bool
+    )
     r_beta = float(result["r_beta"])
     r_pi_i = float(result["r_pi_i"])
 
     print(
         f"    Recovery r(β)={r_beta:.3f}  r(Πⁱ)={r_pi_i:.3f}  "
-        f"optimizer-converged={converged.mean():.1%}"
+        f"optimizer-converged={converged.mean():.1%}  "
+        f"residual-converged={converged_residual.mean():.1%}"
     )
 
     dest = _save(
@@ -266,6 +316,7 @@ def _gen_sim2_parameter_recovery(seed: int) -> pathlib.Path:
             "pi_i_true": pi_i_true,
             "pi_i_hat": pi_i_hat,
             "converged": converged,
+            "converged_residual": converged_residual,
         },
         metadata={
             "n_runs": n_runs,
@@ -278,7 +329,10 @@ def _gen_sim2_parameter_recovery(seed: int) -> pathlib.Path:
             "pearson_r_pi_i": r_pi_i,
             "criterion_met_beta": int(r_beta > 0.75),
             "criterion_met_pi_i": int(r_pi_i > 0.75),
+            "convergence_rate_optimizer": float(converged.mean()),
+            "convergence_rate_residual": float(converged_residual.mean()),
             "convergence_source": "scipy_nelder_mead_success_flag",
+            "convergence_residual_criterion": "nll_per_trial_lt_2.0",
             "master_seed": seed,
             "description": "MLE parameter recovery (1 000 runs, n=200 trials each)",
         },
@@ -293,6 +347,7 @@ def _gen_sim2_parameter_recovery(seed: int) -> pathlib.Path:
                 "pi_i_true": float(pi_i_true[i]),
                 "pi_i_hat": float(pi_i_hat[i]),
                 "converged": int(converged[i]),
+                "converged_residual": int(converged_residual[i]),
             }
             for i in range(n_runs)
         ],
@@ -337,27 +392,28 @@ def _gen_sim3_liquid_network(seed: int) -> pathlib.Path:
     threshold_95 = np.percentile(output_norm, 95, axis=1, keepdims=True)
     lnn_ignition = output_norm > threshold_95
 
-    dest = _save(
-        "sim3_liquid_network.npz",
-        {
-            "states": all_states,
-            "outputs": all_outputs,
-            "inputs": all_inputs,
-            "spectral_radii": spectral_radii,
-            "lnn_ignition": lnn_ignition,
-            "output_norm": output_norm,
-        },
-        metadata={
-            "n_seeds": N_SEEDS,
-            "n_timesteps": T,
-            "n_inputs": N_INPUTS,
-            "n_hidden": N_HIDDEN,
-            "n_outputs": N_OUTPUTS,
-            "dt_ms": DT,
-            "master_seed": seed,
-            "description": "LNN reservoir trajectories across spectral-radius sweep",
-        },
-    )
+    sim3_arrays = {
+        "states": all_states,
+        "outputs": all_outputs,
+        "inputs": all_inputs,
+        "spectral_radii": spectral_radii,
+        "lnn_ignition": lnn_ignition,
+        "output_norm": output_norm,
+    }
+    sim3_meta = {
+        "n_seeds": N_SEEDS,
+        "n_timesteps": T,
+        "n_inputs": N_INPUTS,
+        "n_hidden": N_HIDDEN,
+        "n_outputs": N_OUTPUTS,
+        "dt_ms": DT,
+        "master_seed": seed,
+        "description": "LNN reservoir trajectories across spectral-radius sweep",
+    }
+    dest = _save("sim3_liquid_network.npz", sim3_arrays, metadata=sim3_meta)
+    # HDF5 companion for NWB/MNE/MATLAB/Julia readers
+    _save_hdf5(dest, sim3_arrays, sim3_meta)
+
     # CSV summary: per-seed statistics (full state tensors remain in .npz only)
     _save_csv(
         dest,
@@ -389,7 +445,14 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
 
     all_S_t = np.empty((N_SEEDS, N_TRIALS))
     all_level_S_t = np.empty((N_SEEDS, N_TRIALS, 5))
+    all_level_pe_norm = np.empty(
+        (N_SEEDS, N_TRIALS, 5)
+    )  # L2 norm of prediction error per level
     C_metabolic_all = rng.uniform(0.5, 2.0, (N_SEEDS, N_TRIALS))
+    # theta_t uses default α=0.3, β=0.7 with V drawn from uniform
+    V_information_all = rng.uniform(0.1, 1.0, (N_SEEDS, N_TRIALS))
+
+    from apgi.core import compute_theta_t as _theta
 
     for i, sub_seed in enumerate(sub_seeds):
         trial_rng = np.random.default_rng(int(sub_seed))
@@ -399,6 +462,22 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
             result = hier.forward(sensory, C_metabolic=float(C_metabolic_all[i, t]))
             all_S_t[i, t] = result["S_t_total"]
             all_level_S_t[i, t] = result["level_S_t"]
+            all_level_pe_norm[i, t] = [
+                float(np.linalg.norm(err)) for err in result["level_errors"]
+            ]
+
+    # Adaptive ignition threshold per seed-trial
+    theta_t_all = np.array(
+        [
+            [
+                _theta(
+                    C_metabolic_all[i, t], V_information_all[i, t], alpha=0.3, beta=0.7
+                )
+                for t in range(N_TRIALS)
+            ]
+            for i in range(N_SEEDS)
+        ]
+    )
 
     # Compute level-specific ignition (S_t_total > mean + 1.5 SD per seed)
     per_seed_mean = all_S_t.mean(axis=1, keepdims=True)
@@ -410,7 +489,10 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
         {
             "S_t_total": all_S_t,
             "level_S_t": all_level_S_t,
+            "level_pe_norm": all_level_pe_norm,
+            "theta_t": theta_t_all,
             "C_metabolic": C_metabolic_all,
+            "V_information": V_information_all,
             "hier_ignition": hier_ignition,
         },
         metadata={
@@ -430,9 +512,14 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
                 "seed_idx": i,
                 "S_t_mean": float(all_S_t[i].mean()),
                 "S_t_sd": float(all_S_t[i].std()),
+                "theta_t_mean": float(theta_t_all[i].mean()),
                 "ignition_rate": float(hier_ignition[i].mean()),
                 **{
                     f"level_{l}_S_t_mean": float(all_level_S_t[i, :, l].mean())
+                    for l in range(5)
+                },
+                **{
+                    f"level_{l}_pe_norm_mean": float(all_level_pe_norm[i, :, l].mean())
                     for l in range(5)
                 },
             }

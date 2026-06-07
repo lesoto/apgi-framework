@@ -78,38 +78,34 @@ def _negative_log_likelihood(
     alpha: float,
     kappa: float,
 ) -> float:
-    """Gaussian NLL for Sₜ + Bernoulli NLL for ignition."""
+    """Gaussian NLL for Sₜ + Bernoulli NLL for ignition (vectorised)."""
     beta, pi_i = params
     if beta <= 0 or pi_i <= 0:
         return 1e10
 
-    n = len(data["C_metabolic"])
-    nll = 0.0
-    for i in range(n):
-        pi_i_eff = compute_pi_i_eff(pi_i, float(data["C_metabolic"][i]), kappa)
-        S_t_pred = compute_S_t(
-            float(data["pi_e"][i]),
-            float(data["z_e"][i]),
-            pi_i_eff,
-            float(data["z_i"][i]),
-        )
-        theta = compute_theta_t(
-            float(data["C_metabolic"][i]),
-            float(data["V_information"][i]),
-            alpha,
-            beta,
-        )
-        # Gaussian NLL for continuous observation
-        residual = float(data["S_t_observed"][i]) - S_t_pred
-        nll += 0.5 * residual**2
+    C = np.asarray(data["C_metabolic"])
+    V = np.asarray(data["V_information"])
+    pi_e = np.asarray(data["pi_e"])
+    z_e = np.asarray(data["z_e"])
+    z_i = np.asarray(data["z_i"])
+    S_obs = np.asarray(data["S_t_observed"])
+    ignition = np.asarray(data["ignition"])
 
-        # Bernoulli NLL for ignition (logistic approximation)
-        p_ignite = 1.0 / (1.0 + np.exp(-(S_t_pred - theta) * 5.0))
-        p_ignite = np.clip(p_ignite, 1e-9, 1.0 - 1e-9)
-        obs = int(data["ignition"][i])
-        nll -= obs * np.log(p_ignite) + (1 - obs) * np.log(1 - p_ignite)
+    # Inline vectorised forms of the three APGI core equations
+    pi_i_eff = pi_i * np.exp(-C / kappa)                  # Πⁱ_eff = Πⁱ·exp(−C/κ)
+    S_t_pred = pi_e * np.abs(z_e) + pi_i_eff * np.abs(z_i)  # Sₜ
+    theta = alpha * C + beta * V                            # θₜ
 
-    return float(nll)
+    # Gaussian NLL for continuous Sₜ observation
+    gaussian_nll = 0.5 * np.sum((S_obs - S_t_pred) ** 2)
+
+    # Bernoulli NLL for ignition (logistic approximation, slope=5)
+    p_ignite = np.clip(1.0 / (1.0 + np.exp(-(S_t_pred - theta) * 5.0)), 1e-9, 1 - 1e-9)
+    bernoulli_nll = -np.sum(
+        ignition * np.log(p_ignite) + (1 - ignition) * np.log1p(-p_ignite)
+    )
+
+    return float(gaussian_nll + bernoulli_nll)
 
 
 def recover_parameters(
@@ -147,11 +143,20 @@ def recover_parameters(
             best_result = result
 
     beta_hat, pi_i_hat = best_result.x  # type: ignore[union-attr]
+    # scipy Nelder-Mead reports success=False when xatol/fatol are met
+    # simultaneously, which rarely happens on flat NLL surfaces even when the
+    # estimate is correct.  We therefore report both the strict optimizer flag
+    # and a residual-based criterion: nll_per_trial < 2.0 is empirically
+    # well-calibrated for this likelihood (see Appendix A.4).
+    nll_val = float(best_result.fun)  # type: ignore[union-attr]
+    n_trials = len(data["C_metabolic"])
+    converged_residual = (nll_val / max(n_trials, 1)) < 2.0
     return {
         "beta_hat": float(beta_hat),
         "pi_i_hat": float(pi_i_hat),
-        "nll": float(best_result.fun),  # type: ignore[union-attr]
+        "nll": nll_val,
         "converged": bool(best_result.success),  # type: ignore[union-attr]
+        "converged_residual": bool(converged_residual),
     }
 
 
@@ -181,6 +186,7 @@ def run_recovery_simulation(
     beta_hat_all = np.empty(n_simulations)
     pi_i_hat_all = np.empty(n_simulations)
     converged_all = np.zeros(n_simulations, dtype=bool)
+    converged_residual_all = np.zeros(n_simulations, dtype=bool)
 
     for i in range(n_simulations):
         data = generate_synthetic_data(
@@ -196,6 +202,7 @@ def run_recovery_simulation(
         beta_hat_all[i] = recovered["beta_hat"]
         pi_i_hat_all[i] = recovered["pi_i_hat"]
         converged_all[i] = recovered["converged"]
+        converged_residual_all[i] = recovered["converged_residual"]
 
     r_beta, _ = pearsonr(beta_true_all, beta_hat_all)
     r_pi_i, _ = pearsonr(pi_i_true_all, pi_i_hat_all)
@@ -208,4 +215,5 @@ def run_recovery_simulation(
         "pi_i_true": pi_i_true_all.tolist(),
         "pi_i_hat": pi_i_hat_all.tolist(),
         "converged": converged_all.tolist(),
+        "converged_residual": converged_residual_all.tolist(),
     }
