@@ -67,6 +67,11 @@ def _download(name: str) -> pathlib.Path:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     print(f"[fetch] {name} — {url}")
 
+    # Validate URL scheme to prevent file:// or other unsafe schemes
+    if not url.startswith(("http://", "https://")):
+        print(f"[error] Unsafe URL scheme: {url}", file=sys.stderr)
+        sys.exit(1)
+
     try:
         urllib.request.urlretrieve(url, dest)
     except Exception as exc:

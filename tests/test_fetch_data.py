@@ -3,7 +3,7 @@
 import hashlib
 import pathlib
 import sys
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
@@ -181,3 +181,13 @@ def test_main_all_datasets(mock_datasets, temp_data_dir):
             ) as mock_urlretrieve:
                 fetch_data.main()
                 assert mock_urlretrieve.call_count == 2
+
+
+def test_download_unsafe_url_scheme(mock_datasets, temp_data_dir, capsys):
+    with patch("apgi.scripts.fetch_data.ZENODO_BASE", "file:///unsafe/path"):
+        with patch("sys.exit") as mock_exit:
+            fetch_data._download("sim_placeholder")
+            assert mock_exit.call_count >= 1
+            assert call(1) in mock_exit.call_args_list
+    captured = capsys.readouterr()
+    assert "Unsafe URL scheme" in captured.err

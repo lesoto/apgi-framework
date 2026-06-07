@@ -1,0 +1,56 @@
+{
+  "title": "APGI Framework: Adaptive Predictive Global Integration for Consciousness Research (v0.2.0)",
+  "description": "Companion code and synthetic seed datasets for the APGI paper series (Papers 1–3). Implements core APGI equations (Sₜ, θₜ, Πⁱ_eff), a Liquid Neural Network extension (Paper 2), a five-level hierarchical architecture (Paper 3), parameter recovery, clinical DoC interpretation, and all figure-generation scripts. Includes six pre-generated synthetic datasets (sim1–sim6) covering ignition dynamics, parameter recovery, LNN reservoir trajectories, hierarchical prediction-error series, disorder-of-consciousness biomarkers, and LNN bifurcation signatures.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "publication_date": "2026-06-06",
+  "version": "0.2.0",
+  "language": "eng",
+
+  "creators": [
+    {
+      "name": "Pesochin, Dimitry",
+      "affiliation": "",
+      "orcid": "0000-0000-0000-0000"
+    }
+  ],
+
+  "keywords": [
+    "consciousness",
+    "computational neuroscience",
+    "predictive processing",
+    "active inference",
+    "interoception",
+    "global workspace theory",
+    "liquid neural network",
+    "disorder of consciousness",
+    "parameter recovery",
+    "heartbeat-evoked potential"
+  ],
+
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/lesoto/apgi-framework",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://arxiv.org/abs/XXXX.XXXXX",
+      "relation": "isSupplementTo",
+      "resource_type": "publication-preprint"
+    },
+    {
+      "identifier": "https://osf.io/XXXXXX",
+      "relation": "isSupplementTo",
+      "resource_type": "other"
+    }
+  ],
+
+  "communities": [
+    { "identifier": "neuroscience" },
+    { "identifier": "computational-science" }
+  ],
+
+  "notes": "To reproduce all figures: bash reproduce_all.sh. To regenerate seed datasets: python data/generate_seeds.py. All simulations use MASTER_SEED=2025. Replace ORCID, arXiv ID, and OSF URL placeholders before final deposit."
+}

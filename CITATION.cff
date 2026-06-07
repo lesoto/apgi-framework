@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+message: >
+  If you use the APGI framework in published work, please cite both the
+  software release and the companion paper (update the paper entry once
+  the manuscript DOI is available).
+title: "APGI Framework: Adaptive Predictive Global Integration for Consciousness Research"
+version: 0.2.0
+date-released: "2026-06-06"
+license: MIT
+repository-code: "https://github.com/lesoto/apgi-framework"
+doi: "10.5281/zenodo.XXXXXXX"   # replace after Zenodo deposition
+
+authors:
+  - family-names: Pesochin
+    given-names: Dimitry
+    email: uxod.com@gmail.com
+    # ORCID is required for indexing in OpenAlex, Semantic Scholar, and Europe PMC.
+    # Register at https://orcid.org/register (takes 2 minutes) then replace below.
+    orcid: "https://orcid.org/0000-0000-0000-0000"   # TODO: replace with real ORCID
+
+keywords:
+  - consciousness
+  - computational neuroscience
+  - predictive processing
+  - active inference
+  - interoception
+  - global workspace theory
+  - disorder of consciousness
+  - liquid neural network
+
+references:
+  - type: article
+    title: >
+      Adaptive Predictive Global Integration: A Computational Framework for
+      Consciousness (Paper 1)
+    authors:
+      - family-names: Pesochin
+        given-names: Dimitry
+    # journal: "Journal Name"        # fill in after acceptance
+    # year: 2026
+    # doi: "10.XXXX/XXXXXXX"        # fill in after publication
+    notes: "Manuscript in preparation / under review"
+
+  - type: software
+    title: "APGI Framework"
+    version: 0.2.0
+    doi: "10.5281/zenodo.XXXXXXX"   # replace after Zenodo deposition
+    url: "https://github.com/lesoto/apgi-framework"

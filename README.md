@@ -4,6 +4,22 @@
 
 [![CI](https://github.com/lesoto/apgi-framework/actions/workflows/test.yml/badge.svg)](https://github.com/lesoto/apgi-framework/actions/workflows/test.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![arXiv](https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+
+## Manuscript
+
+> **Pesochin, D. (2026).** Adaptive Predictive Global Integration: A Computational Framework for Consciousness. *Manuscript under review.*  
+> Preprint: [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) — **replace with real arXiv ID before submission**
+
+This repository is the companion code release for the paper series above.
+All figures in Papers 1–3 are reproduced by scripts in `figures/` and `scripts/`.
+Pre-registered protocols are in `protocols/` and archived on OSF at [osf.io/XXXXXX](https://osf.io/XXXXXX).
+
+To reproduce all figures from archived data in one command:
+
+```bash
+bash reproduce_all.sh
+```
 
 ## Overview
 
@@ -138,8 +154,8 @@ Output PDFs land in `figures/output/`.
 pytest tests/ -v
 ```
 
-The full suite (104 tests) covers core equations, normaliser, integration,
-clinical interpreter, parameter recovery, LNN, and five-level hierarchy.
+The full suite (213 tests, 100% coverage) covers core equations, normaliser, integration,
+clinical interpreter, parameter recovery, LNN, bifurcation analysis, and five-level hierarchy.
 
 ## Data
 

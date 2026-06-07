@@ -48,3 +48,11 @@ jobs:
               print(f'  OK  {f.name}')
           print('All protocols valid')
           "
+
+      - name: Validate notebooks (nbval-lax)
+        run: |
+          pytest --nbval-lax \
+            notebooks/quick_start.ipynb \
+            notebooks/protocol1_cardiac_eeg.ipynb \
+            notebooks/protocol6_doc_biomarker.ipynb \
+            --tb=short -q

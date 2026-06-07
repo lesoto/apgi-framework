@@ -62,7 +62,19 @@
       "Bash(sed -n '64,92p' /Users/lesoto/Sites/PYTHON/apgi-framework/scripts/APGI_Somatic_Marker_Identifiability.py)",
       "Bash(sed -n '1096,1115p' /Users/lesoto/Sites/PYTHON/apgi-framework/scripts/APGI_Somatic_Marker_Identifiability.py)",
       "Bash(sed -n '1168,1180p' /Users/lesoto/Sites/PYTHON/apgi-framework/scripts/APGI_Somatic_Marker_Identifiability.py)",
-      "Bash(sed -n '1206,1218p' /Users/lesoto/Sites/PYTHON/apgi-framework/scripts/APGI_Somatic_Marker_Identifiability.py)"
+      "Bash(sed -n '1206,1218p' /Users/lesoto/Sites/PYTHON/apgi-framework/scripts/APGI_Somatic_Marker_Identifiability.py)",
+      "Bash(python3 -c \"import sys,json; nb=json.load\\(sys.stdin\\); [print\\(c['source'][:300] if c['cell_type']=='markdown' else ''\\) for c in nb['cells'][:6]]\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -c \"import sys,json; nb=json.load\\(sys.stdin\\); cells=nb['cells']; print\\(f'Total cells: {len\\(cells\\)}'\\); [print\\(c['cell_type'], ':', ''.join\\(c['source']\\)[:200]\\) for c in cells[:8]]\")",
+      "Bash(python3 -m pytest /Users/lesoto/Sites/PYTHON/apgi-framework/tests/ --tb=no -q)",
+      "Bash(python3 -c \"import sys,json; nb=json.load\\(sys.stdin\\); [print\\(c['cell_type'],':',''.join\\(c['source']\\)[:300],'\\\\n---'\\) for c in nb['cells'][:6]]\")",
+      "Bash(python data/generate_seeds.py)",
+      "Bash(python3 data/generate_seeds.py --dataset sim2)",
+      "Bash(python3 data/generate_seeds.py --dataset sim4)",
+      "Bash(python3 data/generate_seeds.py --dataset sim5)",
+      "Bash(python3 data/generate_seeds.py --dataset sim6)",
+      "Bash(python3 -m pytest tests/ -q --tb=no)",
+      "Bash(python3 -m pytest tests/ -q --tb=short)"
     ]
   }
 }

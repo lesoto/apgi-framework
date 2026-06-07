@@ -323,10 +323,15 @@ class TestRunAnalysisFunction:
 
         def _fast_sweep(self, **kw):
             return original_sweep(
-                self, n_sweep_steps=20, n_stochastic_per_point=20, stochastic_subsample=5
+                self,
+                n_sweep_steps=20,
+                n_stochastic_per_point=20,
+                stochastic_subsample=5,
             )
 
-        monkeypatch.setattr(lnn.BifurcationSignatures, "run_full_sweep_with_stochastic", _fast_sweep)
+        monkeypatch.setattr(
+            lnn.BifurcationSignatures, "run_full_sweep_with_stochastic", _fast_sweep
+        )
         result = run_analysis()
         assert isinstance(result, dict)
         assert "status" in result
