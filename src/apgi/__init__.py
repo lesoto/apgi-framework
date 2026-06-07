@@ -2,6 +2,8 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
+from apgi import datasets
+
 try:
     __version__ = version("apgi")
 except PackageNotFoundError:
@@ -47,4 +49,6 @@ __all__ = [
     "EnhancedClinicalInterpreter",
     # parameter recovery sub-module
     "parameter_recovery",
+    # inline sample datasets (no download required)
+    "datasets",
 ]

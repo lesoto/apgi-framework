@@ -13,40 +13,45 @@ Run once before Zenodo deposition:
 All seeds use a fixed global RNG hierarchy so every dataset is bit-for-bit
 reproducible from this script alone.  No empirical data are required.
 
-Dataset catalogue
------------------
-sim1_ignition_dynamics.npz
+Dataset catalogue (approximate sizes after npz compression)
+-----------------------------------------------------------
+sim1_ignition_dynamics.npz          ~1.5 MB
     10 000-trial session of Sₜ, θₜ, Πⁱ_eff, and ignition flags.
     Used by: Figure 1, notebooks/protocol1_cardiac_eeg.ipynb
 
-sim2_parameter_recovery.npz
+sim2_parameter_recovery.npz         ~0.1 MB
     1 000-run MLE recovery simulation over a β × Πⁱ grid.
+    Convergence determined by optimizer success flag (scipy Nelder-Mead).
     Used by: Figure 2, notebooks/quick_start.ipynb (Appendix A.4)
 
-sim3_liquid_network.npz
+sim3_liquid_network.npz             ~40 MB   ← largest dataset
     LNN reservoir state trajectories (100 neurons × 500 time-steps × 20 seeds).
     Used by: Figure 3 (Paper 2), notebooks/protocol2_somatic_agent_sim.ipynb
 
-sim4_hierarchical.npz
+sim4_hierarchical.npz               ~2 MB
     Five-level hierarchy prediction-error series (50 trials × 100 seeds).
     Used by: Figure 4 (Paper 3), notebooks/protocol5_ignition_ieeg.ipynb
 
 Clinical seed datasets
 ----------------------
-sim5_doc_biomarker.npz
+sim5_doc_biomarker.npz              ~1 MB
     Simulated VS/UWS, MCS, and Controls ignition-index distributions
     with matched HEP and PCI proxies.
     Used by: Figure 6, notebooks/protocol6_doc_biomarker.ipynb
 
-sim6_bifurcation.npz
+sim6_bifurcation.npz                ~0.05 MB
     Pre-ignition critical-slowing-down signatures (AC1 sweep, eigenvalue
     trajectories) for the LNN saddle-node analysis.
     Used by: Figure 7, scripts/APGI_LNN_Bifurcation_Analysis.py
+
+Each .npz is accompanied by a .csv summary for R/MATLAB/Julia readers.
+See data/DATA_DICTIONARY.md for the full variable codebook.
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import pathlib
 import sys
@@ -75,6 +80,18 @@ MASTER_SEED = 2025
 
 def _sha256(path: pathlib.Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _save_csv(dest_npz: pathlib.Path, rows: list[dict]) -> None:
+    """Write a CSV summary alongside the .npz for R/MATLAB/Julia readers."""
+    if not rows:
+        return
+    dest_csv = dest_npz.with_suffix(".csv")
+    with dest_csv.open("w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"  wrote {dest_csv.name}  ({dest_csv.stat().st_size // 1024} KB, CSV)")
 
 
 def _save(
@@ -150,7 +167,7 @@ def _gen_sim1_ignition_dynamics(seed: int) -> pathlib.Path:
     )
     ignition_cardiac = S_t_cardiac >= theta
 
-    return _save(
+    dest = _save(
         "sim1_ignition_dynamics.npz",
         {
             "pi_e": pi_e,
@@ -182,6 +199,25 @@ def _gen_sim1_ignition_dynamics(seed: int) -> pathlib.Path:
             "description": "10 000-trial APGI session with cardiac-phase labels",
         },
     )
+    _save_csv(
+        dest,
+        [
+            {
+                "trial": t,
+                "pi_e": float(pi_e[t]),
+                "pi_i": float(pi_i[t]),
+                "C_metabolic": float(C_metabolic[t]),
+                "V_information": float(V_information[t]),
+                "pi_i_eff": float(pi_i_eff[t]),
+                "S_t": float(S_t[t]),
+                "theta_t": float(theta[t]),
+                "ignition": int(ignition[t]),
+                "cardiac_phase": int(cardiac_phase[t]),
+            }
+            for t in range(N)
+        ],
+    )
+    return dest
 
 
 def _gen_sim2_parameter_recovery(seed: int) -> pathlib.Path:
@@ -211,22 +247,18 @@ def _gen_sim2_parameter_recovery(seed: int) -> pathlib.Path:
     beta_hat = np.array(result["beta_hat"])
     pi_i_true = np.array(result["pi_i_true"])
     pi_i_hat = np.array(result["pi_i_hat"])
+    # Convergence flags come directly from scipy optimizer success field,
+    # not from a hardcoded noise threshold.
+    converged = np.array(result["converged"], dtype=bool)
     r_beta = float(result["r_beta"])
     r_pi_i = float(result["r_pi_i"])
 
-    # run_recovery_simulation does not return convergence flags — approximate
-    # convergence as runs where |recovered - true| < 3 * noise_sd
-    noise_sd = 0.05
-    converged = (np.abs(beta_hat - beta_true) < 3 * noise_sd) & (
-        np.abs(pi_i_hat - pi_i_true) < 3 * noise_sd
-    )
-
     print(
         f"    Recovery r(β)={r_beta:.3f}  r(Πⁱ)={r_pi_i:.3f}  "
-        f"approx-converged={converged.mean():.1%}"
+        f"optimizer-converged={converged.mean():.1%}"
     )
 
-    return _save(
+    dest = _save(
         "sim2_parameter_recovery.npz",
         {
             "beta_true": beta_true,
@@ -246,10 +278,26 @@ def _gen_sim2_parameter_recovery(seed: int) -> pathlib.Path:
             "pearson_r_pi_i": r_pi_i,
             "criterion_met_beta": int(r_beta > 0.75),
             "criterion_met_pi_i": int(r_pi_i > 0.75),
+            "convergence_source": "scipy_nelder_mead_success_flag",
             "master_seed": seed,
             "description": "MLE parameter recovery (1 000 runs, n=200 trials each)",
         },
     )
+    _save_csv(
+        dest,
+        [
+            {
+                "run": i,
+                "beta_true": float(beta_true[i]),
+                "beta_hat": float(beta_hat[i]),
+                "pi_i_true": float(pi_i_true[i]),
+                "pi_i_hat": float(pi_i_hat[i]),
+                "converged": int(converged[i]),
+            }
+            for i in range(n_runs)
+        ],
+    )
+    return dest
 
 
 def _gen_sim3_liquid_network(seed: int) -> pathlib.Path:
@@ -289,7 +337,7 @@ def _gen_sim3_liquid_network(seed: int) -> pathlib.Path:
     threshold_95 = np.percentile(output_norm, 95, axis=1, keepdims=True)
     lnn_ignition = output_norm > threshold_95
 
-    return _save(
+    dest = _save(
         "sim3_liquid_network.npz",
         {
             "states": all_states,
@@ -310,6 +358,21 @@ def _gen_sim3_liquid_network(seed: int) -> pathlib.Path:
             "description": "LNN reservoir trajectories across spectral-radius sweep",
         },
     )
+    # CSV summary: per-seed statistics (full state tensors remain in .npz only)
+    _save_csv(
+        dest,
+        [
+            {
+                "seed_idx": i,
+                "spectral_radius": float(spectral_radii[i]),
+                "mean_output_norm": float(output_norm[i].mean()),
+                "sd_output_norm": float(output_norm[i].std()),
+                "ignition_rate": float(lnn_ignition[i].mean()),
+            }
+            for i in range(N_SEEDS)
+        ],
+    )
+    return dest
 
 
 def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
@@ -342,7 +405,7 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
     per_seed_sd = all_S_t.std(axis=1, keepdims=True)
     hier_ignition = all_S_t > (per_seed_mean + 1.5 * per_seed_sd)
 
-    return _save(
+    dest = _save(
         "sim4_hierarchical.npz",
         {
             "S_t_total": all_S_t,
@@ -360,6 +423,23 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
             "description": "Five-level hierarchy Sₜ series across 100 parameter seeds",
         },
     )
+    _save_csv(
+        dest,
+        [
+            {
+                "seed_idx": i,
+                "S_t_mean": float(all_S_t[i].mean()),
+                "S_t_sd": float(all_S_t[i].std()),
+                "ignition_rate": float(hier_ignition[i].mean()),
+                **{
+                    f"level_{l}_S_t_mean": float(all_level_S_t[i, :, l].mean())
+                    for l in range(5)
+                },
+            }
+            for i in range(N_SEEDS)
+        ],
+    )
+    return dest
 
 
 def _gen_sim5_doc_biomarker(seed: int) -> pathlib.Path:
@@ -440,7 +520,7 @@ def _gen_sim5_doc_biomarker(seed: int) -> pathlib.Path:
         group_labels == "VS_UWS", 0, np.where(group_labels == "MCS", 1, 2)
     )
 
-    return _save(
+    dest = _save(
         "sim5_doc_biomarker.npz",
         {
             "group_labels": group_labels.astype("U10"),
@@ -465,6 +545,28 @@ def _gen_sim5_doc_biomarker(seed: int) -> pathlib.Path:
             "description": "Simulated DoC group data for Protocol 6 (VS/UWS, MCS, Controls)",
         },
     )
+    # Per-subject CSV summary (one row per subject, not per trial)
+    subj_ids = np.array(all_subjects)
+    S_t_arr = np.array(all_S_t)
+    ign_arr = np.array(all_ignition, dtype=bool)
+    hep_arr = np.array(all_hep_proxy)
+    pci_arr = np.array(all_pci_proxy)
+    _save_csv(
+        dest,
+        [
+            {
+                "subject_id": int(s),
+                "group": str(group_labels[subj_ids == s][0]),
+                "group_code": int(group_codes[subj_ids == s][0]),
+                "S_t_mean": float(S_t_arr[subj_ids == s].mean()),
+                "ignition_rate": float(ign_arr[subj_ids == s].mean()),
+                "hep_proxy": float(hep_arr[subj_ids == s][0]),
+                "pci_proxy": float(pci_arr[subj_ids == s][0]),
+            }
+            for s in range(subject_id)
+        ],
+    )
+    return dest
 
 
 def _gen_sim6_bifurcation(seed: int) -> pathlib.Path:
@@ -593,7 +695,7 @@ def _gen_sim6_bifurcation(seed: int) -> pathlib.Path:
         f"CSD criterion(≥1.2)={'PASS' if mean_csd >= 1.2 else 'FAIL'}"
     )
 
-    return _save(
+    dest = _save(
         "sim6_bifurcation.npz",
         {
             "ac1_baseline": ac1_baseline,
@@ -626,6 +728,22 @@ def _gen_sim6_bifurcation(seed: int) -> pathlib.Path:
             ),
         },
     )
+    _save_csv(
+        dest,
+        [
+            {
+                "subject_idx": i,
+                "ac1_baseline": float(ac1_baseline[i]),
+                "ac1_pre_ignition": float(ac1_pre_ignition[i]),
+                "ac1_increase": int(ac1_pre_ignition[i] > ac1_baseline[i]),
+                "csd_ratio": float(csd_ratio[i]),
+                "eigenvalue_baseline": float(eigenvalue_real_max_baseline[i]),
+                "eigenvalue_pre": float(eigenvalue_real_max_pre[i]),
+            }
+            for i in range(N_SUBJECTS)
+        ],
+    )
+    return dest
 
 
 # ---------------------------------------------------------------------------

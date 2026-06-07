@@ -10,9 +10,38 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.2.0] — 2026-06-06
+- `src/apgi/datasets.py` — `make_sample_session()` and `make_sample_doc_groups()` inline toy
+  datasets; no Zenodo download required; exposed as `apgi.datasets` in `__all__`.
+- `data/DATA_DICTIONARY.md` — full variable codebook for all six `.npz` archives (shape,
+  dtype, units, equation symbol); includes R/MATLAB/Julia loading examples.
+- CSV summaries alongside every `.npz` — six `.csv` files emitted by `data/generate_seeds.py`
+  for R/MATLAB/Julia readers who cannot load `.npz` natively.
+- `environment.lock.yml` — exact-version conda lock file for bit-for-bit reproducibility on
+  macOS arm64; regenerate with `conda-lock` for other platforms.
+- `binder/environment.yml` — Binder configuration enabling in-browser notebook execution.
+- Binder and Google Colab launch badges in `README.md`.
+- `protocol_0_hep_proxy_validation.json` listed in README protocol table.
 
-### Added
+- `src/apgi/scripts/fetch_data.py` — adds `--verify` flag (SHA-256 check of cached files
+  without re-downloading; exits non-zero on mismatch); adds `sim5` and `sim6` to DATASETS
+  registry with real checksums; size hints shown in `--list` output.
+- `src/apgi/parameter_recovery.py` — `recover_parameters()` now returns `converged` (bool)
+  from `scipy` optimizer `success` flag; `run_recovery_simulation()` propagates it.
+- `data/generate_seeds.py` — sim2 convergence criterion now uses actual optimizer success
+  flags instead of hardcoded `noise_sd = 0.05`; size annotations added to dataset catalogue
+  docstring; all six generators emit companion CSV summaries.
+- `.github/workflows/test.yml` — validates all 7 notebooks (was 3); adds ruff lint step and
+  mypy type-check step.
+- `pyproject.toml` — adds `ruff>=0.4.0` and `mypy>=1.10.0` to `[dev]` extras; adds
+  `[tool.ruff]` and `[tool.ruff.lint]` configuration.
+- `CONTRIBUTING.md` — documents locked environment, `conda-lock` regeneration, and
+  `apgi-fetch --verify` usage.
+- `reproduce_all.sh` — runs `apgi-fetch --verify` after Zenodo download; mentions
+  `environment.lock.yml`.
+- `CHANGELOG.md` — removed duplicate `[0.1.0]` section.
+
+---
+
 - `data/generate_seeds.py` — canonical synthetic seed generator for all six `.npz` datasets
   (sim1–sim6). Derives every sub-RNG from `MASTER_SEED = 2025`; self-describing metadata
   is stored inside each archive. Outputs SHA-256 digests for Zenodo deposition.
@@ -28,7 +57,6 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the original four).
 - Notebook CI validation via `pytest --nbval-lax` in `.github/workflows/test.yml`.
 
-### Changed
 - `pyproject.toml` version `0.1.0` → `0.2.0`; Development Status `3 - Alpha` → `4 - Beta`.
 - `environment.yml` adds `nbformat`, `ipykernel`, and `nbval` so notebooks execute in the
   conda environment without additional installs.
@@ -39,15 +67,9 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `.gitignore` updated: `data/seeds/` excluded (upload to Zenodo instead); old blanket
   `data/*.npz` rule removed.
 
-### Fixed
 - `sim6_bifurcation` LNN parameters retuned to reliably satisfy the pre-registered
   falsification criterion (AC1 increase n ≥ 20/25, CSD ratio ≥ 1.2).
 
----
-
-## [0.1.0] — 2026-05-16
-
-### Added
 - `src/apgi/core.py` — renamed from `apgi_core.py` for cleaner import paths.
 - `src/apgi/normalizer.py` — `APGINormalizer` for z-score / min-max normalisation across sessions.
 - `src/apgi/integration.py` — `APGICoreIntegration` stateful session integrator.
@@ -63,21 +85,13 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `data/checksums.sha256` — integrity manifest for Zenodo downloads.
 - `.github/workflows/release.yml` — automated PyPI and Zenodo publish on version tags.
 - `CHANGELOG.md` — this file.
-
-### Changed
-- `src/apgi/__init__.py` now exposes an explicit `__all__` listing only the stable public API; extension classes are excluded from the top-level namespace.
-- `figures/generate_figure1.py` and `generate_figure2.py` updated to import from `figures.utils` and `apgi.core`.
-- `data/fetch_data.py` promoted to `src/apgi/scripts/fetch_data.py` (registered as `apgi-fetch` CLI entry point in `pyproject.toml`).
-- `pyproject.toml` adds `jsonschema>=4.0` to core dependencies.
-
----
-
-## [0.1.0] — 2026-05-16
-
-### Added
 - Initial release: core APGI equations (`compute_S_t`, `compute_theta_t`, `compute_pi_i_eff`, `ignition_criterion`, `run_trial`, `update_theta`).
 - `LiquidNeuralNetwork` continuous-time reservoir (Paper 2).
 - `APGIHierarchy` five-level hierarchical architecture (Paper 3).
 - `parameter_recovery` module with MLE-based recovery simulation (Appendix A.4).
 - Experimental protocols: `protocol_1_cardiac_phase.json`, `protocol_2_tms_insula.json`.
 - GitHub Actions CI (`test.yml`) covering Python 3.11 and 3.12.
+- `src/apgi/__init__.py` now exposes an explicit `__all__` listing only the stable public API; extension classes are excluded from the top-level namespace.
+- `figures/generate_figure1.py` and `generate_figure2.py` updated to import from `figures.utils` and `apgi.core`.
+- `data/fetch_data.py` promoted to `src/apgi/scripts/fetch_data.py` (registered as `apgi-fetch` CLI entry point in `pyproject.toml`).
+- `pyproject.toml` adds `jsonschema>=4.0` to core dependencies.

@@ -5,6 +5,8 @@
 [![CI](https://github.com/lesoto/apgi-framework/actions/workflows/test.yml/badge.svg)](https://github.com/lesoto/apgi-framework/actions/workflows/test.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![arXiv](https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lesoto/apgi-framework/HEAD?labpath=notebooks%2Fquick_start.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lesoto/apgi-framework/blob/main/notebooks/quick_start.ipynb)
 
 ## Manuscript
 
@@ -26,7 +28,7 @@ bash reproduce_all.sh
 The APGI framework implements the core equations from the APGI paper series:
 
 | Symbol | Formula | Meaning |
-|--------|---------|---------|
+| :--- | :--- | :--- |
 | Πⁱ_eff | Πⁱ · exp(−C/κ) | Metabolically gated inhibitory precision |
 | Sₜ | Πᵉ·\|zᵉ\| + Πⁱ_eff·\|zⁱ\| | Global integration signal |
 | θₜ | α·C + β·V | Adaptive ignition threshold |
@@ -37,7 +39,7 @@ The APGI framework implements the core equations from the APGI paper series:
 
 ## Repository structure
 
-```
+```text
 apgi-framework/
 ├── src/apgi/              # pip-installable library
 │   ├── core.py            # Sₜ, θₜ, Πⁱ_eff equations
@@ -96,15 +98,14 @@ print(f"Sₜ={S_t:.4f}  θₜ={theta_t:.4f}  ignition={apgi.ignition_criterion(S
 
 ```python
 from apgi.integration import APGICoreIntegration
-import numpy as np
+import apgi
 
-rng   = np.random.default_rng(0)
+# Built-in sample data — no Zenodo download required
+session = apgi.datasets.make_sample_session(n_trials=200, seed=0)
+
 integ = APGICoreIntegration(alpha=0.3, beta=0.7, gamma=0.9)
-integ.run_sequence(
-    pi_e=rng.uniform(0.8, 1.5, 200), z_e=rng.uniform(0.2, 1.0, 200),
-    pi_i=rng.uniform(0.5, 1.5, 200), z_i=rng.uniform(0.1, 0.8, 200),
-    C_metabolic=rng.uniform(0.5, 2.0, 200), V_information=rng.uniform(0.1, 1.0, 200),
-)
+integ.run_sequence(**{k: session[k] for k in
+    ("pi_e", "z_e", "pi_i", "z_i", "C_metabolic", "V_information")})
 print(f"Ignition rate: {integ.ignition_rate():.3f}")
 ```
 
@@ -120,7 +121,7 @@ from apgi.extensions.hierarchical  import APGIHierarchy
 Interactive walkthroughs are in `notebooks/`:
 
 | Notebook | Content |
-|----------|---------|
+| :--- | :--- |
 | `01_quick_start.ipynb` | Core equations, `APGICoreIntegration`, signal normalisation |
 | `02_protocol1_cardiac_eeg.ipynb` | Protocol 1 — Cardiac-EEG: interoceptive precision gating (Pred 1.a–Pred 1.c) |
 | `03_protocol2_somatic_agent_sim.ipynb` | Protocol 2 — Somatic-AgentSim: active inference agent simulations (Pred 2.a–Pred 2.e) |
@@ -176,7 +177,8 @@ Pre-registered protocols are in `protocols/` and on OSF: [osf.io/XXXXXX](https:/
 All protocol files are validated against `protocols/schemas/protocol.schema.json` in CI.
 
 | File | Paradigm | Status |
-|------|---------|--------|
+| :--- | :--- | :--- |
+| `protocol_0_hep_proxy_validation.json` | Protocol 0 — HEP Proxy Validation: empirical prerequisite (Pred 0.A–Pred 0.C) | specified |
 | `protocol_1_cardiac_eeg.json` | Protocol 1 — Cardiac-EEG: interoceptive precision gating (Pred 1.a–Pred 1.c) | specified |
 | `protocol_2_somatic_agent_sim.json` | Protocol 2 — Somatic-AgentSim: somatic marker advantage (Pred 2.a–Pred 2.e) | validated |
 | `protocol_3_anticipation_fmri.json` | Protocol 3 — Anticipation-fMRI: somatic marker vs. prediction error (Pred 3.a–Pred 3.d) | specified |

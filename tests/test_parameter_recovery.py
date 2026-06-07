@@ -48,7 +48,8 @@ class TestRecoverParameters:
             n_trials=50, beta_true=0.7, pi_i_true=1.0, seed=0
         )
         result = recover_parameters(data, n_restarts=2)
-        assert set(result.keys()) == {"beta_hat", "pi_i_hat", "nll"}
+        assert set(result.keys()) == {"beta_hat", "pi_i_hat", "nll", "converged"}
+        assert isinstance(result["converged"], bool)
 
     def test_recovered_values_are_positive(self):
         data = generate_synthetic_data(
@@ -102,5 +103,8 @@ class TestRunRecoverySimulation:
             "beta_hat",
             "pi_i_true",
             "pi_i_hat",
+            "converged",
         }
         assert len(results["beta_true"]) == 5
+        assert len(results["converged"]) == 5
+        assert all(isinstance(c, bool) for c in results["converged"])

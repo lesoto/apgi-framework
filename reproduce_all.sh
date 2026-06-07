@@ -11,7 +11,9 @@
 #   bash reproduce_all.sh --generate   # regenerate seeds then figures
 #
 # Requirements: apgi installed in the active Python environment.
-#   pip install -e ".[dev]"   OR   conda env create -f environment.yml
+#   pip install -e ".[dev]"
+#   OR for exact-version reproducibility:
+#   conda env create -f environment.lock.yml && conda activate apgi && pip install -e ".[dev]"
 
 set -euo pipefail
 
@@ -35,6 +37,8 @@ case "$MODE" in
   zenodo)
     echo "Fetching seed datasets from Zenodo…"
     apgi-fetch
+    echo "Verifying checksums…"
+    apgi-fetch --verify
     DATA_DIR="data/cache"
     ;;
   local)

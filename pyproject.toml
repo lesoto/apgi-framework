@@ -45,8 +45,10 @@ Documentation = "https://github.com/lesoto/apgi-framework#readme"
 lnn = ["torch>=2.0"]
 dev = [
     "pytest>=8.2.0",
-    "pytest-cov>=5.0.0", 
-    "nbval"
+    "pytest-cov>=5.0.0",
+    "nbval",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -71,6 +73,14 @@ exclude_lines = [
     "raise NotImplementedError",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
 
 [tool.mypy]
 explicit_package_bases = true

@@ -12,10 +12,24 @@ cd apgi-framework
 # Option A — pip (any Python 3.11+)
 pip install -e ".[dev]"
 
-# Option B — conda (exact versions for HPC / clean-machine replication)
+# Option B — conda with pinned versions (recommended for exact reproducibility)
+conda env create -f environment.lock.yml   # exact versions, bit-for-bit
+conda activate apgi
+pip install -e ".[dev]"
+
+# Option C — conda with loose constraints (easier on new platforms)
 conda env create -f environment.yml
 conda activate apgi
 pip install -e ".[dev]"
+```
+
+To regenerate the locked environment after a dependency update:
+
+```bash
+conda env export --no-builds > environment.lock.yml   # from an active env
+# or cross-platform with conda-lock:
+pip install conda-lock
+conda-lock -f environment.yml -p linux-64 -p osx-arm64
 ```
 
 ## Running tests
@@ -34,9 +48,16 @@ at 100% for modules under `src/apgi/`.
 Seed `.npz` files are not committed. To regenerate locally:
 
 ```bash
-python data/generate_seeds.py           # all six datasets → data/seeds/
+python data/generate_seeds.py           # all six datasets + CSV summaries → data/seeds/
 python data/generate_seeds.py --dataset sim1_ignition_dynamics   # one dataset
-python data/generate_seeds.py --verify  # check digests
+python data/generate_seeds.py --verify  # check digests of locally generated files
+```
+
+To verify files already downloaded from Zenodo:
+
+```bash
+apgi-fetch --verify               # check all cached files against checksums.sha256
+apgi-fetch --verify --dataset sim3_liquid_network   # check one file
 ```
 
 Upload `data/seeds/*.npz` to Zenodo before updating `src/apgi/scripts/fetch_data.py`.
@@ -51,7 +72,7 @@ bash reproduce_all.sh --local   # use locally generated seeds instead of Zenodo
 ## Branch naming
 
 | Type | Pattern | Example |
-|---|---|---|
+| :--- | :--- | :--- |
 | Feature | `feature/<short-name>` | `feature/add-hep-filter` |
 | Bug fix | `fix/<issue-number>-<description>` | `fix/42-theta-update` |
 | Protocol | `protocol/<id>-<label>` | `protocol/p07-meg-source` |

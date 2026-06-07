@@ -17,13 +17,20 @@ def mock_datasets():
             "sim_placeholder.npz",
             "PLACEHOLDER_SHA256",
             "Placeholder test",
+            "~0 MB",
         ),
         "sim_sha_ok": (
             "sim_sha_ok.npz",
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             "Empty file test",
+            "~0 MB",
         ),
-        "sim_sha_fail": ("sim_sha_fail.npz", "wrong_hash_here", "Wrong hash test"),
+        "sim_sha_fail": (
+            "sim_sha_fail.npz",
+            "wrong_hash_here",
+            "Wrong hash test",
+            "~0 MB",
+        ),
     }
     with patch.dict(fetch_data.DATASETS, test_datasets, clear=True):
         yield test_datasets
@@ -168,11 +175,13 @@ def test_main_all_datasets(mock_datasets, temp_data_dir):
                 "sim_placeholder.npz",
                 "PLACEHOLDER_SHA256",
                 "Placeholder test",
+                "~0 MB",
             ),
             "sim_sha_ok": (
                 "sim_sha_ok.npz",
                 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                 "Empty file test",
+                "~0 MB",
             ),
         }
         with patch.dict(fetch_data.DATASETS, filtered_datasets, clear=True):
@@ -191,3 +200,97 @@ def test_download_unsafe_url_scheme(mock_datasets, temp_data_dir, capsys):
             assert call(1) in mock_exit.call_args_list
     captured = capsys.readouterr()
     assert "Unsafe URL scheme" in captured.err
+
+
+def test_verify_cached_all_ok(mock_datasets, temp_data_dir, capsys):
+    # Create valid cached files (exclude sim_sha_fail which has wrong hash)
+    for name in ["sim_placeholder", "sim_sha_ok"]:
+        filename, sha256, _, _ = mock_datasets[name]
+        dest = temp_data_dir / filename
+        if sha256 == "PLACEHOLDER_SHA256":
+            dest.write_bytes(b"content")
+        else:
+            dest.write_bytes(b"")
+
+    with patch("sys.argv", ["fetch_data.py", "--verify"]):
+        result = fetch_data._verify_cached(["sim_placeholder", "sim_sha_ok"])
+        assert result is True
+    captured = capsys.readouterr()
+    assert "ok" in captured.out
+
+
+def test_verify_cached_missing_file(mock_datasets, temp_data_dir, capsys):
+    # Don't create any files - all should be missing
+    with patch("sys.argv", ["fetch_data.py", "--verify"]):
+        result = fetch_data._verify_cached()
+        assert result is False
+    captured = capsys.readouterr()
+    assert "missing" in captured.out
+
+
+def test_verify_cached_checksum_mismatch(mock_datasets, temp_data_dir, capsys):
+    # Create file with wrong content for sim_sha_ok
+    dest = temp_data_dir / "sim_sha_ok.npz"
+    dest.write_bytes(b"wrong content")
+
+    with patch("sys.argv", ["fetch_data.py", "--verify"]):
+        result = fetch_data._verify_cached()
+        assert result is False
+    captured = capsys.readouterr()
+    assert "MISMATCH" in captured.out
+
+
+def test_verify_cached_specific_dataset(mock_datasets, temp_data_dir, capsys):
+    # Create valid file for one dataset
+    dest = temp_data_dir / "sim_placeholder.npz"
+    dest.write_bytes(b"content")
+
+    with patch("sys.argv", ["fetch_data.py", "--verify", "--dataset", "sim_placeholder"]):
+        result = fetch_data._verify_cached(["sim_placeholder"])
+        assert result is True
+    captured = capsys.readouterr()
+    assert "ok" in captured.out
+
+
+def test_main_verify_flag_all_ok(mock_datasets, temp_data_dir, capsys):
+    # Create valid cached files (exclude sim_sha_fail which has wrong hash)
+    for name in ["sim_placeholder", "sim_sha_ok"]:
+        filename, sha256, _, _ = mock_datasets[name]
+        dest = temp_data_dir / filename
+        if sha256 == "PLACEHOLDER_SHA256":
+            dest.write_bytes(b"content")
+        else:
+            dest.write_bytes(b"")
+
+    # Use filtered datasets without sim_sha_fail
+    filtered_datasets = {
+        "sim_placeholder": mock_datasets["sim_placeholder"],
+        "sim_sha_ok": mock_datasets["sim_sha_ok"],
+    }
+    with patch.dict(fetch_data.DATASETS, filtered_datasets, clear=True):
+        with patch("sys.argv", ["fetch_data.py", "--verify"]):
+            with pytest.raises(SystemExit) as excinfo:
+                fetch_data.main()
+            assert excinfo.value.code == 0
+
+
+def test_main_verify_flag_with_mismatch(mock_datasets, temp_data_dir, capsys):
+    # Create file with wrong content
+    dest = temp_data_dir / "sim_sha_ok.npz"
+    dest.write_bytes(b"wrong content")
+
+    with patch("sys.argv", ["fetch_data.py", "--verify"]):
+        with pytest.raises(SystemExit) as excinfo:
+            fetch_data.main()
+        assert excinfo.value.code == 1
+
+
+def test_main_verify_specific_dataset(mock_datasets, temp_data_dir, capsys):
+    # Create valid file for specific dataset
+    dest = temp_data_dir / "sim_placeholder.npz"
+    dest.write_bytes(b"content")
+
+    with patch("sys.argv", ["fetch_data.py", "--verify", "--dataset", "sim_placeholder"]):
+        with pytest.raises(SystemExit) as excinfo:
+            fetch_data.main()
+        assert excinfo.value.code == 0

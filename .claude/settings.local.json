@@ -74,7 +74,12 @@
       "Bash(python3 data/generate_seeds.py --dataset sim5)",
       "Bash(python3 data/generate_seeds.py --dataset sim6)",
       "Bash(python3 -m pytest tests/ -q --tb=no)",
-      "Bash(python3 -m pytest tests/ -q --tb=short)"
+      "Bash(python3 -m pytest tests/ -q --tb=short)",
+      "Bash(xargs ls -la)",
+      "Bash(python3 -c \"import json,sys; nb=json.load\\(sys.stdin\\); [print\\(c['source'][:200]\\) for c in nb['cells'][:5] if c['cell_type']=='markdown']\")",
+      "Bash(python3 -c 'import ast, pathlib *)",
+      "Bash(python -m pytest tests/ -q --tb=short --no-header)",
+      "Bash(git -C /Users/lesoto/Sites/PYTHON/apgi-framework status --short)"
     ]
   }
 }

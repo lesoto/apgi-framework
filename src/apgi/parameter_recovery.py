@@ -151,6 +151,7 @@ def recover_parameters(
         "beta_hat": float(beta_hat),
         "pi_i_hat": float(pi_i_hat),
         "nll": float(best_result.fun),  # type: ignore[union-attr]
+        "converged": bool(best_result.success),  # type: ignore[union-attr]
     }
 
 
@@ -170,7 +171,8 @@ def run_recovery_simulation(
     returns Pearson r between true and recovered values.
 
     Returns:
-        dict with keys: r_beta, r_pi_i, beta_true, beta_hat, pi_i_true, pi_i_hat.
+        dict with keys: r_beta, r_pi_i, beta_true, beta_hat, pi_i_true, pi_i_hat,
+        converged (bool array from optimizer success flag per run).
     """
     rng = np.random.default_rng(seed)
 
@@ -178,6 +180,7 @@ def run_recovery_simulation(
     pi_i_true_all = rng.uniform(*pi_i_range, n_simulations)
     beta_hat_all = np.empty(n_simulations)
     pi_i_hat_all = np.empty(n_simulations)
+    converged_all = np.zeros(n_simulations, dtype=bool)
 
     for i in range(n_simulations):
         data = generate_synthetic_data(
@@ -192,6 +195,7 @@ def run_recovery_simulation(
         recovered = recover_parameters(data, alpha=alpha, kappa=kappa)
         beta_hat_all[i] = recovered["beta_hat"]
         pi_i_hat_all[i] = recovered["pi_i_hat"]
+        converged_all[i] = recovered["converged"]
 
     r_beta, _ = pearsonr(beta_true_all, beta_hat_all)
     r_pi_i, _ = pearsonr(pi_i_true_all, pi_i_hat_all)
@@ -203,4 +207,5 @@ def run_recovery_simulation(
         "beta_hat": beta_hat_all.tolist(),
         "pi_i_true": pi_i_true_all.tolist(),
         "pi_i_hat": pi_i_hat_all.tolist(),
+        "converged": converged_all.tolist(),
     }

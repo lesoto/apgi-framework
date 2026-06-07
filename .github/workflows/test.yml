@@ -24,6 +24,12 @@ jobs:
       - name: Install package and dev dependencies
         run: pip install -e ".[dev]"
 
+      - name: Lint (ruff)
+        run: ruff check src/ tests/ figures/ scripts/
+
+      - name: Type check (mypy)
+        run: mypy src/apgi --ignore-missing-imports
+
       - name: Run test suite
         run: pytest tests/ -v --tb=short
 
@@ -49,10 +55,14 @@ jobs:
           print('All protocols valid')
           "
 
-      - name: Validate notebooks (nbval-lax)
+      - name: Validate all notebooks (nbval-lax)
         run: |
           pytest --nbval-lax \
             notebooks/quick_start.ipynb \
             notebooks/protocol1_cardiac_eeg.ipynb \
+            notebooks/protocol2_somatic_agent_sim.ipynb \
+            notebooks/protocol3_anticipation_fmri.ipynb \
+            notebooks/protocol4_insula_tms.ipynb \
+            notebooks/protocol5_ignition_ieeg.ipynb \
             notebooks/protocol6_doc_biomarker.ipynb \
             --tb=short -q
