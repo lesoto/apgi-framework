@@ -58,6 +58,11 @@ try:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    # Disable mathtext to avoid LaTeX font warnings
+    matplotlib.rcParams["mathtext.default"] = "regular"
+    matplotlib.rcParams["font.family"] = "sans-serif"
+    matplotlib.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans", "Liberation Sans", "sans-serif"]
+
     HAS_MATPLOTLIB = True
 except ImportError:  # pragma: no cover
     HAS_MATPLOTLIB = False  # pragma: no cover
@@ -1022,7 +1027,7 @@ def _save_figure(
 
     # Panel 3: Off-diagonal ratios (cross-block)
     ax = axes[2]
-    off_labels = list(m2["offdiag_ratios"].keys()) + ["β↔log_Πⁱ (free-β)"]
+    off_labels = list(m2["offdiag_ratios"].keys()) + ["beta <-> log(Pi_i) (free-beta)"]
     off_vals = list(m2["offdiag_ratios"].values()) + [m3["beta_pi_offdiag_ratio"]]
     bar_colors = ["steelblue"] * len(m2["offdiag_ratios"]) + ["tomato"]
     ax.barh(off_labels, off_vals, color=bar_colors, alpha=0.85)

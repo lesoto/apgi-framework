@@ -50,6 +50,9 @@ try:
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    matplotlib.rcParams["mathtext.default"] = "regular"
+    matplotlib.rcParams["font.family"] = "sans-serif"
+    matplotlib.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans", "Liberation Sans", "sans-serif"]
 
     HAS_MATPLOTLIB = True
 except ImportError:  # pragma: no cover
@@ -561,19 +564,19 @@ def plot_bifurcation_signatures(
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 9))
     fig.suptitle(
-        "APGI-LNN Bifurcation Signatures\n" "(Saddle-node bifurcation at S = θₜ)",
+        "APGI-LNN Bifurcation Signatures\n" "(Saddle-node bifurcation at S = theta_t)",
         fontsize=13,
     )
 
     ax1, ax2, ax3, ax4 = axes.flat
 
-    # 1. Dominant eigenvalue λ₁
+    # 1. Dominant eigenvalue lambda_1
     ax1.plot(S_vals, sweep.lambda1_trace, color="#2166AC", linewidth=2)
     ax1.axhline(0, color="gray", linestyle="--", linewidth=1)
-    ax1.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = θₜ")
+    ax1.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
     ax1.set_xlabel("S_input")
-    ax1.set_ylabel("λ₁ (dominant eigenvalue)")
-    ax1.set_title("Critical Slowing: λ₁ → 0 at bifurcation")
+    ax1.set_ylabel("lambda_1 (dominant eigenvalue)")
+    ax1.set_title("Critical Slowing: lambda_1 -> 0 at bifurcation")
     ax1.legend(fontsize=9)
     ax1.set_ylim(
         max(-20, sweep.lambda1_trace.min() - 1),
@@ -585,15 +588,15 @@ def plot_bifurcation_signatures(
         sweep.variance_trace, 0, np.percentile(sweep.variance_trace, 95) * 1.5
     )
     ax2.plot(S_vals, var_clipped, color="#41AB5D", linewidth=2)
-    ax2.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = θₜ")
+    ax2.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
     ax2.set_xlabel("S_input")
-    ax2.set_ylabel("σ²(S) (theoretical)")
-    ax2.set_title("Variance Inflation: σ² ∝ 1/|λ₁|")
+    ax2.set_ylabel("sigma^2(S) (theoretical)")
+    ax2.set_title("Variance Inflation: sigma^2 ~ 1/|lambda_1|")
     ax2.legend(fontsize=9)
 
     # 3. AC1 trace
     ax3.plot(S_vals, sweep.ac1_trace, color="#856404", linewidth=2)
-    ax3.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = θₜ")
+    ax3.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
     ax3.axhline(0, color="gray", linestyle="--", linewidth=0.8)
     ax3.set_xlabel("S_input")
     ax3.set_ylabel("AC1 (lag-1 autocorrelation)")
@@ -608,7 +611,7 @@ def plot_bifurcation_signatures(
         color=VISUAL_CONSTANTS.ALLOSTATIC_PURPLE,
         linewidth=2,
     )
-    ax4.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = θₜ")
+    ax4.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
     ax4.axhline(
         0.555,
         color="gray",
@@ -626,7 +629,7 @@ def plot_bifurcation_signatures(
     if save_path is None:
         _out_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
         os.makedirs(_out_dir, exist_ok=True)
-        save_path = os.path.join(_out_dir, "bifurcation_signatures.png")
+        save_path = os.path.join(_out_dir, "APGI_LNN_Bifurcation_Analysis.png")
 
     plt.savefig(save_path, dpi=100, bbox_inches="tight")
     plt.close(fig)

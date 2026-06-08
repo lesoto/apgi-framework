@@ -85,7 +85,8 @@
       "Bash(shasum -a 256 data/seeds/sim*.npz)",
       "Bash(awk '{print $1, $2}')",
       "Bash(python3 -c \"import h5py; print\\('h5py available:', h5py.__version__\\)\")",
-      "Bash(python3 -m pytest tests/test_parameter_recovery.py -q --tb=short)"
+      "Bash(python3 -m pytest tests/test_parameter_recovery.py -q --tb=short)",
+      "Bash(bash reproduce_all.sh --local)"
     ]
   }
 }
