@@ -50,9 +50,15 @@ try:
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+
     matplotlib.rcParams["mathtext.default"] = "regular"
     matplotlib.rcParams["font.family"] = "sans-serif"
-    matplotlib.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans", "Liberation Sans", "sans-serif"]
+    matplotlib.rcParams["font.sans-serif"] = [
+        "Arial",
+        "DejaVu Sans",
+        "Liberation Sans",
+        "sans-serif",
+    ]
 
     HAS_MATPLOTLIB = True
 except ImportError:  # pragma: no cover
@@ -573,7 +579,9 @@ def plot_bifurcation_signatures(
     # 1. Dominant eigenvalue lambda_1
     ax1.plot(S_vals, sweep.lambda1_trace, color="#2166AC", linewidth=2)
     ax1.axhline(0, color="gray", linestyle="--", linewidth=1)
-    ax1.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
+    ax1.axvline(
+        theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t"
+    )
     ax1.set_xlabel("S_input")
     ax1.set_ylabel("lambda_1 (dominant eigenvalue)")
     ax1.set_title("Critical Slowing: lambda_1 -> 0 at bifurcation")
@@ -588,7 +596,9 @@ def plot_bifurcation_signatures(
         sweep.variance_trace, 0, np.percentile(sweep.variance_trace, 95) * 1.5
     )
     ax2.plot(S_vals, var_clipped, color="#41AB5D", linewidth=2)
-    ax2.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
+    ax2.axvline(
+        theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t"
+    )
     ax2.set_xlabel("S_input")
     ax2.set_ylabel("sigma^2(S) (theoretical)")
     ax2.set_title("Variance Inflation: sigma^2 ~ 1/|lambda_1|")
@@ -596,7 +606,9 @@ def plot_bifurcation_signatures(
 
     # 3. AC1 trace
     ax3.plot(S_vals, sweep.ac1_trace, color="#856404", linewidth=2)
-    ax3.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
+    ax3.axvline(
+        theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t"
+    )
     ax3.axhline(0, color="gray", linestyle="--", linewidth=0.8)
     ax3.set_xlabel("S_input")
     ax3.set_ylabel("AC1 (lag-1 autocorrelation)")
@@ -611,7 +623,9 @@ def plot_bifurcation_signatures(
         color=VISUAL_CONSTANTS.ALLOSTATIC_PURPLE,
         linewidth=2,
     )
-    ax4.axvline(theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t")
+    ax4.axvline(
+        theta, color="#D6604D", linestyle="--", linewidth=1, label="S = theta_t"
+    )
     ax4.axhline(
         0.555,
         color="gray",

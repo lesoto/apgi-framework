@@ -61,7 +61,12 @@ try:
     # Disable mathtext to avoid LaTeX font warnings
     matplotlib.rcParams["mathtext.default"] = "regular"
     matplotlib.rcParams["font.family"] = "sans-serif"
-    matplotlib.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans", "Liberation Sans", "sans-serif"]
+    matplotlib.rcParams["font.sans-serif"] = [
+        "Arial",
+        "DejaVu Sans",
+        "Liberation Sans",
+        "sans-serif",
+    ]
 
     HAS_MATPLOTLIB = True
 except ImportError:  # pragma: no cover

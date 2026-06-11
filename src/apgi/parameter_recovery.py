@@ -92,9 +92,9 @@ def _negative_log_likelihood(
     ignition = np.asarray(data["ignition"])
 
     # Inline vectorised forms of the three APGI core equations
-    pi_i_eff = pi_i * np.exp(-C / kappa)                  # Πⁱ_eff = Πⁱ·exp(−C/κ)
+    pi_i_eff = pi_i * np.exp(-C / kappa)  # Πⁱ_eff = Πⁱ·exp(−C/κ)
     S_t_pred = pi_e * np.abs(z_e) + pi_i_eff * np.abs(z_i)  # Sₜ
-    theta = alpha * C + beta * V                            # θₜ
+    theta = alpha * C + beta * V  # θₜ
 
     # Gaussian NLL for continuous Sₜ observation
     gaussian_nll = 0.5 * np.sum((S_obs - S_t_pred) ** 2)
