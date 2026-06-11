@@ -22,7 +22,7 @@ class TestAPGICoreIntegrationStep:
         assert r1.t == 1
 
     def test_theta_adapts_across_trials(self):
-        integ = APGICoreIntegration(alpha=0.3, beta=0.7, gamma=0.9)
+        integ = APGICoreIntegration(kappa_meta=0.3, delta_info=0.15)
         thetas = [
             integ.step(1.0, 1.0, 1.0, 0.5, float(c), 0.5).theta_t
             for c in np.linspace(0.5, 2.0, 20)
@@ -69,8 +69,8 @@ class TestAPGICoreIntegrationRunSequence:
             "z_e": rng.uniform(0.2, 1.0, n),
             "pi_i": rng.uniform(0.5, 1.5, n),
             "z_i": rng.uniform(0.1, 0.8, n),
-            "C_metabolic": rng.uniform(0.5, 2.0, n),
-            "V_information": rng.uniform(0.1, 1.0, n),
+            "C_t": rng.uniform(0.5, 2.0, n),
+            "I_t": rng.uniform(0.1, 1.0, n),
         }
 
     def test_run_sequence_length(self):
@@ -99,16 +99,14 @@ class TestAPGICoreIntegrationRunSequence:
 
 
 class TestSomaticModulation:
-    """Verify that elevated C_metabolic suppresses Πⁱ_eff and reduces Sₜ."""
+    """Verify that higher M̂ with positive β_SM raises Πⁱ_eff and S_t."""
 
-    def test_high_metabolic_cost_reduces_pi_i_eff(self):
-        integ_low = APGICoreIntegration(alpha=0.3, beta=0.7)
-        integ_high = APGICoreIntegration(alpha=0.3, beta=0.7)
+    def test_high_M_hat_raises_pi_i_eff(self):
+        integ_low = APGICoreIntegration(beta_sm=0.6, M_hat=0.0)
+        integ_high = APGICoreIntegration(beta_sm=0.6, M_hat=2.0)
 
-        r_low = integ_low.step(1.0, 1.0, 1.0, 0.5, C_metabolic=0.5, V_information=0.5)
-        r_high = integ_high.step(
-            1.0, 1.0, 1.0, 0.5, C_metabolic=200.0, V_information=0.5
-        )
+        r_low = integ_low.step(1.0, 1.0, 1.0, 0.5, C_t=1.0, I_t=0.5)
+        r_high = integ_high.step(1.0, 1.0, 1.0, 0.5, C_t=1.0, I_t=0.5)
 
-        assert r_high.pi_i_eff < r_low.pi_i_eff
-        assert r_high.S_t < r_low.S_t
+        assert r_high.pi_i_eff > r_low.pi_i_eff
+        assert r_high.S_t > r_low.S_t

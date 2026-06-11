@@ -75,7 +75,9 @@ class HierarchicalLevel:
         self.state = self.state + 0.1 * (prediction_error - self.state)
         self.prediction = np.tanh(self.state)
 
-        pi_i_eff = compute_pi_i_eff(self.pi_i, C_metabolic, self.kappa)
+        # Hierarchical levels have no somatic-marker drive (M̂=0, β_SM=0):
+        # precision is unmodulated at the sensory hierarchy level.
+        pi_i_eff = compute_pi_i_eff(self.pi_i, beta_sm=0.0, M_hat=0.0)
         z_e = float(np.mean(np.abs(prediction_error)))
         z_i = float(np.mean(np.abs(self.state)))
         S_t_contribution = compute_S_t(self.pi_e, z_e, pi_i_eff, z_i)

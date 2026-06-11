@@ -58,10 +58,19 @@ def make_sample_doc_groups(
         dict with keys: group_labels (str), group_codes (int),
         subject_id (int), S_t (float), ignition (bool).
     """
-    from apgi.core import compute_pi_i_eff, compute_S_t, compute_theta_t
+    from apgi.core import (
+        BETA_SM_DEFAULT,
+        GAMMA_SIG_DEFAULT,
+        TAU_S_DEFAULT,
+        accumulate_S_t,
+        compute_pi_i_eff,
+        compute_S_t,
+        ignition_criterion,
+        step_theta,
+        theta_equilibrium,
+    )
 
     rng = np.random.default_rng(seed)
-    KAPPA, ALPHA, BETA = 100.0, 0.3, 0.7
 
     group_cfg = {
         "VS_UWS": {"pi_i": 0.30, "pi_e": 0.40, "code": 0},
@@ -77,18 +86,25 @@ def make_sample_doc_groups(
             pi_i_s = max(0.05, rng.normal(cfg["pi_i"], cfg["pi_i"] * 0.15))
             pi_e_s = max(0.05, rng.normal(cfg["pi_e"], cfg["pi_e"] * 0.10))
             C = rng.uniform(0.5, 2.0, n_trials)
-            V = rng.uniform(0.1, 1.0, n_trials)
+            I_t = rng.uniform(0.1, 1.0, n_trials)
             z_e = rng.uniform(0.2, 1.0, n_trials)
             z_i = rng.uniform(0.1, 0.8, n_trials)
+            M_hat = rng.uniform(0.0, 0.5, n_trials)
+            theta_t = theta_equilibrium(float(C.mean()), float(I_t.mean()))
+            S_acc = 0.0
             for t in range(n_trials):
-                pi_i_eff = compute_pi_i_eff(pi_i_s, C[t], KAPPA)
-                s = compute_S_t(pi_e_s, z_e[t], pi_i_eff, z_i[t])
-                theta = compute_theta_t(C[t], V[t], ALPHA, BETA)
+                pi_i_eff = compute_pi_i_eff(
+                    pi_i_s, beta_sm=BETA_SM_DEFAULT, M_hat=float(M_hat[t])
+                )
+                s_inp = compute_S_t(pi_e_s, float(z_e[t]), pi_i_eff, float(z_i[t]))
+                S_acc = accumulate_S_t(S_acc, s_inp, tau_S=TAU_S_DEFAULT)
+                ign = ignition_criterion(S_acc, theta_t, GAMMA_SIG_DEFAULT)
+                theta_t = step_theta(theta_t, float(C[t]), float(I_t[t]))
                 groups.append(group)
                 codes.append(cfg["code"])
                 subj_ids.append(sid)
-                S_t_all.append(s)
-                ign_all.append(s >= theta)
+                S_t_all.append(S_acc)
+                ign_all.append(ign)
             sid += 1
 
     return {

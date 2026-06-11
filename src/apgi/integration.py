@@ -8,11 +8,20 @@ import numpy as np
 from numpy.typing import NDArray
 
 from apgi.core import (
+    BETA_SM_DEFAULT,
+    DELTA_INFO_DEFAULT,
+    ETA_NE_DEFAULT,
+    GAMMA_SIG_DEFAULT,
+    KAPPA_META_DEFAULT,
+    LAMBDA_THETA_DEFAULT,
+    TAU_S_DEFAULT,
+    THETA_0_DEFAULT,
+    accumulate_S_t,
     compute_pi_i_eff,
     compute_S_t,
-    compute_theta_t,
     ignition_criterion,
-    update_theta,
+    step_theta,
+    theta_equilibrium,
 )
 
 
@@ -25,45 +34,63 @@ class TrialRecord:
     S_t: float
     theta_t: float
     ignition: bool
-    C_metabolic: float
-    V_information: float
+    C_t: float
+    I_t: float
 
 
 class APGICoreIntegration:
     """Stateful integrator that runs APGI trials and tracks session history.
 
-    Maintains a rolling estimate of θₜ across trials using exponential
-    smoothing, accumulates trial records, and exposes aggregate summaries
-    (ignition rate, mean Sₜ, etc.) without requiring the caller to manage
-    state manually.
+    Implements the full §4.1 equations across a trial sequence, maintaining
+    a running S_t leaky accumulator and evolving θₜ via the ODE stepper.
 
     Parameters
     ----------
-    alpha : float
-        Metabolic weighting coefficient α.
-    beta : float
-        Information weighting coefficient β.
-    kappa : float
-        Energy-information coupling constant κ.
-    gamma : float
-        Smoothing factor for the θₜ update rule.
+    beta_sm : float
+        Somatic-marker gain β_SM (§4.2).
+    M_hat : float
+        Fixed somatic marker estimate for the session (use 0 for neutral).
+    theta_0 : float
+        Homeostatic threshold baseline θ₀.
+    lambda_theta : float
+        Mean-reversion rate λθ.
+    kappa_meta : float
+        Metabolic cost coefficient κ_meta.
+    delta_info : float
+        Information value coefficient Δ_info.
+    eta_NE : float
+        Noradrenaline modulation coefficient η_NE.
+    gamma_sig : float
+        Sigmoid steepness γ_sig.
+    tau_S : float
+        Surprise accumulation timescale τ_S (trial steps).
     theta_init : float or None
-        Initial threshold.  If None, the threshold for the first trial is
-        computed directly from α, β, C, V without smoothing.
+        Initial threshold.  If None, initialised at equilibrium.
     """
 
     def __init__(
         self,
-        alpha: float = 0.3,
-        beta: float = 0.7,
-        kappa: float = 100.0,
-        gamma: float = 0.9,
+        beta_sm: float = BETA_SM_DEFAULT,
+        M_hat: float = 0.0,
+        theta_0: float = THETA_0_DEFAULT,
+        lambda_theta: float = LAMBDA_THETA_DEFAULT,
+        kappa_meta: float = KAPPA_META_DEFAULT,
+        delta_info: float = DELTA_INFO_DEFAULT,
+        eta_NE: float = ETA_NE_DEFAULT,
+        gamma_sig: float = GAMMA_SIG_DEFAULT,
+        tau_S: float = TAU_S_DEFAULT,
         theta_init: float | None = None,
     ) -> None:
-        self.alpha = alpha
-        self.beta = beta
-        self.kappa = kappa
-        self.gamma = gamma
+        self.beta_sm = beta_sm
+        self.M_hat = M_hat
+        self.theta_0 = theta_0
+        self.lambda_theta = lambda_theta
+        self.kappa_meta = kappa_meta
+        self.delta_info = delta_info
+        self.eta_NE = eta_NE
+        self.gamma_sig = gamma_sig
+        self.tau_S = tau_S
+        self._S_acc: float = 0.0
         self._theta: float | None = theta_init
         self._records: list[TrialRecord] = []
 
@@ -75,46 +102,68 @@ class APGICoreIntegration:
         self,
         pi_e: float,
         z_e: float,
-        pi_i: float,
+        pi_i_baseline: float,
         z_i: float,
-        C_metabolic: float,
-        V_information: float,
+        C_t: float,
+        I_t: float,
+        M_hat: float | None = None,
+        NE_t: float = 0.0,
+        rng: np.random.Generator | None = None,
     ) -> TrialRecord:
         """Integrate one trial and update internal state.
 
         Args:
-            pi_e: Excitatory precision Πᵉ.
-            z_e: Excitatory state variable.
-            pi_i: Raw inhibitory precision Πⁱ.
-            z_i: Inhibitory state variable.
-            C_metabolic: Metabolic cost at this trial.
-            V_information: Information value at this trial.
+            pi_e: Exteroceptive precision Πᵉ.
+            z_e: Exteroceptive prediction error.
+            pi_i_baseline: Baseline interoceptive precision Πⁱ_baseline.
+            z_i: Interoceptive prediction error.
+            C_t: Metabolic cost at this trial.
+            I_t: Information value at this trial.
+            M_hat: Per-trial somatic marker (overrides session default if given).
+            NE_t: Noradrenaline drive.
+            rng: RNG for stochastic ignition; None → deterministic (P≥0.5).
 
         Returns:
             TrialRecord for this trial.
         """
-        pi_i_eff = compute_pi_i_eff(pi_i, C_metabolic, self.kappa)
-        S_t = compute_S_t(pi_e, z_e, pi_i_eff, z_i)
+        m = M_hat if M_hat is not None else self.M_hat
+        pi_i_eff = compute_pi_i_eff(pi_i_baseline, self.beta_sm, m)
+        S_input = compute_S_t(pi_e, z_e, pi_i_eff, z_i)
+        self._S_acc = accumulate_S_t(self._S_acc, S_input, tau_S=self.tau_S)
 
         if self._theta is None:
-            theta_t = compute_theta_t(C_metabolic, V_information, self.alpha, self.beta)
-        else:
-            theta_t = self._theta
+            self._theta = theta_equilibrium(
+                C_t,
+                I_t,
+                theta_0=self.theta_0,
+                lambda_theta=self.lambda_theta,
+                kappa_meta=self.kappa_meta,
+                delta_info=self.delta_info,
+            )
 
-        fired = ignition_criterion(S_t, theta_t)
+        theta_t = self._theta
+        fired = ignition_criterion(self._S_acc, theta_t, self.gamma_sig, rng=rng)
         t = len(self._records)
         record = TrialRecord(
             t=t,
             pi_i_eff=pi_i_eff,
-            S_t=S_t,
+            S_t=self._S_acc,
             theta_t=theta_t,
             ignition=fired,
-            C_metabolic=C_metabolic,
-            V_information=V_information,
+            C_t=C_t,
+            I_t=I_t,
         )
         self._records.append(record)
-        self._theta = update_theta(
-            theta_t, C_metabolic, V_information, self.alpha, self.beta, self.gamma
+        self._theta = step_theta(
+            theta_t,
+            C_t,
+            I_t,
+            NE_t=NE_t,
+            theta_0=self.theta_0,
+            lambda_theta=self.lambda_theta,
+            kappa_meta=self.kappa_meta,
+            delta_info=self.delta_info,
+            eta_NE=self.eta_NE,
         )
         return record
 
@@ -124,14 +173,16 @@ class APGICoreIntegration:
         z_e: NDArray,
         pi_i: NDArray,
         z_i: NDArray,
-        C_metabolic: NDArray,
-        V_information: NDArray,
+        C_t: NDArray,
+        I_t: NDArray,
+        M_hat: NDArray | None = None,
+        rng: np.random.Generator | None = None,
     ) -> list[TrialRecord]:
         """Run a sequence of trials from equal-length arrays.
 
         Returns the list of TrialRecord objects appended in this call.
         """
-        arrays = [pi_e, z_e, pi_i, z_i, C_metabolic, V_information]
+        arrays = [pi_e, z_e, pi_i, z_i, C_t, I_t]
         length = len(arrays[0])
         if any(len(a) != length for a in arrays):
             raise ValueError("All input arrays must have the same length")
@@ -142,8 +193,10 @@ class APGICoreIntegration:
                 float(z_e[i]),
                 float(pi_i[i]),
                 float(z_i[i]),
-                float(C_metabolic[i]),
-                float(V_information[i]),
+                float(C_t[i]),
+                float(I_t[i]),
+                M_hat=float(M_hat[i]) if M_hat is not None else None,
+                rng=rng,
             )
             for i in range(length)
         ]

@@ -16,12 +16,14 @@ from apgi.clinical import (
     EnhancedClinicalInterpreter,
 )
 from apgi.core import (
+    accumulate_S_t,
     compute_pi_i_eff,
     compute_S_t,
-    compute_theta_t,
     ignition_criterion,
+    ignition_probability,
     run_trial,
-    update_theta,
+    step_theta,
+    theta_equilibrium,
 )
 from apgi.integration import APGICoreIntegration, TrialRecord
 from apgi.normalizer import APGINormalizer
@@ -31,13 +33,15 @@ from apgi.normalizer import APGINormalizer
 #      from apgi.extensions.hierarchical import APGIHierarchy
 
 __all__ = [
-    # core equations
+    # core equations (paper §4.1, App. A.1)
+    "accumulate_S_t",
     "compute_pi_i_eff",
     "compute_S_t",
-    "compute_theta_t",
     "ignition_criterion",
+    "ignition_probability",
     "run_trial",
-    "update_theta",
+    "step_theta",
+    "theta_equilibrium",
     # session integration
     "APGICoreIntegration",
     "TrialRecord",
