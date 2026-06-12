@@ -38,8 +38,10 @@ class TestValidateProtocols:
         protocol_path = tmp_path / "protocol.json"
         protocol_path.write_text(json.dumps(protocol))
 
-        # Should not raise
-        jsonschema.validate(protocol, schema)
+        exit_code = validate_protocols.validate_protocols(
+            schema_path=schema_path, protocols_glob=[protocol_path]
+        )
+        assert exit_code == 0
 
     def test_invalid_protocol_fails_validation(self, tmp_path):
         """Test that an invalid protocol fails validation."""
@@ -56,8 +58,10 @@ class TestValidateProtocols:
         protocol_path = tmp_path / "protocol.json"
         protocol_path.write_text(json.dumps(protocol))
 
-        with pytest.raises(jsonschema.ValidationError):
-            jsonschema.validate(protocol, schema)
+        exit_code = validate_protocols.validate_protocols(
+            schema_path=schema_path, protocols_glob=[protocol_path]
+        )
+        assert exit_code == 1
 
     def test_protocol_glob_finds_json_files(self, tmp_path):
         """Test that the glob pattern finds JSON files."""
@@ -84,3 +88,8 @@ class TestValidateProtocols:
         except jsonschema.ValidationError as e:
             assert e.message is not None
             assert len(e.message) > 0
+
+    def test_main_exits_cleanly(self):
+        with pytest.raises(SystemExit) as excinfo:
+            validate_protocols.main()
+        assert excinfo.value.code == 0
