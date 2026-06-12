@@ -7,7 +7,6 @@ import pytest
 
 from apgi.core import (
     DELTA_INFO_DEFAULT,
-    GAMMA_SIG_DEFAULT,
     KAPPA_META_DEFAULT,
     LAMBDA_THETA_DEFAULT,
     TAU_S_DEFAULT,

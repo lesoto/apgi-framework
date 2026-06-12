@@ -515,12 +515,14 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
                 "theta_t_mean": float(theta_t_all[i].mean()),
                 "ignition_rate": float(hier_ignition[i].mean()),
                 **{
-                    f"level_{l}_S_t_mean": float(all_level_S_t[i, :, l].mean())
-                    for l in range(5)
+                    f"level_{lvl}_S_t_mean": float(all_level_S_t[i, :, lvl].mean())
+                    for lvl in range(5)
                 },
                 **{
-                    f"level_{l}_pe_norm_mean": float(all_level_pe_norm[i, :, l].mean())
-                    for l in range(5)
+                    f"level_{lvl}_pe_norm_mean": float(
+                        all_level_pe_norm[i, :, lvl].mean()
+                    )
+                    for lvl in range(5)
                 },
             }
             for i in range(N_SEEDS)

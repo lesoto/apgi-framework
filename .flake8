@@ -1,0 +1,26 @@
+[flake8]
+max-line-length = 120
+max-complexity = 30
+exclude =
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .hypothesis,
+    .mypy_cache,
+    build,
+    dist,
+    *.egg-info,
+    .venv,
+    venv
+ignore =
+    E203,
+    E501,
+    W503,
+    C901
+per-file-ignores =
+    __init__.py:F401
+    examples/04_thermodynamics.py:E402
+    examples/05_bold_thermodynamics.py:E402
+    examples/11_maturity_assessment.py:E402
+    examples/12_maturity_demo.py:E402
+    examples/14_bold_calibration.py:E402

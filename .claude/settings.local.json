@@ -117,7 +117,16 @@
       "Bash(python3 -m pytest tests/ -x -q --no-cov)",
       "Bash(python3 figures/generate_figure2.py --no-show --n-sim 10)",
       "Bash(python3 figures/generate_figure8.py --no-show)",
-      "Bash(python3 -m pytest tests/ -q --no-cov)"
+      "Bash(python3 -m pytest tests/ -q --no-cov)",
+      "Bash(python -m pytest tests/ -q)",
+      "Bash(python -m pytest tests/test_figures_utils.py -q)",
+      "Bash(python -m pytest tests/ -q --tb=no)",
+      "Bash(sed -n '1,12p' tests/test_validate_protocols.py)",
+      "Bash(sed -n '1,22p' tests/test_figures_utils.py)",
+      "Bash(sed -n '1,12p' tests/test_core_equations.py)",
+      "Bash(sed -n '50,65p' figures/generate_figure8.py)",
+      "Bash(sed -n '130,145p' figures/generate_figure4.py)",
+      "Bash(ruff check *)"
     ]
   }
 }

@@ -162,7 +162,6 @@ class TestVlinesIgnition:
         ax = self._make_ax_with_data()
         t = np.arange(5, dtype=float)
         ignition = np.zeros(5, dtype=bool)
-        n_before = len(ax.collections)
         fig_utils.vlines_ignition(ax, t, ignition)
         # vlines called with empty array — may add an empty collection
         # just assert it doesn't raise

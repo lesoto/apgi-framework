@@ -64,8 +64,8 @@ try:
 except ImportError:  # pragma: no cover
     HAS_MATPLOTLIB = False  # pragma: no cover
 
-import os
-import sys
+import os  # noqa: E402
+import sys  # noqa: E402
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

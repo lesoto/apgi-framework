@@ -153,7 +153,6 @@ DEFAULT_EXTRA_DIR_NAMES = {
     "screenshots",
     "temp",
     "tmp",
-    "figures",
     "plots",
     "debug_output",
 }
