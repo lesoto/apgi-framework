@@ -69,7 +69,8 @@ STAGES = [
 
 def draw_pipeline(ax: plt.Axes) -> None:
     n = len(STAGES)
-    box_w, box_h = 0.13, 0.30
+    # Wider boxes / tighter gaps so labels stay legible at true print width.
+    box_w, box_h = 0.155, 0.30
     gap = (1.0 - n * box_w) / (n + 1)
 
     for i, stage in enumerate(STAGES):
@@ -96,33 +97,37 @@ def draw_pipeline(ax: plt.Axes) -> None:
             stage["label"],
             ha="center",
             va="center",
-            fontsize=7.5,
+            fontsize=6.5,
             fontweight="bold",
             transform=ax.transAxes,
             zorder=4,
         )
 
-        # Variable annotation below
+        # Variable annotation below — staggered to two heights (the Stage 3
+        # label is long) to avoid horizontal collision at print width.
+        variable_y = y - (0.16 if i % 2 else 0.07)
         ax.text(
             x + box_w / 2,
-            y - 0.07,
+            variable_y,
             stage["variable"],
             ha="center",
             va="top",
-            fontsize=8,
+            fontsize=7,
             color=color,
             transform=ax.transAxes,
             zorder=4,
         )
 
-        # Neural substrate above
+        # Neural substrate above — staggered to two heights so adjacent
+        # (long) substrate labels don't collide at print width.
+        substrate_y = y + box_h + (0.16 if i % 2 else 0.04)
         ax.text(
             x + box_w / 2,
-            y + box_h + 0.04,
+            substrate_y,
             stage["substrate"],
             ha="center",
             va="bottom",
-            fontsize=6.5,
+            fontsize=6,
             color="#555555",
             transform=ax.transAxes,
             zorder=4,
@@ -170,7 +175,7 @@ def draw_pipeline(ax: plt.Axes) -> None:
                     r"$\sigma(S_t, \theta_t)$",
                     ha="center",
                     va="bottom",
-                    fontsize=8,
+                    fontsize=7,
                     color=dst_color,
                     fontweight="bold",
                     transform=ax.transAxes,
@@ -182,7 +187,7 @@ def draw_pipeline(ax: plt.Axes) -> None:
                     "see inset →",
                     ha="center",
                     va="top",
-                    fontsize=6.5,
+                    fontsize=5.5,
                     color="#777777",
                     style="italic",
                     transform=ax.transAxes,
@@ -196,7 +201,7 @@ def draw_pipeline(ax: plt.Axes) -> None:
         "(a) Neural substrate  |  (b) APGI variable  |  (c) Sigmoid inset → right panel",
         ha="center",
         va="bottom",
-        fontsize=7,
+        fontsize=6,
         color="#777777",
         transform=ax.transAxes,
     )
@@ -218,9 +223,9 @@ def draw_sigmoid_inset(ax: plt.Axes) -> None:
         fontsize=9,
         arrowprops=dict(arrowstyle="->", lw=0.8),
     )
-    ax.set_xlabel(r"$S_t$", fontsize=10)
-    ax.set_ylabel(r"$P(\mathrm{ignition}\,|\,S_t, \theta_t)$", fontsize=9)
-    ax.set_title("Ignition sigmoid", fontsize=9, style="italic")
+    ax.set_xlabel(r"$S_t$", fontsize=8)
+    ax.set_ylabel(r"$P(\mathrm{ignition}\,|\,S_t, \theta_t)$", fontsize=7)
+    ax.set_title("Ignition sigmoid", fontsize=7.5, style="italic")
     ax.set_ylim(-0.05, 1.05)
     ax.set_xlim(-0.5, 2.8)
     ax.spines["top"].set_visible(False)
@@ -228,9 +233,10 @@ def draw_sigmoid_inset(ax: plt.Axes) -> None:
 
 
 def plot(show: bool = True) -> None:
-    # Full page width so the pipeline stays legible at Neuron two-column
-    # format; the sigmoid is a genuine right-margin inset at <20% of width.
-    fig = plt.figure(figsize=(14, 5))
+    # Authored at true Neuron full-page (double-column) width, 180 mm ≈ 7.1 in,
+    # so embedded text renders at its real point size when placed (no downscale
+    # shrinking labels below ~6 pt). The sigmoid is a right-margin inset <20%.
+    fig = plt.figure(figsize=(7.1, 3.7))
     gs = fig.add_gridspec(1, 5, width_ratios=[4.0, 0.05, 0.05, 0.05, 1.0])
     ax_main = fig.add_subplot(gs[0])
     ax_sig = fig.add_subplot(gs[4])
@@ -247,18 +253,20 @@ def plot(show: bool = True) -> None:
             [], [], color=color, lw=3, label=f"Tier {tier} — {TIER_CURRENCY[tier]}"
         )
     ax_main.legend(
-        loc="lower right",
-        fontsize=7.5,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.02),
+        ncol=3,
+        fontsize=6,
         title="Epistemic Tier (currency)",
-        title_fontsize=8,
+        title_fontsize=6.5,
         framealpha=0.8,
     )
 
     ax_main.set_title(
         "Figure 1 — APGI Architecture: Five-Stage Processing Pipeline",
-        fontsize=11,
+        fontsize=9,
         fontweight="bold",
-        pad=12,
+        pad=8,
     )
 
     draw_sigmoid_inset(ax_sig)

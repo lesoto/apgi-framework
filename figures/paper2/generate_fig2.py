@@ -185,7 +185,12 @@ def draw_pathway_panel(ax):
         arrowprops=dict(arrowstyle="->", color=_DIS, lw=2.0),
     )
 
-    pi_eq = r"$\Pi^i_{\mathrm{eff}} = \Pi^i_{\mathrm{base}} \cdot \exp(\beta_{\mathrm{SM}} \cdot M(c,a))$"
+    # Canonical somatic-marker precision modulation (src/apgi/core.py §4.2):
+    # Πⁱ_eff = Πⁱ_baseline · exp(β_SM · M̂(c,a))  — note the marker *estimate* hat.
+    pi_eq = (
+        r"$\Pi^i_{\mathrm{eff}} = \Pi^i_{\mathrm{baseline}} \cdot "
+        r"\exp(\beta_{\mathrm{SM}} \cdot \hat{M}(c,a))$"
+    )
     ax.text(0.50, 0.08, pi_eq, ha="center", fontsize=7.5, color="#333333")
 
 
