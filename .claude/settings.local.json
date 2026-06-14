@@ -126,7 +126,15 @@
       "Bash(sed -n '1,12p' tests/test_core_equations.py)",
       "Bash(sed -n '50,65p' figures/generate_figure8.py)",
       "Bash(sed -n '130,145p' figures/generate_figure4.py)",
-      "Bash(ruff check *)"
+      "Bash(ruff check *)",
+      "Bash(python3 -c \"import scipy; print\\('scipy ok'\\)\")",
+      "Bash(python3 figures/paper1/generate_fig1.py --no-show)",
+      "Bash(python3 figures/paper1/generate_fig2.py --no-show)",
+      "Bash(python3 figures/paper1/generate_fig3.py --no-show)",
+      "Bash(python3 figures/paper1/generate_figS1.py --no-show)",
+      "Bash(python3 figures/paper1/generate_figS2.py --no-show)",
+      "Bash(python3 figures/paper1/generate_figS3.py --no-show)",
+      "Bash(python3 figures/paper1/generate_figS4.py --no-show)"
     ]
   }
 }
