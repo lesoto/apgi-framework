@@ -75,6 +75,18 @@ PREDICTIONS = [
         "Now",
         "Pending",
     ),
+    # P11 is a computational model property (Monte Carlo–confirmed bistability),
+    # so it is classified Tier 3 (computational/algorithmic) and grouped here.
+    (
+        "P11",
+        "T3",
+        "Bistability preserved\nacross 94% of parameter space",
+        "Monte Carlo",
+        "94.2%",
+        "<80% bistability",
+        "Now",
+        "Confirmed",
+    ),
     # P5–P8 Tier 2
     (
         "P5",
@@ -138,16 +150,6 @@ PREDICTIONS = [
         "Speculative",
     ),
     (
-        "P11",
-        "T1",
-        "Bistability preserved\nacross 94% of parameter space",
-        "Monte Carlo",
-        "94.2%",
-        "<80% bistability",
-        "Now",
-        "Confirmed",
-    ),
-    (
         "P12",
         "T1",
         "Post-block θ elevation\nin DoC patients",
@@ -199,7 +201,8 @@ def plot(show: bool = True) -> None:
         )
 
     # ── Tier group labels ─────────────────────────────────────────────────
-    tier_row_ranges = {"T3": (0, 3), "T2": (4, 7), "T1": (8, 11)}
+    # T3 gains P11 (5 rows: P1–P4, P11); T1 drops to 3 rows (P9, P10, P12).
+    tier_row_ranges = {"T3": (0, 4), "T2": (5, 8), "T1": (9, 11)}
     tier_labels = {
         "T3": "Tier 3\nComputational",
         "T2": "Tier 2\nInfo-Theoretic",

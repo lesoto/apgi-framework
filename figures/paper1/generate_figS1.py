@@ -74,6 +74,8 @@ def plot(show: bool = True) -> None:
         ax.set_title(param["name"], fontsize=11, fontweight="bold")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
+        if i == 0:  # name the identity line once
+            ax.legend(loc="lower right", fontsize=8, framealpha=0.85)
 
     # Sixth panel: collinearity reduction
     ax6 = axes_flat[5]

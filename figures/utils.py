@@ -64,7 +64,12 @@ def annotate_pearson_r(
 
 
 def add_identity_line(ax: Axes, lo: float, hi: float) -> None:
-    ax.plot([lo, hi], [lo, hi], "--", color=PALETTE["identity"], lw=0.8, alpha=0.5)
+    # Prominent y = x reference so systematic recovery bias is visually
+    # assessable against the scatter (drawn on top of the points).
+    ax.plot(
+        [lo, hi], [lo, hi],
+        "--", color="black", lw=1.2, alpha=0.9, zorder=6, label="y = x (identity)",
+    )
 
 
 def vlines_ignition(ax: Axes, t: np.ndarray, ignition: np.ndarray) -> None:
