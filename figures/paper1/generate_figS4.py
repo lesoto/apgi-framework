@@ -15,6 +15,7 @@ import argparse
 import pathlib
 import sys
 
+import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,11 +44,27 @@ def plot(show: bool = True) -> None:
             "label": r"Anticipatory window ($\Pi^i_{\mathrm{eff}}$ via vmPFC–insula)",
             "color": "#2166ac",
             "phases": [
-                {"t": 0.0, "dur": 2.0, "label": "Foreperiod\n(0 ms jitter)", "color": "#cce5ff"},
+                {
+                    "t": 0.0,
+                    "dur": 2.0,
+                    "label": "Foreperiod\n(0 ms jitter)",
+                    "color": "#cce5ff",
+                },
                 {"t": 2.0, "dur": 1.0, "label": "Decision", "color": "#6baed6"},
-                {"t": 3.0, "dur": 2.0, "label": "Foreperiod\n(2–4 s jitter)", "color": "#deebf7"},
+                {
+                    "t": 3.0,
+                    "dur": 2.0,
+                    "label": "Foreperiod\n(2–4 s jitter)",
+                    "color": "#deebf7",
+                },
                 {"t": 5.0, "dur": 1.0, "label": "Decision", "color": "#6baed6"},
-                {"t": 6.0, "dur": 1.0, "label": "Outcome", "color": "#08519c", "fc": "white"},
+                {
+                    "t": 6.0,
+                    "dur": 1.0,
+                    "label": "Outcome",
+                    "color": "#08519c",
+                    "fc": "white",
+                },
                 {"t": 7.0, "dur": 1.2, "label": "ITI", "color": "#f0f0f0"},
             ],
         },
@@ -56,13 +73,35 @@ def plot(show: bool = True) -> None:
             "label": r"Outcome window ($\varepsilon^i$ encoding)",
             "color": "#d6604d",
             "phases": [
-                {"t": 0.0, "dur": 3.0, "label": "Foreperiod + Decision", "color": "#fde0d9"},
-                {"t": 3.0, "dur": 3.0, "label": "Foreperiod + Decision", "color": "#fde0d9"},
-                {"t": 6.0, "dur": 1.0, "label": "Outcome\n(εⁱ encoded)", "color": "#d6604d"},
+                {
+                    "t": 0.0,
+                    "dur": 3.0,
+                    "label": "Foreperiod + Decision",
+                    "color": "#fde0d9",
+                },
+                {
+                    "t": 3.0,
+                    "dur": 3.0,
+                    "label": "Foreperiod + Decision",
+                    "color": "#fde0d9",
+                },
+                {
+                    "t": 6.0,
+                    "dur": 1.0,
+                    "label": "Outcome\n(εⁱ encoded)",
+                    "color": "#d6604d",
+                },
                 {"t": 7.0, "dur": 1.2, "label": "ITI", "color": "#f0f0f0"},
             ],
         },
     ]
+
+    def _text_color(fill: str) -> str:
+        """Black text on light fills, white on dark — keeps every label
+        (notably the light-grey ITI segment) legible at print resolution."""
+        r, g, b = mcolors.to_rgb(fill)
+        luminance = 0.299 * r + 0.587 * g + 0.114 * b
+        return "black" if luminance > 0.6 else "white"
 
     BAR_H = 0.55
     for track in TRACKS:
@@ -70,26 +109,49 @@ def plot(show: bool = True) -> None:
         for ph in track["phases"]:
             fc = ph.get("fc", ph["color"])
             rect = mpatches.FancyBboxPatch(
-                (ph["t"], y), ph["dur"], BAR_H,
+                (ph["t"], y),
+                ph["dur"],
+                BAR_H,
                 boxstyle="round,pad=0.03",
-                linewidth=1.2, edgecolor=track["color"],
-                facecolor=fc, alpha=0.85, zorder=3,
+                linewidth=1.2,
+                edgecolor=track["color"],
+                facecolor=fc,
+                alpha=0.85,
+                zorder=3,
             )
             ax.add_patch(rect)
             ax.text(
-                ph["t"] + ph["dur"] / 2, y + BAR_H / 2,
-                ph["label"], ha="center", va="center",
-                fontsize=7, color="black" if fc != ph["color"] else "white",
-                zorder=4, multialignment="center",
+                ph["t"] + ph["dur"] / 2,
+                y + BAR_H / 2,
+                ph["label"],
+                ha="center",
+                va="center",
+                fontsize=7,
+                color=_text_color(fc),
+                zorder=4,
+                multialignment="center",
             )
 
-        ax.text(-0.08, y + BAR_H / 2, track["label"], ha="right", va="center",
-                fontsize=7.5, color=track["color"], fontweight="bold",
-                transform=ax.transData, wrap=True)
+        ax.text(
+            -0.08,
+            y + BAR_H / 2,
+            track["label"],
+            ha="right",
+            va="center",
+            fontsize=7.5,
+            color=track["color"],
+            fontweight="bold",
+            transform=ax.transData,
+            wrap=True,
+        )
 
     # x-axis
-    ax.annotate("", xy=(8.4, -0.1), xytext=(-0.05, -0.1),
-                arrowprops=dict(arrowstyle="->", lw=1.5, color="#333"))
+    ax.annotate(
+        "",
+        xy=(8.4, -0.1),
+        xytext=(-0.05, -0.1),
+        arrowprops=dict(arrowstyle="->", lw=1.5, color="#333"),
+    )
     for t, lbl in {0: "0 s", 2: "2", 3: "3", 5: "5", 6: "6", 7: "7", 8: "8 s"}.items():
         ax.text(t, -0.18, lbl, ha="center", fontsize=7.5)
         ax.plot([t, t], [-0.10, -0.07], lw=1, color="#333")
@@ -97,7 +159,8 @@ def plot(show: bool = True) -> None:
 
     ax.set_title(
         "Figure S4 — Protocol 3 fMRI Trial-Structure Schematic (Appendix D.3)",
-        fontsize=11, fontweight="bold",
+        fontsize=11,
+        fontweight="bold",
     )
 
     # ── Bottom: SCR trace ─────────────────────────────────────────────────
@@ -110,8 +173,7 @@ def plot(show: bool = True) -> None:
         resp = np.where(t_rel > 0, amp * t_rel * np.exp(-t_rel / 1.5), 0)
         return resp
 
-    scr = (scr_kernel(2.0, amp=0.6) + scr_kernel(5.0, amp=0.6) +
-           scr_kernel(6.0, amp=1.0))
+    scr = scr_kernel(2.0, amp=0.6) + scr_kernel(5.0, amp=0.6) + scr_kernel(6.0, amp=1.0)
     scr = scr / scr.max()
     ax_scr.plot(t_scr, scr, lw=1.8, color="#7b3294")
     ax_scr.fill_between(t_scr, scr, alpha=0.15, color="#7b3294")

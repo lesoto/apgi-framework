@@ -16,20 +16,16 @@ import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from apgi.core import compute_pi_i_eff  # noqa: E402
 from apgi.core import (
     BETA_SM_DEFAULT,
-    compute_pi_i_eff,  # noqa: E402
     compute_S_t,
     ignition_criterion,
     step_theta,
     theta_equilibrium,
 )
-from figures.utils import (
-    PALETTE,
-    make_figure,
-    save_figure,  # noqa: E402
-    vlines_ignition,
-)
+from figures.utils import save_figure  # noqa: E402
+from figures.utils import PALETTE, make_figure, vlines_ignition
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 

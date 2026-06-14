@@ -186,13 +186,41 @@ def plot(show: bool = True) -> None:
 
     # ── Layer labels ───────────────────────────────────────────────────────
     ax.text(
-        -15, BAR_Y + BAR_H + 0.70, "APGI\nvariable", ha="right", fontsize=7, va="center", color="#666666"
+        -15,
+        BAR_Y + BAR_H + 0.70,
+        "APGI\nvariable",
+        ha="right",
+        fontsize=7,
+        va="center",
+        color="#666666",
     )
     ax.text(
-        -15, BAR_Y + BAR_H + 0.15, "Neural\nsubstrate", ha="right", fontsize=7, va="center", color="#666666"
+        -15,
+        BAR_Y + BAR_H + 0.15,
+        "Neural\nsubstrate",
+        ha="right",
+        fontsize=7,
+        va="center",
+        color="#666666",
     )
-    ax.text(-15, BAR_Y - 0.50, "EEG/MEG\nmarker", ha="right", fontsize=7, va="center", color="#666666")
-    ax.text(-15, BAR_Y - 1.0, "Pharm.\nprobe", ha="right", fontsize=7, va="center", color="#7b3294")
+    ax.text(
+        -15,
+        BAR_Y - 0.50,
+        "EEG/MEG\nmarker",
+        ha="right",
+        fontsize=7,
+        va="center",
+        color="#666666",
+    )
+    ax.text(
+        -15,
+        BAR_Y - 1.0,
+        "Pharm.\nprobe",
+        ha="right",
+        fontsize=7,
+        va="center",
+        color="#7b3294",
+    )
 
     ax.set_title(
         "Figure 2 — Onset Ignition Timeline: Causal Cascade 0–500 ms\n"

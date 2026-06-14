@@ -102,27 +102,53 @@ def plot(show: bool = True) -> None:
     BOX_H = 0.20
     for tier in TIERS:
         rect = mpatches.FancyBboxPatch(
-            (0.05, tier["y"]), 0.90, BOX_H,
+            (0.05, tier["y"]),
+            0.90,
+            BOX_H,
             boxstyle="round,pad=0.01",
             facecolor=tier["color"] + "22",
             edgecolor=tier["color"],
-            lw=2.5, zorder=3,
+            lw=2.5,
+            zorder=3,
         )
         ax_tiers.add_patch(rect)
-        ax_tiers.text(0.50, tier["y"] + BOX_H / 2 + 0.02,
-                      tier["name"], ha="center", va="center",
-                      fontsize=9, fontweight="bold", color=tier["color"], zorder=4)
-        ax_tiers.text(0.50, tier["y"] + 0.04,
-                      f"Currency: {tier['currency']}\nEvidence: {tier['evidence']}",
-                      ha="center", va="bottom", fontsize=6.5, color="#444444", zorder=4,
-                      multialignment="center")
+        ax_tiers.text(
+            0.50,
+            tier["y"] + BOX_H / 2 + 0.02,
+            tier["name"],
+            ha="center",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+            color=tier["color"],
+            zorder=4,
+        )
+        ax_tiers.text(
+            0.50,
+            tier["y"] + 0.04,
+            f"Currency: {tier['currency']}\nEvidence: {tier['evidence']}",
+            ha="center",
+            va="bottom",
+            fontsize=6.5,
+            color="#444444",
+            zorder=4,
+            multialignment="center",
+        )
 
     # L4 exclusion note
-    ax_tiers.text(0.50, 0.03,
-                  "L4 (phenomenal) deliberately excluded from this architecture (§8.4)",
-                  ha="center", fontsize=7, color="#888888", style="italic")
+    ax_tiers.text(
+        0.50,
+        0.03,
+        "L4 (phenomenal) deliberately excluded from this architecture (§8.4)",
+        ha="center",
+        fontsize=7,
+        color="#888888",
+        style="italic",
+    )
 
-    ax_tiers.set_title("Three-Tier Epistemic Architecture", fontsize=9, fontweight="bold")
+    ax_tiers.set_title(
+        "Three-Tier Epistemic Architecture", fontsize=9, fontweight="bold"
+    )
 
     # ── Valid bridges ─────────────────────────────────────────────────────
     for br in BRIDGES:
@@ -141,9 +167,16 @@ def plot(show: bool = True) -> None:
             zorder=5,
         )
         mid_y = (br["y_from"] + br["y_to"] + 0.10) / 2
-        ax_bridges.text(x0 + 0.08 + offset, mid_y, br["label"],
-                        ha="left", va="center", fontsize=6.5, color=br["color"],
-                        multialignment="left")
+        ax_bridges.text(
+            x0 + 0.08 + offset,
+            mid_y,
+            br["label"],
+            ha="left",
+            va="center",
+            fontsize=6.5,
+            color=br["color"],
+            multialignment="left",
+        )
 
     # Absent bridges (dashed + X)
     for ab in ABSENT_BRIDGES:
@@ -160,33 +193,82 @@ def plot(show: bool = True) -> None:
             zorder=5,
         )
         mid_y = (ab["y_from"] + ab["y_to"] + 0.10) / 2
-        ax_bridges.text(0.20, mid_y, "✗", ha="center", fontsize=14, color="#cc0000", zorder=6)
-        ax_bridges.text(0.08, mid_y, ab["label"], ha="center", fontsize=6.5, color="#cc0000",
-                        multialignment="center", style="italic")
+        ax_bridges.text(
+            0.20, mid_y, "✗", ha="center", fontsize=14, color="#cc0000", zorder=6
+        )
+        ax_bridges.text(
+            0.08,
+            mid_y,
+            ab["label"],
+            ha="center",
+            fontsize=6.5,
+            color="#cc0000",
+            multialignment="center",
+            style="italic",
+        )
 
-    ax_bridges.text(0.50, 0.96, "Valid bridges (solid)\nAbsent bridges (dashed ✗)",
-                    ha="center", va="top", fontsize=8.5, fontweight="bold")
+    ax_bridges.text(
+        0.50,
+        0.96,
+        "Valid bridges (solid)\nAbsent bridges (dashed ✗)",
+        ha="center",
+        va="top",
+        fontsize=8.5,
+        fontweight="bold",
+    )
 
     # ── Four-step double-bridge calculation ───────────────────────────────
-    ax_calc.text(0.50, 0.94, "Double-bridge\ncalculation", ha="center", va="top",
-                 fontsize=9, fontweight="bold", color="#555555")
+    ax_calc.text(
+        0.50,
+        0.94,
+        "Double-bridge\ncalculation",
+        ha="center",
+        va="top",
+        fontsize=9,
+        fontweight="bold",
+        color="#555555",
+    )
     for i, step in enumerate(CALC_STEPS):
         y = 0.80 - i * 0.17
-        circ = mpatches.Circle((0.13, y), 0.05, facecolor="#333333",
-                                edgecolor="white", lw=1.0, zorder=3)
+        circ = mpatches.Circle(
+            (0.13, y), 0.05, facecolor="#333333", edgecolor="white", lw=1.0, zorder=3
+        )
         ax_calc.add_patch(circ)
-        ax_calc.text(0.13, y, str(i + 1), ha="center", va="center",
-                     fontsize=9, color="white", fontweight="bold", zorder=4)
-        ax_calc.text(0.22, y, step, ha="left", va="center",
-                     fontsize=7.5, color="#333333", multialignment="left")
+        ax_calc.text(
+            0.13,
+            y,
+            str(i + 1),
+            ha="center",
+            va="center",
+            fontsize=9,
+            color="white",
+            fontweight="bold",
+            zorder=4,
+        )
+        ax_calc.text(
+            0.22,
+            y,
+            step,
+            ha="left",
+            va="center",
+            fontsize=7.5,
+            color="#333333",
+            multialignment="left",
+        )
         if i < len(CALC_STEPS) - 1:
-            ax_calc.annotate("", xy=(0.13, y - 0.07), xytext=(0.13, y - 0.02),
-                             arrowprops=dict(arrowstyle="->", color="#555555", lw=1.2))
+            ax_calc.annotate(
+                "",
+                xy=(0.13, y - 0.07),
+                xytext=(0.13, y - 0.02),
+                arrowprops=dict(arrowstyle="->", color="#555555", lw=1.2),
+            )
 
     fig.suptitle(
         "Figure 1 — Three-Tier Epistemic Architecture with Canonical Bridge Principles\n"
         "(Paper 4, §3.2)",
-        fontsize=11, fontweight="bold", y=1.01,
+        fontsize=11,
+        fontweight="bold",
+        y=1.01,
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig1_three_tier_epistemic_architecture.pdf")

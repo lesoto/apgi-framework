@@ -27,51 +27,104 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 RNG = np.random.default_rng(99)
 
 GROUPS = [
-    {"name": "VS/UWS",   "N": 30, "pci": 0.15, "hep": 0.20, "color": "#a50f15"},
-    {"name": "MCS",      "N": 30, "pci": 0.40, "hep": 0.45, "color": "#fc8d59"},
-    {"name": "EMCS",     "N": 20, "pci": 0.65, "hep": 0.68, "color": "#2166ac"},
+    {"name": "VS/UWS", "N": 30, "pci": 0.15, "hep": 0.20, "color": "#a50f15"},
+    {"name": "MCS", "N": 30, "pci": 0.40, "hep": 0.45, "color": "#fc8d59"},
+    {"name": "EMCS", "N": 20, "pci": 0.65, "hep": 0.68, "color": "#2166ac"},
     {"name": "Controls", "N": 30, "pci": 0.85, "hep": 0.88, "color": "#4dac26"},
 ]
 
 TIMEPOINTS = [
-    {"label": "Baseline\n(wk 0)",    "x": 0.15},
+    {"label": "Baseline\n(wk 0)", "x": 0.15},
     {"label": "Follow-up 1\n(3 mo)", "x": 0.50},
     {"label": "Follow-up 2\n(6 mo)", "x": 0.85},
 ]
 ASSESSMENTS = ["EEG/HEP", "TMS-EEG/PCI", "CRS-R"]
 
 
+def _cov_ellipse(ax, mean, cov, color, nstd=1.0):
+    """Draw an n-SD prediction ellipse for a Gaussian cluster."""
+    vals, vecs = np.linalg.eigh(cov)
+    order = vals.argsort()[::-1]
+    vals, vecs = vals[order], vecs[:, order]
+    angle = np.degrees(np.arctan2(vecs[1, 0], vecs[0, 0]))
+    width, height = 2 * nstd * np.sqrt(vals)
+    ell = mpatches.Ellipse(
+        mean,
+        width,
+        height,
+        angle=angle,
+        facecolor=color,
+        edgecolor=color,
+        alpha=0.22,
+        lw=1.6,
+        zorder=3,
+    )
+    ax.add_patch(ell)
+
+
 def draw_scatter(ax):
+    # Predicted (not observed) clusters: drawn as mean ± 1 SD ellipses rather
+    # than simulated dots, which would imply empirical variability not yet
+    # collected for this prospective Protocol 6 trial.
+    cov = np.array([[0.015, 0.010], [0.010, 0.015]])
+    legend_handles = []
     for g in GROUPS:
-        pts = RNG.multivariate_normal(
-            [g["pci"], g["hep"]],
-            [[0.015, 0.010], [0.010, 0.015]],
-            size=g["N"],
+        _cov_ellipse(ax, [g["pci"], g["hep"]], cov, g["color"], nstd=1.0)
+        ax.plot(
+            g["pci"],
+            g["hep"],
+            "*",
+            ms=13,
+            color=g["color"],
+            markeredgecolor="white",
+            markeredgewidth=0.8,
+            zorder=5,
         )
-        ax.scatter(pts[:, 0], pts[:, 1], s=22, color=g["color"],
-                   alpha=0.6, label=f"{g['name']} (N={g['N']})", zorder=4)
-        # Group centroid
-        ax.plot(g["pci"], g["hep"], "*", ms=12, color=g["color"],
-                markeredgecolor="white", markeredgewidth=0.8, zorder=5)
+        legend_handles.append(
+            mpatches.Patch(
+                facecolor=g["color"],
+                alpha=0.5,
+                label=f"{g['name']} (N={g['N']}, mean ± 1 SD)",
+            )
+        )
 
     # Decision boundary (linear diagonal)
     x_dec = np.linspace(0, 1, 200)
-    ax.plot(x_dec, x_dec * 0.95 + 0.05, "k--", lw=1.5, alpha=0.6,
-            label="Joint AUC ≥ 0.80 decision boundary")
+    (bound,) = ax.plot(
+        x_dec,
+        x_dec * 0.95 + 0.05,
+        "k--",
+        lw=1.5,
+        alpha=0.6,
+        label="Joint AUC ≥ 0.80 decision boundary",
+    )
+    legend_handles.append(bound)
 
     ax.set_xlabel("PCI (perturbational complexity index)", fontsize=10)
     ax.set_ylabel("HEP amplitude (norm.)", fontsize=10)
     ax.set_xlim(-0.05, 1.05)
     ax.set_ylim(-0.05, 1.15)
-    ax.set_title("A — Predicted group clusters\n(PCI × HEP joint biomarker)", fontsize=9, fontweight="bold")
-    ax.legend(fontsize=8, loc="upper left", framealpha=0.85)
+    ax.set_title(
+        "A — Predicted group clusters\n(PCI × HEP joint biomarker)",
+        fontsize=9,
+        fontweight="bold",
+    )
+    ax.legend(handles=legend_handles, fontsize=7.5, loc="upper left", framealpha=0.85)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
-    ax.text(0.50, -0.04,
-            "Deeper substrates including thalamic and claustral contributions are not directly testable\n"
-            "by transcranial stimulation; EP-2 constrains only the cortically accessible nodes of the gating network. (§5.3)",
-            ha="center", fontsize=5.5, color="#888888", style="italic", transform=ax.transAxes)
+    # Pre-registered quantitative falsification criterion stated on the figure face.
+    ax.text(
+        0.50,
+        -0.02,
+        "Pre-registered target: joint PCI×HEP AUC ≥ 0.80 for 3-month GCS-S prediction;\n"
+        "formal test that HEP and PCI provide statistically independent predictive information.",
+        ha="center",
+        fontsize=6.2,
+        color="#555555",
+        style="italic",
+        transform=ax.transAxes,
+    )
 
 
 def draw_timeline(ax):
@@ -88,30 +141,68 @@ def draw_timeline(ax):
 
     # Header
     for tp in TIMEPOINTS:
-        ax.text(tp["x"], 0.96, tp["label"], ha="center", va="top", fontsize=8,
-                fontweight="bold", color="#333333")
-        ax.axvline(tp["x"], ymin=0.02, ymax=0.94, lw=0.8, color="#dddddd", ls="--", zorder=1)
+        ax.text(
+            tp["x"],
+            0.96,
+            tp["label"],
+            ha="center",
+            va="top",
+            fontsize=8,
+            fontweight="bold",
+            color="#333333",
+        )
+        ax.axvline(
+            tp["x"], ymin=0.02, ymax=0.94, lw=0.8, color="#dddddd", ls="--", zorder=1
+        )
 
     for g in GROUPS:
         y = ROW_Y[g["name"]]
-        ax.text(0.02, y, f"{g['name']}\n(N={g['N']})", ha="left", va="center",
-                fontsize=8, color=g["color"], fontweight="bold")
+        ax.text(
+            0.02,
+            y,
+            f"{g['name']}\n(N={g['N']})",
+            ha="left",
+            va="center",
+            fontsize=8,
+            color=g["color"],
+            fontweight="bold",
+        )
 
         for x in tp_x:
-            circ = mpatches.Circle((x, y), 0.025, facecolor=g["color"],
-                                   edgecolor="white", lw=1.0, alpha=0.85, zorder=3)
+            circ = mpatches.Circle(
+                (x, y),
+                0.025,
+                facecolor=g["color"],
+                edgecolor="white",
+                lw=1.0,
+                alpha=0.85,
+                zorder=3,
+            )
             ax.add_patch(circ)
             # Assessments
             for j, assess in enumerate(ASSESSMENTS):
-                ax.text(x, y - 0.045 - j * 0.028, f"• {assess}",
-                        ha="center", fontsize=5.5, color="#555555")
+                ax.text(
+                    x,
+                    y - 0.045 - j * 0.028,
+                    f"• {assess}",
+                    ha="center",
+                    fontsize=5.5,
+                    color="#555555",
+                )
 
         # Horizontal connector
         ax.plot(tp_x, [y] * len(tp_x), lw=1.2, color=g["color"], alpha=0.40, zorder=2)
 
     # Assessment legend
-    ax.text(0.50, 0.05, "Assessments at each timepoint: " + " | ".join(ASSESSMENTS),
-            ha="center", fontsize=7, color="#555555", style="italic")
+    ax.text(
+        0.50,
+        0.05,
+        "Assessments at each timepoint: " + " | ".join(ASSESSMENTS),
+        ha="center",
+        fontsize=7,
+        color="#555555",
+        style="italic",
+    )
 
 
 def plot(show: bool = True) -> None:
@@ -122,7 +213,9 @@ def plot(show: bool = True) -> None:
     fig.suptitle(
         "Figure S1 — Protocol 6 Clinical Study Design: Patient Groups and Assessment Timeline\n"
         "(Paper 3, supplementary; cross-referenced from §5.2)",
-        fontsize=11, fontweight="bold", y=1.01,
+        fontsize=11,
+        fontweight="bold",
+        y=1.01,
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS1_protocol6_clinical_design.pdf")

@@ -18,21 +18,15 @@ from scipy.stats import pearsonr
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from apgi.core import compute_pi_i_eff  # noqa: E402
 from apgi.core import (
     BETA_SM_DEFAULT,
-    compute_pi_i_eff,  # noqa: E402
     compute_S_t,
     ignition_criterion,
     theta_equilibrium,
 )
-from figures.utils import (
-    HALF_WIDTH,
-    PALETTE,
-    PANEL_HEIGHT,  # noqa: E402
-    label_axes,
-    make_figure,
-    save_figure,
-)
+from figures.utils import PANEL_HEIGHT  # noqa: E402
+from figures.utils import HALF_WIDTH, PALETTE, label_axes, make_figure, save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 

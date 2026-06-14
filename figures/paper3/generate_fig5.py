@@ -25,10 +25,10 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
 # Level maturation inflection ages and spectral crossovers
 INFLECTIONS = [
-    {"level": "L1", "age": 2,  "freq": "~10 Hz",       "color": "#fdcc8a"},
-    {"level": "L2", "age": 7,  "freq": "~0.6 Hz",      "color": "#fc8d59"},
-    {"level": "L3", "age": 13, "freq": "~0.01 Hz",     "color": "#de2d26"},
-    {"level": "L4", "age": 25, "freq": "~10⁻⁴ Hz",    "color": "#a50f15"},
+    {"level": "L1", "age": 2, "freq": "~10 Hz", "color": "#fdcc8a"},
+    {"level": "L2", "age": 7, "freq": "~0.6 Hz", "color": "#fc8d59"},
+    {"level": "L3", "age": 13, "freq": "~0.01 Hz", "color": "#de2d26"},
+    {"level": "L4", "age": 25, "freq": "~10⁻⁴ Hz", "color": "#a50f15"},
 ]
 
 
@@ -52,17 +52,37 @@ def plot(show: bool = True) -> None:
     # Empirical reference band (Voytek et al. 2015 style)
     H_lo = H - 0.07
     H_hi = H + 0.07
-    ax.fill_between(age, H_lo, H_hi, alpha=0.20, color="#2166ac",
-                    label="Empirical reference band (Voytek et al. 2015)")
+    ax.fill_between(
+        age,
+        H_lo,
+        H_hi,
+        alpha=0.20,
+        color="#2166ac",
+        label="Empirical reference band (Voytek et al. 2015)",
+    )
     ax.plot(age, H, lw=2.5, color="#2166ac", label="Predicted H trajectory")
 
     # Neonatal / adult reference lines
     ax.axhline(0.55, lw=1.0, ls=":", color="#aaaaaa", alpha=0.7)
     ax.axhline(0.90, lw=1.0, ls=":", color="#aaaaaa", alpha=0.7)
-    ax.text(27, 0.55, "Neonatal\nH≈0.55", fontsize=7.5, color="#aaaaaa",
-            va="center", ha="right")
-    ax.text(27, 0.90, "Adult\nH≈0.90", fontsize=7.5, color="#aaaaaa",
-            va="center", ha="right")
+    ax.text(
+        27,
+        0.55,
+        "Neonatal\nH≈0.55",
+        fontsize=7.5,
+        color="#aaaaaa",
+        va="center",
+        ha="right",
+    )
+    ax.text(
+        27,
+        0.90,
+        "Adult\nH≈0.90",
+        fontsize=7.5,
+        color="#aaaaaa",
+        va="center",
+        ha="right",
+    )
 
     # White noise reference
     ax.axhline(0.5, lw=1.0, ls="--", color="#888888", alpha=0.5)
@@ -74,12 +94,22 @@ def plot(show: bool = True) -> None:
         H_mark = sigmoid_rise(np.array([age_mark]), inflection_ages)[0]
         ax.axvline(age_mark, lw=1.5, ls="--", color=inf["color"], alpha=0.85)
         ax.plot(age_mark, H_mark, "o", ms=8, color=inf["color"], zorder=5)
-        ax.text(age_mark + 0.3, H_mark + 0.012,
-                inf["level"],
-                fontsize=9, fontweight="bold", color=inf["color"])
-        ax.text(age_mark + 0.3, H_mark - 0.025,
-                "Absent/out-of-sequence\ninflection falsifies\nL-k maturation",
-                fontsize=6.0, color="#888888", style="italic")
+        ax.text(
+            age_mark + 0.3,
+            H_mark + 0.012,
+            inf["level"],
+            fontsize=9,
+            fontweight="bold",
+            color=inf["color"],
+        )
+        ax.text(
+            age_mark + 0.3,
+            H_mark - 0.025,
+            "Absent/out-of-sequence\ninflection falsifies\nL-k maturation",
+            fontsize=6.0,
+            color="#888888",
+            style="italic",
+        )
 
     ax.set_xlabel("Developmental age (years)", fontsize=11)
     ax.set_ylabel("Aperiodic EEG exponent H", fontsize=11)
@@ -93,14 +123,16 @@ def plot(show: bool = True) -> None:
     ax2.set_xlim(ax.get_xlim())
     ax2.set_xticks([inf["age"] for inf in INFLECTIONS])
     ax2.set_xticklabels([inf["freq"] for inf in INFLECTIONS], fontsize=8)
-    ax2.set_xlabel("Spectral crossover frequency (level maturation)", fontsize=9,
-                   labelpad=8)
+    ax2.set_xlabel(
+        "Spectral crossover frequency (level maturation)", fontsize=9, labelpad=8
+    )
 
     ax.legend(fontsize=9, loc="upper left")
     ax.set_title(
         "Figure 5 — Developmental Maturation × Spectral Crossover: Dual-Axis Timeline\n"
         "(Paper 3, §5.4 — sequence L1→L2→L3→L4)",
-        fontsize=11, fontweight="bold",
+        fontsize=11,
+        fontweight="bold",
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig5_developmental_maturation_spectral.pdf")

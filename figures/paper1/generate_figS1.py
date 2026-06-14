@@ -20,7 +20,7 @@ import numpy as np
 from scipy import stats
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
-from figures.utils import annotate_pearson_r, add_identity_line, label_axes, save_figure
+from figures.utils import add_identity_line, annotate_pearson_r, label_axes, save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
@@ -29,10 +29,22 @@ N_SIMS = 1000
 
 PARAMS = [
     {"name": r"$\theta_0$", "key": "theta0", "r_true": 0.91, "lo": 0.5, "hi": 2.5},
-    {"name": r"$\tau_S$",   "key": "tau_S",  "r_true": 0.88, "lo": 50,  "hi": 500},
-    {"name": r"$\Pi^i$",    "key": "pi_i",   "r_true": 0.85, "lo": 0.3, "hi": 1.8},
-    {"name": r"$\beta_{\mathrm{SM}}$", "key": "beta_sm", "r_true": 0.82, "lo": 0.0, "hi": 3.0},
-    {"name": r"$\gamma_{\mathrm{sig}}$", "key": "gamma", "r_true": 0.79, "lo": 1.0, "hi": 15.0},
+    {"name": r"$\tau_S$", "key": "tau_S", "r_true": 0.88, "lo": 50, "hi": 500},
+    {"name": r"$\Pi^i$", "key": "pi_i", "r_true": 0.85, "lo": 0.3, "hi": 1.8},
+    {
+        "name": r"$\beta_{\mathrm{SM}}$",
+        "key": "beta_sm",
+        "r_true": 0.82,
+        "lo": 0.0,
+        "hi": 3.0,
+    },
+    {
+        "name": r"$\gamma_{\mathrm{sig}}$",
+        "key": "gamma",
+        "r_true": 0.79,
+        "lo": 1.0,
+        "hi": 15.0,
+    },
 ]
 
 
@@ -65,8 +77,10 @@ def plot(show: bool = True) -> None:
 
     # Sixth panel: collinearity reduction
     ax6 = axes_flat[5]
-    labels = [r"Joint estimation" + "\n" + r"($\beta_{SM} \times \Pi^i$)",
-              "Pre-session M\nestimation"]
+    labels = [
+        r"Joint estimation" + "\n" + r"($\beta_{SM} \times \Pi^i$)",
+        "Pre-session M\nestimation",
+    ]
     r_vals = [0.45, 0.92]
     colors = ["#4dac26", "#d6604d"]
     bars = ax6.bar(labels, r_vals, color=colors, width=0.5, edgecolor="#333333", lw=1.2)
@@ -82,7 +96,9 @@ def plot(show: bool = True) -> None:
     fig.suptitle(
         "Figure S1 — Parameter Recovery Scatter Plots (N = 1,000 simulation runs)\n"
         "Appendix A.4, following Table S2",
-        fontsize=11, fontweight="bold", y=1.01,
+        fontsize=11,
+        fontweight="bold",
+        y=1.01,
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS1_parameter_recovery.pdf")

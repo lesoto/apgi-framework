@@ -27,11 +27,27 @@ LEVEL_NAMES = ["L4", "L3", "L2", "L1", "L0"]
 
 
 def _box(ax, x, y, w, h, label, color, fontsize=8, edge="#333333", lw=1.5):
-    rect = mpatches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.01",
-                                   facecolor=color, edgecolor=edge, lw=lw, zorder=3)
+    rect = mpatches.FancyBboxPatch(
+        (x, y),
+        w,
+        h,
+        boxstyle="round,pad=0.01",
+        facecolor=color,
+        edgecolor=edge,
+        lw=lw,
+        zorder=3,
+    )
     ax.add_patch(rect)
-    ax.text(x + w / 2, y + h / 2, label, ha="center", va="center",
-            fontsize=fontsize, zorder=4, multialignment="center")
+    ax.text(
+        x + w / 2,
+        y + h / 2,
+        label,
+        ha="center",
+        va="center",
+        fontsize=fontsize,
+        zorder=4,
+        multialignment="center",
+    )
 
 
 def plot(show: bool = True) -> None:
@@ -48,8 +64,15 @@ def plot(show: bool = True) -> None:
         _box(ax, LVL_X, y, LVL_W, LVL_H, name, color, fontsize=9)
         level_centres[name] = (LVL_X + LVL_W / 2, y + LVL_H / 2)
 
-    ax.text(LVL_X + LVL_W / 2, 0.96, "Hierarchy\nLevel", ha="center", fontsize=8,
-            fontweight="bold", color="#333333")
+    ax.text(
+        LVL_X + LVL_W / 2,
+        0.96,
+        "Hierarchy\nLevel",
+        ha="center",
+        fontsize=8,
+        fontweight="bold",
+        color="#333333",
+    )
 
     # ── Pathway A: fast NE (ACC → LC → L1) ───────────────────────────────
     NE_COLOR = "#2166ac"
@@ -62,30 +85,65 @@ def plot(show: bool = True) -> None:
         (node_lc, "Locus\nCoeruleus", "#d0e4ff"),
         (node_theta1, r"$\theta_1 \downarrow$ (L1)" + "\ngain ↑ (L0)", "#e8f4fd"),
     ]:
-        circ = mpatches.Circle(xy, 0.07, facecolor=color, edgecolor=NE_COLOR,
-                               lw=1.8, zorder=5)
+        circ = mpatches.Circle(
+            xy, 0.07, facecolor=color, edgecolor=NE_COLOR, lw=1.8, zorder=5
+        )
         ax.add_patch(circ)
-        ax.text(xy[0], xy[1], label, ha="center", va="center", fontsize=7,
-                zorder=6, multialignment="center")
+        ax.text(
+            xy[0],
+            xy[1],
+            label,
+            ha="center",
+            va="center",
+            fontsize=7,
+            zorder=6,
+            multialignment="center",
+        )
 
     def _arr(ax, src, dst, color, lw=1.8, label=None):
-        ax.annotate("", xy=dst, xytext=src,
-                    arrowprops=dict(arrowstyle="->", color=color, lw=lw), zorder=7)
+        ax.annotate(
+            "",
+            xy=dst,
+            xytext=src,
+            arrowprops=dict(arrowstyle="->", color=color, lw=lw),
+            zorder=7,
+        )
         if label:
             mx, my = (src[0] + dst[0]) / 2, (src[1] + dst[1]) / 2
             ax.text(mx + 0.02, my + 0.02, label, fontsize=7, color=color, ha="center")
 
-    _arr(ax, (node_acc[0] + 0.07, node_acc[1] - 0.04),
-             (node_lc[0] - 0.07, node_lc[1] + 0.03),
-             NE_COLOR, label="cortico-\ncoeruleus\nglutamate")
-    _arr(ax, (node_lc[0] + 0.06, node_lc[1] - 0.04),
-             (node_theta1[0] - 0.07, node_theta1[1] + 0.02),
-             NE_COLOR, label="phasic NE\n(ms timescale)")
+    _arr(
+        ax,
+        (node_acc[0] + 0.07, node_acc[1] - 0.04),
+        (node_lc[0] - 0.07, node_lc[1] + 0.03),
+        NE_COLOR,
+        label="cortico-\ncoeruleus\nglutamate",
+    )
+    _arr(
+        ax,
+        (node_lc[0] + 0.06, node_lc[1] - 0.04),
+        (node_theta1[0] - 0.07, node_theta1[1] + 0.02),
+        NE_COLOR,
+        label="phasic NE\n(ms timescale)",
+    )
 
-    ax.text(0.55, 0.88, "Pathway A — Fast NE", fontsize=9, fontweight="bold",
-            color=NE_COLOR, ha="center")
-    ax.text(0.55, 0.84, "(ACC→LC→L1; milliseconds)", fontsize=7.5,
-            color=NE_COLOR, ha="center")
+    ax.text(
+        0.55,
+        0.88,
+        r"Pathway A — Fast NE  ($\alpha_{3\to1}$)",
+        fontsize=9,
+        fontweight="bold",
+        color=NE_COLOR,
+        ha="center",
+    )
+    ax.text(
+        0.55,
+        0.84,
+        "(ACC→LC→L1; milliseconds)",
+        fontsize=7.5,
+        color=NE_COLOR,
+        ha="center",
+    )
 
     # ── Pathway B: slow cortisol (L3/L4 → PVN → HPA → L1/L0) ───────────
     CRT_COLOR = "#d6604d"
@@ -96,39 +154,93 @@ def plot(show: bool = True) -> None:
     for xy, label, color in [
         (node_pvn, "PVN\n(hypothalamus)", "#fde0d9"),
         (node_hpa, "HPA axis\n(adrenal)", "#fdd49e"),
-        (node_l1l0, "Cortisol →\nL1/L0 synaptic\nexcitability", "#fee8c8"),
+        (node_l1l0, "Cortisol →\nL1/L0 synaptic\nexcitability (↑/↓)", "#fee8c8"),
     ]:
-        circ = mpatches.Circle(xy, 0.07, facecolor=color, edgecolor=CRT_COLOR,
-                               lw=1.8, zorder=5)
+        circ = mpatches.Circle(
+            xy, 0.07, facecolor=color, edgecolor=CRT_COLOR, lw=1.8, zorder=5
+        )
         ax.add_patch(circ)
-        ax.text(xy[0], xy[1], label, ha="center", va="center", fontsize=7,
-                zorder=6, multialignment="center")
+        ax.text(
+            xy[0],
+            xy[1],
+            label,
+            ha="center",
+            va="center",
+            fontsize=7,
+            zorder=6,
+            multialignment="center",
+        )
 
-    _arr(ax, (level_centres["L3"][0] + LVL_W / 2, level_centres["L3"][1]),
-             (node_pvn[0] - 0.07, node_pvn[1] + 0.02),
-             CRT_COLOR, label="L3/L4\ngoal state")
-    _arr(ax, (node_pvn[0] + 0.07, node_pvn[1] - 0.03),
-             (node_hpa[0] - 0.07, node_hpa[1] + 0.03),
-             CRT_COLOR, label="CRH cascade")
-    _arr(ax, (node_hpa[0] + 0.07, node_hpa[1] - 0.03),
-             (node_l1l0[0] - 0.07, node_l1l0[1] + 0.03),
-             CRT_COLOR, label="cortisol\n(min–hours)")
+    _arr(
+        ax,
+        (level_centres["L3"][0] + LVL_W / 2, level_centres["L3"][1]),
+        (node_pvn[0] - 0.07, node_pvn[1] + 0.02),
+        CRT_COLOR,
+        label="L3/L4\ngoal state",
+    )
+    _arr(
+        ax,
+        (node_pvn[0] + 0.07, node_pvn[1] - 0.03),
+        (node_hpa[0] - 0.07, node_hpa[1] + 0.03),
+        CRT_COLOR,
+        label="CRH cascade",
+    )
+    _arr(
+        ax,
+        (node_hpa[0] + 0.07, node_hpa[1] - 0.03),
+        (node_l1l0[0] - 0.07, node_l1l0[1] + 0.03),
+        CRT_COLOR,
+        label="cortisol\n(min–hours)",
+    )
 
-    ax.text(0.55, 0.50, "Pathway B — Slow Cortisol", fontsize=9,
-            fontweight="bold", color=CRT_COLOR, ha="center")
-    ax.text(0.55, 0.46, "(L3/L4→PVN→HPA→L1/L0; minutes–hours)", fontsize=7.5,
-            color=CRT_COLOR, ha="center")
+    # Directionality note for the cortisol endpoint (GR vs MR / duration)
+    ax.text(
+        node_l1l0[0],
+        node_l1l0[1] - 0.10,
+        "bidirectional: ↑ (acute, MR-dominated)\nvs ↓ (sustained, GR-dominated)",
+        ha="center",
+        va="top",
+        fontsize=6.0,
+        color=CRT_COLOR,
+        style="italic",
+    )
+
+    ax.text(
+        0.55,
+        0.50,
+        r"Pathway B — Slow Cortisol  ($\alpha_{4\to1}$)",
+        fontsize=9,
+        fontweight="bold",
+        color=CRT_COLOR,
+        ha="center",
+    )
+    ax.text(
+        0.55,
+        0.46,
+        "(L3/L4→PVN→HPA→L1/L0; minutes–hours)",
+        fontsize=7.5,
+        color=CRT_COLOR,
+        ha="center",
+    )
 
     # Caveat
-    ax.text(0.50, 0.01,
-            "Causal evidence for specific projection strengths is limited; "
-            "pathway assignments follow anatomical and pharmacological literature (§3).",
-            ha="center", va="bottom", fontsize=6.5, color="#888888", style="italic")
+    ax.text(
+        0.50,
+        0.01,
+        "Causal evidence for specific projection strengths is limited; "
+        "pathway assignments follow anatomical and pharmacological literature (§3).",
+        ha="center",
+        va="bottom",
+        fontsize=6.5,
+        color="#888888",
+        style="italic",
+    )
 
     ax.set_title(
         "Figure 3 — Cross-Level Neuromodulatory Coupling Pathways (Paper 3, §3)\n"
         "Pathway A: Fast NE  |  Pathway B: Slow Cortisol",
-        fontsize=11, fontweight="bold",
+        fontsize=11,
+        fontweight="bold",
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig3_neuromodulatory_coupling.pdf")

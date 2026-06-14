@@ -17,10 +17,10 @@ from scipy.stats import pearsonr
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from apgi.parameter_recovery import run_recovery_simulation  # noqa: E402
+from figures.utils import PANEL_HEIGHT  # noqa: E402
 from figures.utils import (
     HALF_WIDTH,
     PALETTE,
-    PANEL_HEIGHT,  # noqa: E402
     add_identity_line,
     annotate_pearson_r,
     label_axes,

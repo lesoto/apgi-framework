@@ -25,6 +25,11 @@ from figures.utils import save_figure
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
 TIER_COLORS = {1: "#2166ac", 2: "#4dac26", 3: "#d6604d"}
+TIER_CURRENCY = {
+    1: "thermodynamic",
+    2: "information-theoretic",
+    3: "computational",
+}
 BOX_COLOR = "#f7f7f7"
 BOX_EDGE = "#333333"
 
@@ -43,7 +48,7 @@ STAGES = [
     },
     {
         "label": "Stage 3\nSomatic-Marker\nAmplification",
-        "variable": r"$\beta_{\mathrm{SM}}$ modulation",
+        "variable": r"$\Pi^i_{\mathrm{eff}}\,(\uparrow$ via $\beta_{\mathrm{SM}})$",
         "substrate": "vmPFC–VIP pathway",
         "tier": 2,
     },
@@ -124,29 +129,41 @@ def draw_pipeline(ax: plt.Axes) -> None:
             style="italic",
         )
 
-        # Arrow to next stage
+        # Arrow to next stage. Colour encodes the tier transition: the first
+        # half carries the source-stage tier colour, the second half the
+        # destination-stage tier colour, so tier-boundary crossings are visible.
         if i < n - 1:
             next_x = gap + (i + 1) * (box_w + gap)
-            arrow_color = TIER_COLORS[STAGES[i + 1]["tier"]]
+            src_color = TIER_COLORS[stage["tier"]]
+            dst_color = TIER_COLORS[STAGES[i + 1]["tier"]]
             # Stage 4→5 transition: thicker arrow labelled with the sigmoid function
             is_ignition_transition = i == 3
             lw = 3.0 if is_ignition_transition else 2.0
+            arrow_y = y + box_h / 2
+            mid_arrow_x = (x + box_w + next_x) / 2
+            # First half (source tier), no arrowhead
             ax.annotate(
                 "",
-                xy=(next_x, y + box_h / 2),
-                xytext=(x + box_w, y + box_h / 2),
+                xy=(mid_arrow_x, arrow_y),
+                xytext=(x + box_w, arrow_y),
                 xycoords="axes fraction",
                 textcoords="axes fraction",
-                arrowprops=dict(
-                    arrowstyle="->",
-                    color=arrow_color,
-                    lw=lw,
-                ),
+                arrowprops=dict(arrowstyle="-", color=src_color, lw=lw),
+                zorder=5,
+            )
+            # Second half (destination tier), with arrowhead
+            ax.annotate(
+                "",
+                xy=(next_x, arrow_y),
+                xytext=(mid_arrow_x, arrow_y),
+                xycoords="axes fraction",
+                textcoords="axes fraction",
+                arrowprops=dict(arrowstyle="->", color=dst_color, lw=lw),
                 zorder=5,
             )
             if is_ignition_transition:
                 # Label the sigmoid transition on the arrow
-                mid_x = (x + box_w + next_x) / 2
+                mid_x = mid_arrow_x
                 ax.text(
                     mid_x,
                     y + box_h / 2 + 0.05,
@@ -154,7 +171,7 @@ def draw_pipeline(ax: plt.Axes) -> None:
                     ha="center",
                     va="bottom",
                     fontsize=8,
-                    color=arrow_color,
+                    color=dst_color,
                     fontweight="bold",
                     transform=ax.transAxes,
                     zorder=6,
@@ -211,8 +228,10 @@ def draw_sigmoid_inset(ax: plt.Axes) -> None:
 
 
 def plot(show: bool = True) -> None:
-    fig = plt.figure(figsize=(13, 5))
-    gs = fig.add_gridspec(1, 5, width_ratios=[3, 0.05, 0.05, 0.05, 1.4])
+    # Full page width so the pipeline stays legible at Neuron two-column
+    # format; the sigmoid is a genuine right-margin inset at <20% of width.
+    fig = plt.figure(figsize=(14, 5))
+    gs = fig.add_gridspec(1, 5, width_ratios=[4.0, 0.05, 0.05, 0.05, 1.0])
     ax_main = fig.add_subplot(gs[0])
     ax_sig = fig.add_subplot(gs[4])
 
@@ -222,13 +241,15 @@ def plot(show: bool = True) -> None:
 
     draw_pipeline(ax_main)
 
-    # Tier legend
+    # Tier legend with explicit currency descriptions (Paper 4 framework)
     for tier, color in TIER_COLORS.items():
-        ax_main.plot([], [], color=color, lw=3, label=f"Tier {tier}")
+        ax_main.plot(
+            [], [], color=color, lw=3, label=f"Tier {tier} — {TIER_CURRENCY[tier]}"
+        )
     ax_main.legend(
         loc="lower right",
-        fontsize=8,
-        title="Epistemic Tier",
+        fontsize=7.5,
+        title="Epistemic Tier (currency)",
         title_fontsize=8,
         framealpha=0.8,
     )

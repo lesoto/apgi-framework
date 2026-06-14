@@ -35,27 +35,30 @@ CRITERIA = [
 ]
 
 # Scores 0–2; APGI C3 = 1–2 range → midpoint 1.5 ± 0.5
+# Values verified against Table 5. Two prior misplots corrected:
+#   GNWT C2 (Bridge Principles)  = 0  ("no bridge from broadcast to info-reduction")
+#   IIT 3.0 C7 (Causal Roadmap)  = 0  ("no causal manipulation predictions at scale")
 FRAMEWORKS = {
-    "GNWT":     [1.5, 1.0, 1.5, 1.5, 1.0, 1.0, 2.0],
-    "IIT 3.0":  [1.0, 0.5, 1.0, 1.0, 1.0, 1.5, 1.5],
-    "PP/FEP":   [1.5, 1.0, 1.0, 1.5, 1.5, 1.5, 2.0],
-    "APGI":     [1.5, 1.5, 1.5, 1.5, 1.5, 1.0, 2.0],  # midpoints
+    "GNWT": [1.5, 0.0, 1.5, 1.5, 1.0, 1.0, 2.0],
+    "IIT 3.0": [1.0, 0.5, 1.0, 1.0, 1.0, 1.5, 0.0],
+    "PP/FEP": [1.5, 1.0, 1.0, 1.5, 1.5, 1.5, 2.0],
+    "APGI": [1.5, 1.5, 1.5, 1.5, 1.5, 1.0, 2.0],  # midpoints
 }
 APGI_ERRORS = [0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0]  # C3 range bar
 
 COLORS = {
-    "GNWT":    "#6baed6",
+    "GNWT": "#6baed6",
     "IIT 3.0": "#fd8d3c",
-    "PP/FEP":  "#74c476",
-    "APGI":    "#9e9ac8",
+    "PP/FEP": "#74c476",
+    "APGI": "#9e9ac8",
 }
 
 # Falsification gap tiers
 FAL_GAPS = [
-    ("GNWT",   "T3", "threshold mechanism\nunspecified",   "#6baed6"),
-    ("IIT 3.0","T2", "Φ uncomputable",                     "#fd8d3c"),
-    ("PP/FEP", "T3", "no access criterion",                "#74c476"),
-    ("APGI",   "T1", "κ unmeasured",                       "#9e9ac8"),
+    ("GNWT", "T3", "threshold mechanism\nunspecified", "#6baed6"),
+    ("IIT 3.0", "T2", "Φ uncomputable", "#fd8d3c"),
+    ("PP/FEP", "T3", "no access criterion", "#74c476"),
+    ("APGI", "T1", "κ unmeasured", "#9e9ac8"),
 ]
 
 
@@ -75,17 +78,44 @@ def plot(show: bool = True) -> None:
         hatch = "//" if fw_name == "APGI" else ""
         errs = APGI_ERRORS if fw_name == "APGI" else [0.0] * len(CRITERIA)
         bars = ax_bars.bar(
-            x + offsets[i], scores, width,
-            color=color, edgecolor="#333333", lw=0.8,
-            hatch=hatch, alpha=0.85,
-            yerr=errs, capsize=3,
+            x + offsets[i],
+            scores,
+            width,
+            color=color,
+            edgecolor="#333333",
+            lw=0.8,
+            hatch=hatch,
+            alpha=0.85,
+            yerr=errs,
+            capsize=3,
             label=f"{fw_name}" + (" (self-audit)" if fw_name == "APGI" else ""),
         )
+        # Explicit "0" markers so a zero score reads as a deliberate audit
+        # finding rather than a missing/omitted bar.
+        for xi, sc in zip(x + offsets[i], scores):
+            if sc == 0.0:
+                ax_bars.text(
+                    xi,
+                    0.04,
+                    "0",
+                    ha="center",
+                    va="bottom",
+                    fontsize=7.5,
+                    fontweight="bold",
+                    color=color,
+                )
 
     # Provisional acceptance threshold line
     ax_bars.axhline(1.1, lw=1.8, ls="--", color="#cc0000", alpha=0.8)
-    ax_bars.text(6.55, 1.12, "Provisional\nacceptance\nthreshold (1.1)",
-                 fontsize=7.5, color="#cc0000", va="bottom", ha="right")
+    ax_bars.text(
+        6.55,
+        1.12,
+        "Provisional\nacceptance\nthreshold (1.1)",
+        fontsize=7.5,
+        color="#cc0000",
+        va="bottom",
+        ha="right",
+    )
 
     ax_bars.set_xticks(x)
     ax_bars.set_xticklabels(CRITERIA, fontsize=9)
@@ -98,13 +128,18 @@ def plot(show: bool = True) -> None:
     ax_bars.set_title(
         "Comparative Audit: Seven Rubric Criteria × Four Frameworks\n"
         "(APGI self-audit: diagonal hatch; scores from Table 5)",
-        fontsize=10, fontweight="bold",
+        fontsize=10,
+        fontweight="bold",
     )
     ax_bars.text(
-        0.5, -0.12,
+        0.5,
+        -0.12,
         "APGI scores are self-audit values (§3.4, §7.2–7.3), "
         "applied with identical standards as competitor audits.",
-        ha="center", fontsize=7, color="#666666", style="italic",
+        ha="center",
+        fontsize=7,
+        color="#666666",
+        style="italic",
         transform=ax_bars.transAxes,
     )
 
@@ -112,30 +147,52 @@ def plot(show: bool = True) -> None:
     ax_gap.set_xlim(-0.5, 6.5)
     ax_gap.set_ylim(0, 1)
     ax_gap.axis("off")
-    ax_gap.text(-0.45, 0.75, "Primary\nFalsification\nGap Tier:",
-                ha="left", va="center", fontsize=8, fontweight="bold", color="#555555")
+    ax_gap.text(
+        -0.45,
+        0.75,
+        "Primary\nFalsification\nGap Tier:",
+        ha="left",
+        va="center",
+        fontsize=8,
+        fontweight="bold",
+        color="#555555",
+    )
 
     for j, (fw, tier, desc, color) in enumerate(FAL_GAPS):
         bx = 0.5 + j * 1.6
         rect = mpatches.FancyBboxPatch(
-            (bx - 0.60, 0.10), 1.20, 0.80,
+            (bx - 0.60, 0.10),
+            1.20,
+            0.80,
             boxstyle="round,pad=0.02",
             facecolor=color + "44",
-            edgecolor=color, lw=2.0,
+            edgecolor=color,
+            lw=2.0,
         )
         ax_gap.add_patch(rect)
-        ax_gap.text(bx, 0.75, fw, ha="center", fontsize=8.5,
-                    fontweight="bold", color=color)
-        ax_gap.text(bx, 0.50, tier, ha="center", fontsize=10,
-                    fontweight="bold", color="#333333")
-        ax_gap.text(bx, 0.22, desc, ha="center", fontsize=6.5,
-                    color="#555555", multialignment="center")
+        ax_gap.text(
+            bx, 0.75, fw, ha="center", fontsize=8.5, fontweight="bold", color=color
+        )
+        ax_gap.text(
+            bx, 0.50, tier, ha="center", fontsize=10, fontweight="bold", color="#333333"
+        )
+        ax_gap.text(
+            bx,
+            0.22,
+            desc,
+            ha="center",
+            fontsize=6.5,
+            color="#555555",
+            multialignment="center",
+        )
 
     label_axes([ax_bars, ax_gap])
     fig.suptitle(
         "Figure 2 — Comparative Audit Grouped Bar Chart + Primary Falsification Gap Inset\n"
         "(Paper 4, §6.6)",
-        fontsize=11, fontweight="bold", y=1.01,
+        fontsize=11,
+        fontweight="bold",
+        y=1.01,
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig2_comparative_audit_bar_chart.pdf")
