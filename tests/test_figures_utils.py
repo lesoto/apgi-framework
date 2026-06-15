@@ -241,3 +241,21 @@ class TestSaveFigure:
         fig_utils.save_figure(fig, out, dpi=72)
         assert pathlib.Path(out).exists()
         plt.close("all")
+
+    def test_pdf_also_emits_png_sibling(self, tmp_path):
+        fig, _ = fig_utils.make_figure()
+        out = tmp_path / "fig.pdf"
+        fig_utils.save_figure(fig, out, dpi=72)
+        assert out.exists()
+        png = out.with_suffix(".png")
+        assert png.exists()
+        assert png.stat().st_size > 0
+        plt.close("all")
+
+    def test_png_request_does_not_create_extra_file(self, tmp_path):
+        fig, _ = fig_utils.make_figure()
+        out = tmp_path / "fig.png"
+        fig_utils.save_figure(fig, out, dpi=72)
+        # Only the requested PNG should exist — no spurious second file.
+        assert sorted(p.name for p in tmp_path.iterdir()) == ["fig.png"]
+        plt.close("all")

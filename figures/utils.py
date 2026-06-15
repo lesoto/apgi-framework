@@ -103,3 +103,9 @@ def save_figure(fig: Figure, path: pathlib.Path | str, dpi: int = 300) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=dpi, bbox_inches="tight")
     print(f"Saved: {path}")
+    # Always emit a PNG raster alongside any non-PNG (e.g. PDF) output, so every
+    # figure is available in both vector (PDF) and raster (PNG) formats.
+    if path.suffix.lower() != ".png":
+        png_path = path.with_suffix(".png")
+        fig.savefig(png_path, dpi=dpi, bbox_inches="tight")
+        print(f"Saved: {png_path}")
