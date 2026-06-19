@@ -236,7 +236,7 @@ def step_theta(
 
 def theta_equilibrium(
     C: float,
-    I: float,
+    I_val: float,
     NE: float = 0.0,
     theta_0: float = THETA_0_DEFAULT,
     lambda_theta: float = LAMBDA_THETA_DEFAULT,
@@ -252,7 +252,7 @@ def theta_equilibrium(
 
     Args:
         C: Metabolic cost signal.
-        I: Information value signal.
+        I_val: Information value signal.
         NE: Noradrenaline drive (default 0).
         theta_0: Homeostatic baseline θ₀.
         lambda_theta: Mean-reversion rate λθ.
@@ -264,7 +264,7 @@ def theta_equilibrium(
         Equilibrium threshold θ*.
     """
     return float(
-        theta_0 + (kappa_meta * C - delta_info * I + eta_NE * NE) / lambda_theta
+        theta_0 + (kappa_meta * C - delta_info * I_val + eta_NE * NE) / lambda_theta
     )
 
 

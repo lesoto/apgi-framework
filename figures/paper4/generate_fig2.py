@@ -77,7 +77,7 @@ def plot(show: bool = True) -> None:
         color = COLORS[fw_name]
         hatch = "//" if fw_name == "APGI" else ""
         errs = APGI_ERRORS if fw_name == "APGI" else [0.0] * len(CRITERIA)
-        bars = ax_bars.bar(
+        ax_bars.bar(
             x + offsets[i],
             scores,
             width,

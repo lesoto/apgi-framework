@@ -18,7 +18,6 @@ import sys
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
 from figures.utils import label_axes, save_figure
@@ -160,12 +159,6 @@ def draw_pathway_panel(ax):
 
     # Arrows for active state
     _EX, _IN, _DIS = "#2166ac", "#d6604d", "#4dac26"
-    arrow_kw = dict(
-        xycoords="data",
-        textcoords="data",
-        arrowprops=dict(arrowstyle="->", lw=1.5),
-        zorder=5,
-    )
     ax.annotate(
         "",
         xy=(0.60, 0.75),

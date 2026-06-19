@@ -17,7 +17,6 @@ import sys
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import multivariate_normal
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
 from figures.utils import label_axes, save_figure

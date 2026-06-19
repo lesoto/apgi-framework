@@ -18,8 +18,14 @@ import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from figures.utils import PANEL_HEIGHT  # noqa: E402
-from figures.utils import HALF_WIDTH, PALETTE, label_axes, make_figure, save_figure
+from figures.utils import (  # noqa: E402
+    HALF_WIDTH,
+    PALETTE,
+    PANEL_HEIGHT,  # noqa: E402
+    label_axes,
+    make_figure,
+    save_figure,
+)
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 

@@ -85,7 +85,7 @@ def plot(show: bool = True) -> None:
     ]
     r_vals = [0.45, 0.92]
     colors = ["#4dac26", "#d6604d"]
-    bars = ax6.bar(labels, r_vals, color=colors, width=0.5, edgecolor="#333333", lw=1.2)
+    ax6.bar(labels, r_vals, color=colors, width=0.5, edgecolor="#333333", lw=1.2)
     ax6.axhline(0.90, lw=1.2, ls="--", color="#888888")
     ax6.text(1.05, 0.91, "r > 0.90\n(collinearity)", fontsize=7.5, color="#888888")
     ax6.set_ylim(0, 1.05)

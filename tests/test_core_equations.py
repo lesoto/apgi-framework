@@ -228,7 +228,7 @@ class TestThetaEquilibrium:
         # θ* = 0.6 + (0.2*1.0 - 0.15*0.5)/0.3 = 0.6 + 0.125/0.3 ≈ 1.017
         result = theta_equilibrium(
             C=1.0,
-            I=0.5,
+            I_val=0.5,
             theta_0=0.6,
             lambda_theta=0.3,
             kappa_meta=0.2,
@@ -239,7 +239,7 @@ class TestThetaEquilibrium:
     def test_step_theta_converges_to_equilibrium(self):
         theta_eq = theta_equilibrium(
             C=1.0,
-            I=0.5,
+            I_val=0.5,
             theta_0=THETA_0_DEFAULT,
             lambda_theta=LAMBDA_THETA_DEFAULT,
             kappa_meta=KAPPA_META_DEFAULT,
