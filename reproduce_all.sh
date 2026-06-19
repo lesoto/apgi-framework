@@ -44,6 +44,19 @@ case "$MODE" in
   local)
     echo "Using local seeds in data/seeds/"
     DATA_DIR="data/seeds"
+    # Verify the expected seed files are present before continuing.
+    MISSING=()
+    for sim in sim0_hep_proxy sim1_ignition_dynamics sim2_parameter_recovery \
+               sim3_liquid_network sim4_hierarchical sim5_doc_biomarker \
+               sim6_bifurcation sim7_metabolic_crossover sim8_tms_pci; do
+      [[ -f "data/seeds/${sim}.npz" ]] || MISSING+=("${sim}.npz")
+    done
+    if [[ ${#MISSING[@]} -gt 0 ]]; then
+      echo "ERROR: missing local seed files: ${MISSING[*]}" >&2
+      echo "Run 'python3 data/generate_seeds.py' first, or use --generate." >&2
+      exit 1
+    fi
+    echo "  All seed files present."
     ;;
   generate)
     echo "Regenerating seed datasets…"
@@ -51,6 +64,10 @@ case "$MODE" in
     DATA_DIR="data/seeds"
     ;;
 esac
+
+# Export DATA_DIR so figure and analysis scripts can read it via os.environ.
+export APGI_DATA_DIR="$SCRIPT_DIR/$DATA_DIR"
+echo "  APGI_DATA_DIR=$APGI_DATA_DIR"
 
 # ------------------------------------------------------------------
 # Step 2 — Tests
