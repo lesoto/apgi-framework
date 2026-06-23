@@ -8,11 +8,11 @@
   "version": "2.0.0",
   "last_updated": "2026-06-04",
   "description": "This fMRI study uses a risky-choice task with variable foreperiod to test whether somatic marker retrieval M̂(c,a) modulates effective interoceptive precision Πⁱ_eff during anticipation, rather than directly encoding the raw prediction error εⁱ during outcome. APGI predicts that vmPFC–anterior insula (aINS) connectivity emerges during the anticipation window (before stimulus onset) while vmPFC–posterior insula (pIC) connectivity remains flat, and that these effects are sensitive to option valence rather than sensory contrast. Four sub-predictions are tested: (Pred 3.a) vmPFC BOLD is parametrically modulated by EV during anticipation but does NOT correlate with outcome-locked SCR, while posterior insula outcome-locked BOLD correlates with SCR as an active εⁱ control; (Pred 3.b) vmPFC→aINS coupling increases during anticipation (precision-gain pathway) while vmPFC→pIC coupling remains statistically flat (BF₀₁ ≥ 6, ROPE d = [−0.15, +0.15]); (Pred 3.c) vmPFC anticipation-period activation is context-specific — modulated by option valence (EV) and high-somatic-cost > low-somatic-cost at matched monetary value — not by sensory contrast; (Pred 3.d) removing the anticipation foreperiod (0 ms ISI) abolishes vmPFC→aINS coupling AND vmPFC EV parametric modulation while leaving posterior insula outcome-locked activity intact. Identifiability of β and Πⁱ is fully resolved via block-diagonal Fisher Information Matrix.",
-  "prediction_cluster": "Pred 3.a–3.d",
+  "prediction_cluster": "Pred 3.A–3.D",
   "prediction_cluster_label": "Dissociating Somatic Marker Retrieval from Prediction Error (aINS vs. pIC Dissociation)",
   "sub_predictions": [
     {
-      "id": "Pred 3.a",
+      "id": "Pred 3.A",
       "claim": "vmPFC BOLD is parametrically modulated by EV during the anticipation foreperiod but does NOT correlate with outcome-locked SCR (dissociates M̂ from εⁱ). Posterior insula outcome-locked BOLD correlates with SCR as the active εⁱ control.",
       "confirming_evidence": "vmPFC anticipation-period BOLD: parametric modulation by EV (p < 0.05 FWE); vmPFC–SCR outcome-period correlation r < 0.20. Posterior insula outcome-locked BOLD correlates with SCR (r > 0.40) as active εⁱ control.",
       "falsifying_evidence": "vmPFC BOLD correlates significantly with outcome-locked SCR during the outcome period (r > 0.35), indicating vmPFC encodes raw εⁱ rather than anticipatory M̂; or vmPFC shows no anticipation-period EV parametric modulation (p > 0.20).",
@@ -28,7 +28,7 @@
       }
     },
     {
-      "id": "Pred 3.b",
+      "id": "Pred 3.B",
       "claim": "vmPFC→aINS functional connectivity increases during the anticipation foreperiod (precision-gain pathway); vmPFC→pIC connectivity remains statistically flat (sensory-intensity pathway, unmodulated by M̂).",
       "confirming_evidence": "PPI coefficient vmPFC→aINS: anticipation foreperiod > neutral baseline (p < 0.05 FWE, Δr ≥ 0.30). PPI coefficient vmPFC→pIC: anticipation vs. neutral baseline NOT significant (BF₀₁ ≥ 6, equivalence ROPE d = [−0.15, +0.15]).",
       "falsifying_evidence": "vmPFC→pIC coupling increases during anticipation (Δr > 0.30, p < 0.05); or vmPFC→aINS coupling is absent; or the aINS/pIC dissociation is not significant (both connectivity estimates statistically equivalent).",
@@ -46,7 +46,7 @@
       }
     },
     {
-      "id": "Pred 3.c",
+      "id": "Pred 3.C",
       "claim": "vmPFC anticipation-period activation is context-specific: parametrically modulated by option expected value (somatic valence), not by sensory contrast or physical stimulus properties. High-somatic-cost EV > low-somatic-cost EV at matched monetary value.",
       "confirming_evidence": "vmPFC activation parametrically modulated by EV across option valence (p < 0.05 FWE); parametric effect of sensory contrast on vmPFC absent (p > 0.20). High-somatic-cost EV > low-somatic-cost EV at matched monetary value (Cohen's d > 0.4).",
       "falsifying_evidence": "vmPFC activation correlates with sensory contrast regardless of option valence; or valence and contrast effects on vmPFC are statistically equivalent.",
@@ -62,7 +62,7 @@
       }
     },
     {
-      "id": "Pred 3.d",
+      "id": "Pred 3.D",
       "claim": "Removing the anticipation foreperiod (0 ms ISI condition) abolishes vmPFC→aINS coupling AND vmPFC EV parametric modulation, while leaving posterior insula outcome-locked activity intact.",
       "confirming_evidence": "vmPFC→aINS PPI coefficient in 0 ms foreperiod condition not significantly different from zero (BF₀₁ ≥ 6; ROPE d = [−0.15, +0.15]); vmPFC EV parametric modulation absent in 0 ms condition (p > 0.20). Posterior insula outcome-locked activity preserved.",
       "falsifying_evidence": "vmPFC→aINS coupling in 0 ms foreperiod condition equivalent to standard foreperiod condition (foreperiod removal does not reduce coupling); indicating vmPFC is not specifically anticipatory.",
@@ -78,11 +78,14 @@
       }
     }
   ],
+  "depends_on": ["EP-0"],
+  "soft_parameter_dependencies": ["EP-1", "EP-2"],
+  "dependency_notes": "EP-0 is hard prerequisite (HEP proxy validity). EP-1 and EP-2 provide β_SM and Πⁱ parameter priors that constrain the fMRI model identifiability (parameter prior dependency, must be available before Protocol 3 analysis).",
   "validation_status": "specified",
   "validation_notes": "Identifiability fully resolved. β and Πⁱ orthogonality confirmed via block-diagonal Fisher Information Matrix from orthogonal fMRI + SCR channels in pre-session protocol. Pred 3.a active εⁱ control (pIC-SCR criterion) added, aINS vs. pIC dissociation specified in Pred 3.b, Bayesian null criteria added to Pred 3.b and 2.d, high-somatic-cost comparison added to Pred 3.c, dual abolition criterion added to Pred 3.d — all matching registry EP-3 requirements.",
   "participants": {
     "n_target": 36,
-    "n_minimum": 28,
+    "n_minimum": 26,
     "inclusion_criteria": [
       "Age 18–45 years",
       "Right-handedness (Edinburgh Handedness Inventory ≥ +40)",
@@ -185,12 +188,13 @@
   "primary_hypothesis": "vmPFC→aINS functional connectivity peaks during the anticipation foreperiod (Δr ≥ 0.30, p < 0.05 FWE) while vmPFC→pIC coupling is statistically flat (BF₀₁ ≥ 6, ROPE d = [−0.15, +0.15]). vmPFC BOLD is parametrically modulated by option EV during anticipation but not by outcome-locked SCR (r < 0.20), dissociating somatic marker retrieval M̂ from interoceptive prediction error εⁱ. Removing the anticipation foreperiod abolishes both vmPFC→aINS coupling and EV modulation while preserving pIC outcome-locked activity.",
   "primary_analysis": "ROI-based PPI analysis: vmPFC→aINS and vmPFC→pIC PPI coefficients compared (anticipation > outcome regressor). Bayesian equivalence for pIC null result: BF₀₁ (JZS prior r = 0.707), ROPE d = [−0.15, +0.15]. Foreperiod manipulation: mixed-effects with foreperiod length as within-participant factor; Bayesian equivalence for 0 ms condition. Somatic-cost specificity: paired t-test on vmPFC beta weights (high vs. low somatic-cost options at matched EV).",
   "power_analysis": {
-    "effect_size_d": 0.5,
+    "effect_size_r": 0.40,
     "alpha": 0.05,
     "power": 0.90,
-    "n_required": 28,
+    "n_required": 26,
+    "n_target_with_buffer": 36,
     "software": "G*Power 3.1",
-    "based_on": "Naqvi et al. (2007) vmPFC-insula in somatic marker tasks; typical PPI effect sizes in anticipation paradigms"
+    "based_on": "Critchley et al. (2004, Brain) vmPFC–insula connectivity r ≈ 0.42; Garfinkel & Critchley (2016) r = 0.40; N = 36 provides buffer against BOLD signal loss in ventral prefrontal ROIs and 15% attrition"
   },
   "pre_registration": {
     "platform": "OSF",

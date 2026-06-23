@@ -21,7 +21,7 @@
         "lrt_p_threshold": 0.05,
         "auc_aspirational_secondary": 0.80,
         "secondary_metric_note": "AUC > 0.80 is aspirational secondary metric ONLY — not required for confirmation",
-        "outcome": "3-month GCS-S"
+        "outcome": "3-month CRS-R total score"
       },
       "falsifying_thresholds": {
         "condition_1": "Joint model R² ≤ max(univariate HEP R², univariate PCI R²)",
@@ -31,7 +31,7 @@
     {
       "id": "Pred 7.B",
       "claim": "HEP amplitude discriminates MCS from VS/UWS at group level; four-group gradient (VS/UWS < MCS < EMCS < controls) confirmed for both HEP and PCI.",
-      "confirming_evidence": "HEP amplitude MCS > VS/UWS (Mann–Whitney p < 0.05, d > 0.5); four-group ordinal gradient confirmed for both HEP and PCI; DMN–PCI r > 0.5; DMN–HEP partial correlation below DMN–PCI.",
+      "confirming_evidence": "HEP amplitude MCS > VS/UWS (Mann–Whitney p < 0.05, d > 0.5); four-group ordinal gradient confirmed for both HEP and PCI; DMN–PCI r > 0.50 AND DMN–HEP r < 0.20 (double dissociation).",
       "falsifying_evidence": "No significant HEP difference between MCS and VS/UWS; four-group gradient absent for HEP or PCI.",
       "confirming_thresholds": {
         "mcs_vs_uws_p_threshold": 0.05,
@@ -39,7 +39,8 @@
         "four_group_gradient": "VS/UWS < MCS < EMCS < controls",
         "biomarkers": ["HEP amplitude", "PCI"],
         "dmn_pci_r_minimum": 0.5,
-        "dmn_hep_constraint": "DMN–HEP partial correlation must be below DMN–PCI r"
+        "dmn_hep_r_maximum": 0.20,
+        "dmn_hep_constraint": "DMN–HEP r < 0.20 (double dissociation: DMN↔PCI r > 0.50 AND DMN↔HEP r < 0.20)"
       },
       "falsifying_thresholds": {
         "condition_1": "No significant HEP difference between MCS and VS/UWS",
@@ -85,9 +86,9 @@
     },
     {
       "id": "Pred 7.D",
-      "claim": "HEP amplitude correlates with GCS-S score at both 3-month and 6-month follow-up (Spearman r > 0.4 within-participant), tracking longitudinal recovery trajectory. Joint HEP + PCI baseline model predicts 6-month recovery status with PPV ≥ 70% and NPV ≥ 70%.",
-      "confirming_evidence": "Within-participant Spearman r(HEP, GCS-S) > 0.4 at both 3-month and 6-month follow-ups; joint baseline model PPV ≥ 70% and NPV ≥ 70% for 6-month recovery status.",
-      "falsifying_evidence": "HEP shows no significant longitudinal correlation with GCS-S (r < 0.2) at either follow-up; or joint model predictive values do not exceed clinical benchmarks.",
+      "claim": "HEP amplitude correlates with CRS-R total score at both 3-month follow-up (primary) and 6-month follow-up (Spearman r > 0.4 within-participant), tracking longitudinal recovery trajectory. Joint HEP + PCI baseline model predicts 6-month recovery status with PPV ≥ 70% and NPV ≥ 70%.",
+      "confirming_evidence": "Within-participant Spearman r(HEP, CRS-R) > 0.4 at both 3-month and 6-month follow-ups; joint baseline model PPV ≥ 70% and NPV ≥ 70% for 6-month recovery status.",
+      "falsifying_evidence": "HEP shows no significant longitudinal correlation with CRS-R (r < 0.2) at either follow-up; or joint model predictive values do not exceed clinical benchmarks.",
       "missing_data_protocol": {
         "locf_exclusion": "LOCF is EXPLICITLY EXCLUDED from all longitudinal analyses — LOCF assumes a static post-dropout state that is clinically false in DoC populations and introduces directional bias in predictive value estimates",
         "primary_model": "JMbayes2 (Rizopoulos 2012) joint modelling of longitudinal GCS-S outcomes and time-to-event data (death or clinical withdrawal), treating informative dropout as structural",
@@ -96,6 +97,7 @@
         "robustness_criterion": "Pred 7.D classified as robust only if joint model and MICE sensitivity estimates agree in sign and both meet ΔR² ≥ 0.05 at p < 0.05"
       },
       "confirming_thresholds": {
+        "outcome_measure": "CRS-R total score",
         "spearman_r_3mo_minimum": 0.4,
         "spearman_r_6mo_minimum": 0.4,
         "followup_3mo_status": "PRIMARY CONFIRMATORY",
@@ -136,6 +138,7 @@
       "exploratory_note": "Exploratory prediction. Confirmation not required for primary DoC-Biomarker claims (Pred 7.A–7.D). Tests the downstream behavioral readout of the β_SM → Πⁱ_eff → θₜ pathway at the Tier 3 access level."
     }
   ],
+  "depends_on": ["EP-0"],
   "validation_status": "specified",
   "validation_notes": "Formally specified. Directly supported by Paper 3 Appendix (Disorders of Consciousness Table). Updated 2026-06-19 per DOCX registry (EP-7, Paper 3): n_target increased to 110 (VS/UWS=30, MCS=30, EMCS=20, controls=30); Pred 7.C updated to CCRC protocol (CO₂ rebreathing replacing heartbeat attention task); Pred 7.D updated with JMbayes2 joint modelling and explicit LOCF exclusion; Pred 7.E reframed from somatic-bias-PQS to embodiment-weighting exploratory; 6-month follow-up now primary confirmatory (both 3-mo and 6-mo) per DOCX.",
   "participants": {
@@ -219,7 +222,7 @@
   "dependent_variables": [
     "HEP amplitude (250–400 ms, Cz) per DoC group and time point — primary (Pred 7.A, 5.b, 5.d)",
     "PCI per DoC group and time point — primary (Pred 7.A, 5.b)",
-    "ΔR² (joint HEP + PCI model vs. best univariate model) for 3-month GCS-S — PRIMARY Pred 7.A",
+    "ΔR² (joint HEP + PCI model vs. best univariate model) for 3-month CRS-R total score — PRIMARY Pred 7.A",
     "AUC (joint model) for binary recovery outcome — aspirational secondary Pred 7.A only",
     "Univariate model R² for HEP alone and PCI alone (comparison benchmarks for Pred 7.A)",
     "Four-group ordinal gradient: HEP and PCI across VS/UWS, MCS, EMCS, controls — Pred 7.B",
@@ -230,13 +233,13 @@
     "ΔPCI_CCRC minus ΔPCI_control (paired t) — Pred 7.C",
     "PCI–HEP change correlation (r) post-CCRC — Pred 7.C",
     "Group × stimulation interaction on ΔPCI — Pred 7.C",
-    "Spearman r(HEP amplitude, GCS-S) at 3-month follow-up within-participant — confirmatory Pred 7.D",
-    "Spearman r(HEP amplitude, GCS-S) at 6-month follow-up within-participant — confirmatory Pred 7.D",
+    "Spearman r(HEP amplitude, CRS-R total score) at 3-month follow-up within-participant — confirmatory Pred 7.D",
+    "Spearman r(HEP amplitude, CRS-R total score) at 6-month follow-up within-participant — confirmatory Pred 7.D",
     "JMbayes2 joint model: longitudinal GCS-S + time-to-event — Pred 7.D",
     "PPV and NPV: joint model prediction of 6-month recovery status — Pred 7.D"
   ],
-  "primary_hypothesis": "A linear model including both HEP amplitude and PCI at enrolment explains ΔR² ≥ 0.05 more variance in 3-month GCS-S outcome than either biomarker alone. HEP amplitude and PCI show a four-group gradient (VS/UWS < MCS < EMCS < controls), interoceptive perturbation increases PCI ≥ 10% in MCS but not VS/UWS with ΔPCI exceeding arousal-matched control by ≥ 5%, and HEP amplitude correlates with 3-month GCS-S (Spearman r > 0.4).",
-  "primary_analysis": "Pred 7.A: Multiple linear regression GCS-S_3mo ~ HEP + PCI + age + etiology + (random site effect); LRT vs. univariate models; ΔR² as primary metric. Ordinal logistic regression for categorical consciousness level (VS/UWS / MCS / EMCS / recovered). Pred 7.B: Mann–Whitney U (MCS vs. VS/UWS); Kruskal-Wallis + Jonckheere–Terpstra across four groups; DMN–PCI and partial DMN–HEP correlations. Pred 7.C: paired t-tests for ΔPCI (CCRC vs. baseline; CCRC vs. white-noise control); Pearson r for PCI–HEP change; group × stimulation interaction. Pred 7.D: JMbayes2 joint model of longitudinal GCS-S and time-to-event; MICE (m=50) as sensitivity analysis; pattern-mixture models for MNAR robustness; LOCF explicitly excluded; PPV/NPV from binary recovery classification. Etiology (traumatic vs. hypoxic-ischemic) included as covariate in all models.",
+  "primary_hypothesis": "A linear model including both HEP amplitude and PCI at enrolment explains ΔR² ≥ 0.05 more variance in 3-month CRS-R total score outcome than either biomarker alone. HEP amplitude and PCI show a four-group gradient (VS/UWS < MCS < EMCS < controls), DMN–PCI r > 0.50 AND DMN–HEP r < 0.20 (double dissociation), interoceptive perturbation increases PCI ≥ 10% in MCS but not VS/UWS with ΔPCI exceeding arousal-matched control, and HEP amplitude correlates with CRS-R total score at 3-month and 6-month follow-up (Spearman r > 0.4).",
+  "primary_analysis": "Pred 7.A: Multiple linear regression CRS-R_3mo ~ HEP + PCI + age + etiology + (random site effect); LRT vs. univariate models; ΔR² as primary metric. Ordinal logistic regression for categorical consciousness level (VS/UWS / MCS / EMCS / recovered). Pred 7.B: Mann–Whitney U (MCS vs. VS/UWS); Kruskal-Wallis + Jonckheere–Terpstra across four groups; DMN–PCI and partial DMN–HEP correlations. Pred 7.C: paired t-tests for ΔPCI (CCRC vs. baseline; CCRC vs. white-noise control); Pearson r for PCI–HEP change; group × stimulation interaction. Pred 7.D: JMbayes2 joint model of longitudinal CRS-R total score and time-to-event; MICE (m=50) as sensitivity analysis; pattern-mixture models for MNAR robustness; LOCF explicitly excluded; PPV/NPV from binary recovery classification. Etiology (traumatic vs. hypoxic-ischemic) included as covariate in all models.",
   "power_analysis": {
     "effect_size_d": 0.6,
     "alpha": 0.05,

@@ -81,6 +81,7 @@
       }
     }
   ],
+  "depends_on": ["EP-2"],
   "validation_status": "validated",
   "validation_notes": "Fully validated. The APGI_LNN_Bifurcation_Analysis.py script is built, integrated, and passes all benchmarks for automated clinical iEEG state detection, Hartigan's dip bimodality tests, and lag-1 autocorrelation (AC1) pre-ignition slowing indicators. Renamed from EP-5 to EP-6 and moved to Paper 2 per DOCX registry update (2026-06-19). Predictions consolidated to Pred 6.A–6.D; pharmacological arm (propofol, ketamine, psilocybin) removed from confirmatory scope pending separate registration. Pred 6.D replaces the coherence tier-structure prediction with the intermediate-states bistability criterion.",
   "participants": {

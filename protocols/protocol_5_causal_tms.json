@@ -79,6 +79,7 @@
       }
     }
   ],
+  "depends_on": ["EP-0"],
   "validation_status": "specified_with_caveat",
   "validation_notes": "Prediction structurally sound. The registry (EP-5, Protocol 5) specifies aINS (via tFUS) and dlPFC/PPC as the causal targets. Primary modality for aINS arm is tFUS (required for depth penetration ≈ 3–4 cm); H-coil dTMS retained as secondary modality at sites lacking tFUS infrastructure, with mandatory target-engagement verification (concurrent fMRI-BOLD suppression or EEG spectral change). Claustrum and mediodorsal thalamic involvement remain viable alternative substrates and must be acknowledged in the paper.",
   "participants": {

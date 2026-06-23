@@ -9,7 +9,7 @@
   "last_updated": "2026-06-04",
   "description": "This empirical prerequisite protocol establishes the heartbeat-evoked potential (HEP, 250–400 ms window) as a valid trial-by-trial proxy for interoceptive precision Πⁱ before any downstream EP-1 through EP-6 analyses are interpreted. Three sub-predictions are tested: that HEP amplitude correlates with an orthogonal Πⁱ index (heartbeat discrimination d′) independent of any EEG measure (Pred 0.A); that pharmacological elevation of acetylcholine via physostigmine increases HEP amplitude in a dose-dependent manner confirmed by pupillometric engagement (Pred 0.B); and that anterior insula (aINS) BOLD signal tracks HEP amplitude trial-by-trial within participants after controlling for arousal (Pred 0.C). All three predictions must pass before HEP is used as a Πⁱ proxy in downstream protocols. Failure of any Pred 0 criterion is a submission-blocking issue for all protocols referencing HEP.",
   "prediction_cluster": "Pred 0.A–0.C",
-  "prediction_cluster_label": "HEP Proxy Validation (Empirical Prerequisite for EP-1 through EP-6)",
+  "prediction_cluster_label": "HEP Proxy Validation (Empirical Prerequisite)",
   "sub_predictions": [
     {
       "id": "Pred 0.A",
@@ -31,12 +31,12 @@
     {
       "id": "Pred 0.B",
       "claim": "Physostigmine (ACh elevation) increases HEP amplitude",
-      "confirming_evidence": "HEP amplitude increases ≥15% vs. placebo (Cohen's d ≥ 0.50, BF₁₀ ≥ 10); pupil constriction confirms target engagement",
+      "confirming_evidence": "HEP amplitude increases ≥15% vs. placebo (Cohen's d ≥ 0.50, BF₁₀ ≥ 100); pupil constriction confirms target engagement",
       "falsifying_evidence": "No HEP change despite verified ACh elevation (pupil constriction confirmed)",
       "confirming_thresholds": {
         "hep_increase_percent_minimum": 15,
         "cohens_d_minimum": 0.50,
-        "bf10_minimum": 10,
+        "bf10_minimum": 100,
         "engagement_check": "pupil constriction confirmed by pupillometry"
       },
       "falsifying_thresholds": {
@@ -62,7 +62,7 @@
   "validation_notes": "Empirical prerequisite for all downstream protocols referencing HEP as a Πⁱ proxy. Failure of any sub-prediction (0.A, 0.B, or 0.C) constitutes a submission-blocking issue requiring protocol amendment before EP-1 through EP-6 results are submitted.",
   "submission_blocking_status": "PREREQUISITE — all three predictions must pass before HEP is used as Πⁱ proxy in EP-1 through EP-6",
   "participants": {
-    "n_target": 60,
+    "n_target": 50,
     "n_minimum": 40,
     "n_validation_subsample": 30,
     "inclusion_criteria": [

@@ -8,11 +8,11 @@
   "version": "2.0.0",
   "last_updated": "2026-06-04",
   "description": "This protocol examines whether interoceptive precision (Πⁱ), indexed by the heartbeat-evoked potential (HEP, 250–400 ms window), modulates conscious detection thresholds (θₜ). Stimuli are time-locked to cardiac phase to test four sub-predictions: (Pred 1.a) that state-level Πⁱ_eff produces greater P3b amplitude for near-threshold stimuli under interoceptive focus than exteroceptive focus or dual-task control — with the effect absent or reversed for suprathreshold stimuli; (Pred 1.a-trait) that trait-level Πⁱ_baseline, indexed by interoceptive accuracy (IA), predicts greater perceptual sensitivity (d′) in the interoceptive condition but not the exteroceptive condition; (Pred 1.b) that cardiac-phase-locked detection advantage exists at diastole versus systole; and (Pred 1.c) that top-tertile IA participants show the strongest state-level P3b condition effects and cardiac-phase detection advantages. Near-threshold contrast titration is mandatory; suprathreshold control blocks are required to confirm specificity.",
-  "prediction_cluster": "Pred 1.a, 1.a-trait, 1.b, 1.c",
-  "prediction_cluster_label": "Interoceptive Precision Modulates Detection Threshold (State and Trait Levels)",
+  "prediction_cluster": "Pred 1.A–1.D",
+  "prediction_cluster_label": "Interoceptive Precision Modulates Detection Threshold",
   "sub_predictions": [
     {
-      "id": "Pred 1.a",
+      "id": "Pred 1.A",
       "claim": "State-level Πⁱ_eff → P3b: interoceptive focus produces greater P3b for near-threshold stimuli than exteroceptive focus or dual-task control. Near-threshold titration mandatory; effect must be absent or reversed for suprathreshold stimuli.",
       "confirming_evidence": "P3b amplitude: interoceptive > exteroceptive > dual-task (p < 0.05 FWE; ηₚ² ≥ 0.06). Effect absent or reversed in suprathreshold matched control block. HEP predicts P3b (partial r > 0.4 surviving RMSSD and pupil diameter covariate control).",
       "falsifying_evidence": "No significant P3b condition main effect (all p > 0.10) across N ≥ 30 in preregistered contrast; or HEP–P3b partial correlation < r = 0.20 after arousal covariate control.",
@@ -31,7 +31,7 @@
       }
     },
     {
-      "id": "Pred 1.a-trait",
+      "id": "Pred 1.A-trait",
       "claim": "Trait-level Πⁱ_baseline → d′: high-IA (top tertile) shows greater perceptual sensitivity (d′) than low-IA (bottom tertile), specific to interoceptive detection condition. Group × modality dissociation control required.",
       "confirming_evidence": "High-IA d′ > Low-IA d′ (independent-samples t or Mann–Whitney, p < 0.05; Cohen's d ≥ 0.5); group difference specific to interoceptive condition, absent in matched exteroceptive condition (group × modality interaction p < 0.05).",
       "falsifying_evidence": "High-IA and Low-IA do not differ on interoceptive d′ (d < 0.3 across N ≥ 30 per group); or d′ group difference replicates equally in the exteroceptive condition, eliminating interoceptive specificity.",
@@ -49,7 +49,7 @@
       }
     },
     {
-      "id": "Pred 1.b",
+      "id": "Pred 1.B",
       "claim": "Cardiac-phase-locked detection advantage at diastole (300–500 ms post-R-peak) vs. systole (0–150 ms post-R-peak).",
       "confirming_evidence": "Logistic mixed-effects model: detection ~ cardiac_phase × contrast + cardiac_phase | participant; significant cardiac_phase × contrast interaction (p < 0.05). d′ higher at diastole than systole.",
       "falsifying_evidence": "Diastole vs. systole hit rate advantage < 5% across two independent samples (interaction p > 0.15); no d′ difference between cardiac phases.",
@@ -68,8 +68,8 @@
       }
     },
     {
-      "id": "Pred 1.c",
-      "claim": "Top-tertile IA participants show strongest Pred 1.a (state P3b condition effect) and Pred 1.b (cardiac-phase detection advantage) effects.",
+      "id": "Pred 1.C",
+      "claim": "Top-tertile IA participants show strongest Pred 1.A (state P3b condition effect) and Pred 1.B (cardiac-phase detection advantage) effects.",
       "confirming_evidence": "Accuracy × condition interaction on P3b amplitude significant (p < 0.05, ηₚ² ≥ 0.08); high-accuracy group shows larger P3b condition difference than low-accuracy group. Accuracy × cardiac-phase interaction on detection rate also significant (p < 0.05).",
       "falsifying_evidence": "Accuracy × condition interaction p > 0.10; tertile groups do not differ in cardiac-phase detection advantage.",
       "confirming_thresholds": {
@@ -81,10 +81,26 @@
       "falsifying_thresholds": {
         "interaction_p_minimum": 0.10
       }
+    },
+    {
+      "id": "Pred 1.D",
+      "claim": "HEP amplitude predicts trial-by-trial P3b independently of arousal (partial r > 0.40 after pupil/HRV control).",
+      "confirming_evidence": "Partial r(HEP, P3b | pupil diameter, HRV) > 0.40; p < 0.017 (Bonferroni corrected across three predictions).",
+      "falsifying_evidence": "Partial r < 0.20 after arousal control; or partial correlation indistinguishable from exteroceptive focus condition.",
+      "confirming_thresholds": {
+        "partial_r_minimum": 0.40,
+        "covariates": ["pupil diameter", "HRV (RMSSD)"],
+        "p_threshold_bonferroni": 0.017
+      },
+      "falsifying_thresholds": {
+        "partial_r_threshold": 0.20,
+        "condition": "Partial r < 0.20 after arousal control"
+      }
     }
   ],
+  "depends_on": ["EP-0"],
   "validation_status": "specified",
-  "validation_notes": "Formally specified. Parameter identifiability confirmed via simulation (Appendix A.4). Identifiability of Πⁱ from HEP confirmed via block-diagonal Fisher Information Matrix. Pred 1.a-trait and Pred 1.c added to match registry EP-1 requirements; suprathreshold control blocks added as mandatory.",
+  "validation_notes": "Formally specified. Parameter identifiability confirmed via simulation (Appendix A.4). Identifiability of Πⁱ from HEP confirmed via block-diagonal Fisher Information Matrix. Pred 1.A-trait, Pred 1.C, and Pred 1.D added to match registry EP-1 requirements; suprathreshold control blocks added as mandatory. P3b canonical window standardised to 250–500 ms per global ERP Window Lookup Table.",
   "participants": {
     "n_target": 40,
     "n_minimum": 32,
@@ -152,7 +168,7 @@
     "artifact_rejection_threshold_uv": 100,
     "hep_window_ms": [250, 400],
     "hep_channels": ["Cz", "FCz", "Fz"],
-    "p3b_window_ms": [300, 600],
+    "p3b_window_ms": [250, 500],
     "p3b_channels": ["Pz", "P3", "P4"],
     "ica_components": "Automated rejection of cardiac and ocular ICA components (EEGLAB ADJUST)",
     "minimum_clean_epochs_per_condition": 30,
