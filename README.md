@@ -214,7 +214,7 @@ All protocol files are validated against `protocols/schemas/protocol.schema.json
 
 ```bibtex
 @software{apgi_framework_2026,
-  author  = {APGI Research Team},
+  author  = {Pesochin, Dimitry},
   title   = {APGI Framework},
   year    = {2026},
   doi     = {10.5281/zenodo.XXXXXXX},
