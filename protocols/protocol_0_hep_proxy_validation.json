@@ -24,7 +24,7 @@
         "test_type": "two-tailed"
       },
       "falsifying_thresholds": {
-        "r_threshold": 0.20,
+        "r_threshold": 0.2,
         "samples_required": 2
       }
     },
@@ -35,7 +35,7 @@
       "falsifying_evidence": "No HEP change despite verified ACh elevation (pupil constriction confirmed)",
       "confirming_thresholds": {
         "hep_increase_percent_minimum": 15,
-        "cohens_d_minimum": 0.50,
+        "cohens_d_minimum": 0.5,
         "bf10_minimum": 100,
         "engagement_check": "pupil constriction confirmed by pupillometry"
       },
@@ -49,7 +49,7 @@
       "confirming_evidence": "r(HEP amplitude, aINS BOLD) > 0.30 within participants after arousal covariate control",
       "falsifying_evidence": "aINS BOLD and HEP statistically independent after arousal covariate",
       "confirming_thresholds": {
-        "r_within_participant_minimum": 0.30,
+        "r_within_participant_minimum": 0.3,
         "covariate_control": "arousal (HRV, pupil diameter)",
         "analysis_level": "within-participant"
       },
@@ -115,15 +115,34 @@
     "pred_0c_session": "Single 45-minute simultaneous EEG-fMRI resting-state session"
   },
   "eeg_analysis_pipeline": {
-    "bandpass_filter_hz": [0.1, 40],
-    "epoch_window_ms": [-200, 800],
-    "baseline_correction_ms": [-200, 0],
+    "bandpass_filter_hz": [
+      0.1,
+      40
+    ],
+    "epoch_window_ms": [
+      -200,
+      800
+    ],
+    "baseline_correction_ms": [
+      -200,
+      0
+    ],
     "artifact_rejection_threshold_uv": 100,
-    "hep_window_ms": [250, 400],
-    "hep_channels": ["Cz", "FCz", "Fz"],
+    "hep_window_ms": [
+      250,
+      400
+    ],
+    "hep_channels": [
+      "Cz",
+      "FCz",
+      "Fz"
+    ],
     "ica_components": "Automated rejection of cardiac and ocular ICA components (EEGLAB ADJUST)",
     "minimum_clean_epochs": 40,
-    "arousal_covariates": ["HRV (RMSSD)", "pupil diameter (z-scored per session)"]
+    "arousal_covariates": [
+      "HRV (RMSSD)",
+      "pupil diameter (z-scored per session)"
+    ]
   },
   "fmri_analysis_pipeline_pred_0c": {
     "preprocessing_software": "fMRIPrep 23.2 (BIDS-compatible)",
@@ -147,12 +166,13 @@
   "primary_hypothesis": "HEP amplitude in the 250–400 ms window serves as a valid proxy for interoceptive precision Πⁱ, evidenced by (1) correlation with orthogonal heartbeat discrimination d′ > 0.35 replicated across two independent samples, (2) significant increase under physostigmine-induced ACh elevation confirmed by pupillometry, and (3) within-participant tracking of anterior insula BOLD signal after arousal covariate control.",
   "primary_analysis": "Pred 0.A: Pearson r between HEP amplitude and heartbeat d′; one-tailed test (directional) with pre-specified threshold r > 0.35; replicated in subsample. Pred 0.B: paired t-test (physostigmine vs. placebo) on HEP amplitude; Bayes Factor via JZS prior (r = 0.707). Pred 0.C: first-level GLM with single-trial HEP as parametric modulator; second-level t-test on aINS beta estimates; partial correlation controlling for pupil diameter and RMSSD.",
   "power_analysis": {
-    "effect_size_d": 0.5,
+    "effect_size_r": 0.35,
     "alpha": 0.01,
-    "power": 0.90,
+    "power": 0.9,
     "n_required": 40,
+    "n_target": 50,
     "software": "G*Power 3.1",
-    "based_on": "Canales-Johnson et al. (2020) HEP–interoception correlation r ≈ 0.38; Filippetti et al. (2022) physostigmine HEP effects d ≈ 0.55"
+    "based_on": "Prereg Sample-size-rationale table: 90% power to detect r=0.35, alpha=0.01, two-tailed (HEP-d' correlation); Canales-Johnson et al. (2020) HEP-interoception correlation r ~ 0.38. N=50 target includes independent validation subsample N>=30 (Pred 0.A replication criterion)."
   },
   "pre_registration": {
     "platform": "OSF",

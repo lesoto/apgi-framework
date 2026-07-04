@@ -20,12 +20,15 @@ import numpy as np
 def make_sample_session(n_trials: int = 50, seed: int = 0) -> dict[str, np.ndarray]:
     """Return biologically-plausible APGI trial arrays for quick exploration.
 
-    All parameter ranges are drawn from the same distributions used in the
-    canonical seed datasets (MASTER_SEED=2025).  No file download required.
+    Parameter ranges match the distributions used in the canonical archived
+    seed datasets (generated separately by ``data/generate_seeds.py`` under
+    ``MASTER_SEED=2025``), but this function draws its own independent
+    samples from *seed* — it does not reproduce the archived datasets
+    bit-for-bit. No file download required.
 
     Args:
         n_trials: Number of trials to generate.
-        seed: RNG seed for reproducibility.
+        seed: RNG seed for reproducibility (independent of MASTER_SEED).
 
     Returns:
         dict with keys: pi_e, z_e, pi_i, z_i, C_metabolic, V_information.

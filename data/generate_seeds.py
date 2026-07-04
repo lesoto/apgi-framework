@@ -497,7 +497,7 @@ def _gen_sim4_hierarchical(seed: int) -> pathlib.Path:
 
     for i, sub_seed in enumerate(sub_seeds):
         trial_rng = np.random.default_rng(int(sub_seed))
-        hier = APGIHierarchy(n_sensory=N_SENSORY, kappa=100.0)
+        hier = APGIHierarchy(n_sensory=N_SENSORY)
         for t in range(N_TRIALS):
             sensory = trial_rng.uniform(0.0, 1.0, N_SENSORY)
             result = hier.forward(sensory, C_metabolic=float(C_metabolic_all[i, t]))

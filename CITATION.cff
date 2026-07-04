@@ -14,9 +14,7 @@ authors:
   - family-names: Pesochin
     given-names: Dimitry
     email: uxod.com@gmail.com
-    # ORCID is required for indexing in OpenAlex, Semantic Scholar, and Europe PMC.
-    # Register at https://orcid.org/register (takes 2 minutes) then replace below.
-    orcid: "https://orcid.org/0000-0000-0000-0000"   # TODO: replace with real ORCID
+    orcid: "https://orcid.org/0009-0005-0328-2896"
 
 keywords:
   - consciousness

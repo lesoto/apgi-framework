@@ -9,13 +9,17 @@ from apgi.core import (
     DELTA_INFO_DEFAULT,
     KAPPA_META_DEFAULT,
     LAMBDA_THETA_DEFAULT,
+    PI_MAX,
+    PI_MIN,
     TAU_S_DEFAULT,
     THETA_0_DEFAULT,
     accumulate_S_t,
+    apply_ne_threshold_gain,
     compute_pi_i_eff,
     compute_S_t,
     ignition_criterion,
     ignition_probability,
+    post_ignition_reset,
     run_trial,
     step_theta,
     theta_equilibrium,
@@ -48,6 +52,14 @@ class TestComputePiIEff:
     def test_hand_computed_value(self):
         result = compute_pi_i_eff(1.0, beta_sm=0.6, M_hat=0.5)
         assert result == pytest.approx(math.exp(0.3), rel=1e-6)
+
+    def test_large_positive_argument_clamped_to_pi_max(self):
+        result = compute_pi_i_eff(1.0, beta_sm=1.2, M_hat=2.0)
+        assert result == pytest.approx(PI_MAX, rel=1e-6)
+
+    def test_large_negative_argument_clamped_to_pi_min(self):
+        result = compute_pi_i_eff(1.0, beta_sm=1.2, M_hat=-10.0)
+        assert result == pytest.approx(PI_MIN, rel=1e-6)
 
 
 # ---------------------------------------------------------------------------
@@ -217,6 +229,42 @@ class TestStepTheta:
         t2 = step_theta(1.0, C_t=0.0, I_t=0.0, NE_t=1.0)
         assert t2 > t1
 
+    def test_NE_additive_term_matches_hand_computation(self):
+        # dθ additive contribution should be exactly eta_NE * NE_t
+        t1 = step_theta(1.0, C_t=0.0, I_t=0.0, NE_t=0.0, eta_NE=0.1)
+        t2 = step_theta(1.0, C_t=0.0, I_t=0.0, NE_t=1.0, eta_NE=0.1)
+        assert t2 - t1 == pytest.approx(0.1, rel=1e-6)
+
+    def test_delta_reset_applied_only_on_ignition(self):
+        t_no_fire = step_theta(1.0, C_t=0.0, I_t=0.0, fired=False, delta_reset=0.2)
+        t_fire = step_theta(1.0, C_t=0.0, I_t=0.0, fired=True, delta_reset=0.2)
+        assert t_fire - t_no_fire == pytest.approx(0.2, rel=1e-6)
+
+
+class TestApplyNEThresholdGain:
+    def test_multiplicative_form_matches_spec(self):
+        # theta * (1 + gamma_NE * g_NE)
+        result = apply_ne_threshold_gain(theta_t=1.0, g_NE=1.0, gamma_NE=0.3)
+        assert result == pytest.approx(1.0 * (1 + 0.3 * 1.0), rel=1e-6)
+
+    def test_scales_with_theta_magnitude(self):
+        # Unlike an additive term, the multiplicative gain scales with theta.
+        small = apply_ne_threshold_gain(theta_t=1.0, g_NE=1.0, gamma_NE=0.3)
+        large = apply_ne_threshold_gain(theta_t=3.0, g_NE=1.0, gamma_NE=0.3)
+        assert (large - 3.0) == pytest.approx(3.0 * (small - 1.0), rel=1e-6)
+
+    def test_raises_when_subdominance_constraint_violated(self):
+        with pytest.raises(ValueError):
+            apply_ne_threshold_gain(theta_t=1.0, g_NE=1.0, gamma_NE=0.6)
+
+
+class TestPostIgnitionReset:
+    def test_no_reset_when_not_fired(self):
+        assert post_ignition_reset(S_t=2.0, fired=False, rho_retain=0.3) == 2.0
+
+    def test_partial_reset_when_fired(self):
+        assert post_ignition_reset(S_t=2.0, fired=True, rho_retain=0.3) == pytest.approx(0.6)
+
 
 # ---------------------------------------------------------------------------
 # theta_equilibrium  —  steady-state helper
@@ -272,6 +320,7 @@ class TestRunTrial:
             "pi_i_eff",
             "S_input",
             "S_t",
+            "S_next",
             "theta_t",
             "theta_next",
             "ignition_prob",

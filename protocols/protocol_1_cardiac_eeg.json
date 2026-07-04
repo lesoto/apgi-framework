@@ -20,14 +20,17 @@
         "p_threshold_fwe": 0.05,
         "eta_p_squared_minimum": 0.06,
         "hep_p3b_partial_r_minimum": 0.4,
-        "hep_p3b_covariates": ["RMSSD", "pupil diameter"],
+        "hep_p3b_covariates": [
+          "RMSSD",
+          "pupil diameter"
+        ],
         "suprathreshold_control": "required — effect must be absent or reversed",
         "condition_order": "interoceptive > exteroceptive > dual-task"
       },
       "falsifying_thresholds": {
-        "p_minimum_all_conditions": 0.10,
+        "p_minimum_all_conditions": 0.1,
         "n_minimum": 30,
-        "hep_p3b_partial_r_threshold": 0.20
+        "hep_p3b_partial_r_threshold": 0.2
       }
     },
     {
@@ -57,8 +60,14 @@
         "interaction_p_threshold": 0.05,
         "d_prime_direction": "diastole > systole",
         "cardiac_phase_windows_ms": {
-          "diastole": [300, 500],
-          "systole": [0, 150]
+          "diastole": [
+            300,
+            500
+          ],
+          "systole": [
+            0,
+            150
+          ]
         }
       },
       "falsifying_thresholds": {
@@ -79,7 +88,7 @@
         "secondary_cardiac_phase_interaction_p": 0.05
       },
       "falsifying_thresholds": {
-        "interaction_p_minimum": 0.10
+        "interaction_p_minimum": 0.1
       }
     },
     {
@@ -88,17 +97,22 @@
       "confirming_evidence": "Partial r(HEP, P3b | pupil diameter, HRV) > 0.40; p < 0.017 (Bonferroni corrected across three predictions).",
       "falsifying_evidence": "Partial r < 0.20 after arousal control; or partial correlation indistinguishable from exteroceptive focus condition.",
       "confirming_thresholds": {
-        "partial_r_minimum": 0.40,
-        "covariates": ["pupil diameter", "HRV (RMSSD)"],
+        "partial_r_minimum": 0.4,
+        "covariates": [
+          "pupil diameter",
+          "HRV (RMSSD)"
+        ],
         "p_threshold_bonferroni": 0.017
       },
       "falsifying_thresholds": {
-        "partial_r_threshold": 0.20,
+        "partial_r_threshold": 0.2,
         "condition": "Partial r < 0.20 after arousal control"
       }
     }
   ],
-  "depends_on": ["EP-0"],
+  "depends_on": [
+    "EP-0"
+  ],
   "validation_status": "specified",
   "validation_notes": "Formally specified. Parameter identifiability confirmed via simulation (Appendix A.4). Identifiability of Πⁱ from HEP confirmed via block-diagonal Fisher Information Matrix. Pred 1.A-trait, Pred 1.C, and Pred 1.D added to match registry EP-1 requirements; suprathreshold control blocks added as mandatory. P3b canonical window standardised to 250–500 ms per global ERP Window Lookup Table.",
   "participants": {
@@ -130,18 +144,35 @@
     "ia_measure": "Heartbeat counting task (Schandry 1981) administered pre-scan: 6 intervals × 2 conditions; d′ computed as IA index for tertile grouping (Pred 1.a-trait, 1.C)"
   },
   "trial_structure": {
-    "isi_ms": [1200, 1600],
+    "isi_ms": [
+      1200,
+      1600
+    ],
     "fixation_duration_ms": 500,
     "cardiac_phase_window_ms": {
-      "systole": [0, 150],
-      "diastole": [300, 500]
+      "systole": [
+        0,
+        150
+      ],
+      "diastole": [
+        300,
+        500
+      ]
     },
     "jitter_tolerance_ms": 10,
     "target": {
       "type": "Gabor patch, vertical orientation",
       "spatial_frequency_cpd": 3,
-      "contrast_levels_near_threshold": [0.02, 0.04, 0.08, 0.16],
-      "contrast_levels_suprathreshold": [0.64, 0.80],
+      "contrast_levels_near_threshold": [
+        0.02,
+        0.04,
+        0.08,
+        0.16
+      ],
+      "contrast_levels_suprathreshold": [
+        0.64,
+        0.8
+      ],
       "duration_ms": 33,
       "background_luminance_cd_m2": 50
     },
@@ -162,17 +193,43 @@
     "condition_counterbalancing": "Cardiac phase pseudo-randomised across trials within block; attention condition (interoceptive/exteroceptive/dual-task) counterbalanced across blocks"
   },
   "eeg_analysis_pipeline": {
-    "bandpass_filter_hz": [0.1, 40],
-    "epoch_window_ms": [-200, 800],
-    "baseline_correction_ms": [-200, 0],
+    "bandpass_filter_hz": [
+      0.1,
+      40
+    ],
+    "epoch_window_ms": [
+      -200,
+      800
+    ],
+    "baseline_correction_ms": [
+      -200,
+      0
+    ],
     "artifact_rejection_threshold_uv": 100,
-    "hep_window_ms": [250, 400],
-    "hep_channels": ["Cz", "FCz", "Fz"],
-    "p3b_window_ms": [250, 500],
-    "p3b_channels": ["Pz", "P3", "P4"],
+    "hep_window_ms": [
+      250,
+      400
+    ],
+    "hep_channels": [
+      "Cz",
+      "FCz",
+      "Fz"
+    ],
+    "p3b_window_ms": [
+      250,
+      500
+    ],
+    "p3b_channels": [
+      "Pz",
+      "P3",
+      "P4"
+    ],
     "ica_components": "Automated rejection of cardiac and ocular ICA components (EEGLAB ADJUST)",
     "minimum_clean_epochs_per_condition": 30,
-    "arousal_covariates": ["HRV (RMSSD)", "pupil diameter (z-scored per block)"]
+    "arousal_covariates": [
+      "HRV (RMSSD)",
+      "pupil diameter (z-scored per block)"
+    ]
   },
   "dependent_variables": [
     "P3b amplitude (300–600 ms, Pz) per attention condition (interoceptive / exteroceptive / dual-task) — primary (Pred 1.a)",
@@ -192,12 +249,13 @@
   "primary_hypothesis": "Interoceptive focus produces greater P3b amplitude for near-threshold stimuli than exteroceptive focus or dual-task control (three-way condition difference, ηₚ² ≥ 0.06), this effect is absent at suprathreshold contrast, and HEP amplitude predicts P3b with partial r > 0.4 surviving arousal covariate control. High-IA participants show larger P3b condition effects and diastolic detection advantages than low-IA participants.",
   "primary_analysis": "Repeated-measures ANOVA: P3b_amplitude ~ condition (interoceptive/exteroceptive/dual-task) × contrast (near/supra-threshold) × cardiac_phase, with HRV and pupil diameter as covariates. FWE-correction across electrode clusters. HEP–P3b partial correlation via mixed-effects with RMSSD and pupil as fixed covariates. IA tertile × condition interaction for Pred 1.c.",
   "power_analysis": {
-    "effect_size_d": 0.4,
+    "effect_size_d": 0.45,
     "alpha": 0.05,
-    "power": 0.9,
-    "n_required": 34,
+    "power": 0.8,
+    "n_required": 32,
+    "n_target": 40,
     "software": "G*Power 3.1",
-    "based_on": "Garfinkel et al. (2014) cardiac-phase detection effect; Canales-Johnson et al. (2020) HEP–P3b coupling"
+    "based_on": "Prereg Sample-size-rationale table: d=0.45, alpha=0.05, power=0.80 (Garfinkel et al. 2014 cardiac-phase detection effect; Canales-Johnson et al. 2020 HEP-P3b coupling). N=40 target / N=32 minimum (30 high-IA, 30 low-IA via Garfinkel SD-split)."
   },
   "pre_registration": {
     "platform": "OSF",

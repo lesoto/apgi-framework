@@ -96,9 +96,36 @@ Full trajectories are in the `.npz` only.
 
 ---
 
+## sim0_hep_proxy.npz  (~0.1 MB)
+
+**Used by:** Figure 0, `notebooks/protocol0_hep_proxy_validation.ipynb`  
+**Rows:** 60 subjects (30 main + 30 independent replication)
+
+| Variable | Shape | Dtype | Units | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `hep_amplitude` | (60,) | float64 | μV | HEP amplitude, 250-400 ms post-R-peak |
+| `d_prime` | (60,) | float64 | a.u. | Heartbeat-discrimination d′ (orthogonal Πⁱ index) |
+| `pi_i_true` | (60,) | float64 | a.u. | Generating interoceptive precision |
+| `ains_coupling` | (60,) | float64 | a.u. | Trial-level HEP-aINS BOLD coupling estimate |
+| `hep_placebo` / `hep_physostigmine` | (60,) | float64 | μV | HEP amplitude under placebo / physostigmine |
+| `pupil_placebo` / `pupil_physo` | (60,) | float64 | mm | Pupil diameter under each condition |
+| `physo_delta_pct` | (60,) | float64 | % | HEP amplitude change, physostigmine vs. placebo |
+| `rmssd` | (60,) | float64 | ms | Resting HRV (RMSSD) |
+| `sample_label` | (60,) | U11 (str) | — | "main" or "replication" |
+
+**Metadata keys:** `n_main`, `n_replication`, `n_total`, `n_physostigmine`,
+`r_hep_dprime_main`, `r_hep_dprime_replication`, `criterion_met_pred_0a_main`,
+`criterion_met_pred_0a_repl`, `mean_physo_hep_increase_pct`, `physo_cohens_d`,
+`criterion_met_pred_0b`, `mean_ains_coupling`, `criterion_met_pred_0c`,
+`hep_window_ms_lo/hi`, `hep_pi_i_mapping`, `pi_i_resting_estimate`, `master_seed`
+
+**CSV summary** (`sim0_hep_proxy.csv`): one row per subject.
+
+---
+
 ## sim4_hierarchical.npz  (~2 MB)
 
-**Used by:** Figure 4, `notebooks/protocol5_ignition_ieeg.ipynb`  
+**Used by:** Figure 4 (Paper 1), `notebooks/protocol3_anticipation_fmri.ipynb`  
 **Dimensions:** 100 parameter seeds × 50 trials × 5 hierarchy levels
 
 | Variable | Shape | Dtype | Units | Description |
@@ -123,34 +150,83 @@ Full trajectories are in the `.npz` only.
 
 ## sim5_doc_biomarker.npz  (~1 MB)
 
-**Used by:** Figure 6, `notebooks/protocol6_doc_biomarker.ipynb`  
-**Rows:** 12 000 observations (100 subjects × 120 trials each)  
-**Groups:** VS/UWS (n=30), MCS (n=40), Controls (n=30)
+**Used by:** Figure 7, `notebooks/protocol7_doc_biomarker.ipynb`  
+**Rows:** 110 subjects × trials each (Protocol 7 four-group design)  
+**Groups:** VS/UWS (n=30), MCS (n=30), EMCS (n=20), Controls (n=30) — N=110 total
 
 | Variable | Shape | Dtype | Units | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `group_labels` | (12000,) | U10 (str) | — | Diagnostic group: "VS_UWS", "MCS", or "Controls" |
-| `group_codes` | (12000,) | int64 | — | 0 = VS/UWS, 1 = MCS, 2 = Controls |
-| `subject_id` | (12000,) | int64 | — | Subject index (0–99) |
-| `S_t` | (12000,) | float64 | a.u. | Global integration signal per trial |
-| `theta_t` | (12000,) | float64 | a.u. | Adaptive ignition threshold per trial |
-| `ignition` | (12000,) | bool | — | True when Sₜ ≥ θₜ |
-| `hep_proxy` | (12000,) | float64 | μV (proxy) | Subject-level HEP amplitude proxy (mean Πⁱ_eff + noise) |
-| `pci_proxy` | (12000,) | float64 | a.u. | PCI proxy (ignition rate × complexity term) |
+| `group_labels` | (N,) | U10 (str) | — | Diagnostic group: "VS_UWS", "MCS", "EMCS", or "Controls" |
+| `group_codes` | (N,) | int64 | — | 0 = VS/UWS, 1 = MCS, 2 = EMCS, 3 = Controls |
+| `subject_id` | (N,) | int64 | — | Subject index (0–109) |
+| `S_t` | (N,) | float64 | a.u. | Global integration signal per trial |
+| `theta_t` | (N,) | float64 | a.u. | Adaptive ignition threshold per trial |
+| `ignition` | (N,) | bool | — | True when Sₜ ≥ θₜ |
+| `hep_proxy` | (N,) | float64 | μV (proxy) | Subject-level HEP amplitude proxy |
+| `pci_proxy` | (N,) | float64 | a.u. | PCI proxy (ignition rate × complexity term) |
 
-**Ground-truth Πⁱ by group:** VS/UWS=0.30, MCS=0.80, Controls=1.20  
-**Metadata keys:** `n_subjects_vs_uws/mcs/controls`, `n_trials_per_subject`,
-`pi_i_vs_uws/mcs/controls`, `kappa`, `master_seed`
+**Metadata keys:** `n_subjects_vs_uws/mcs/emcs/controls`, `n_subjects_total`,
+`n_trials_per_subject`, `pi_i_vs_uws/mcs/emcs/controls`, `beta_sm`, `master_seed`
 
-**CSV summary** (`sim5_doc_biomarker.csv`): per-subject summary (100 rows) —
+**CSV summary** (`sim5_doc_biomarker.csv`): per-subject summary (110 rows) —
 `subject_id`, `group`, `group_code`, `S_t_mean`, `ignition_rate`,
 `hep_proxy`, `pci_proxy`.
 
 ---
 
+## sim7_metabolic_crossover.npz  (~0.3 MB)
+
+**Used by:** Figure 4b, `notebooks/protocol4_metabolic_crossover.ipynb`  
+**Design:** 2×2 within-subject (Metabolic State × Interoceptive Load), multi-site
+
+| Variable | Shape | Dtype | Units | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `subject_id` | (N,) | int64 | — | Subject index |
+| `site` | (N,) | int64 | — | Site index (multi-site design) |
+| `metabolic_state` | (N,) | U16 (str) | — | Metabolic-state condition label |
+| `interoceptive_load` | (N,) | U16 (str) | — | Interoceptive-load condition label |
+| `d_prime` | (N,) | float64 | a.u. | Near-threshold perceptual sensitivity |
+| `p3b_amplitude` | (N,) | float64 | μV | P3b amplitude per cell |
+| `pupil_diameter` | (N,) | mm | float64 | Pupil diameter covariate |
+| `rmssd` | (N,) | float64 | ms | HRV (RMSSD) covariate |
+| `glucose_mmol` | (N,) | float64 | mmol/L | Blood glucose covariate |
+
+**Metadata keys:** `n_subjects`, `n_sites`, `n_trials_per_session`, `design`,
+`metabolic_states`, `interoceptive_loads`, `eta_p2_estimate`, `kappa`, `alpha`,
+`beta_initial_estimate`, `master_seed`
+
+**CSV summary** (`sim7_metabolic_crossover.csv`): per-subject summary.
+
+---
+
+## sim8_tms_pci.npz  (~0.2 MB)
+
+**Used by:** Figure 5, `notebooks/protocol5_insula_tms.ipynb`  
+**Design:** TMS/tFUS site comparison (aINS vs. dlPFC vs. vertex), N stratified by Πⁱ tertile
+
+| Variable | Shape | Dtype | Units | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `subject_id` | (N,) | int64 | — | Subject index |
+| `site` | (N,) | U8 (str) | — | Stimulation site: aINS / dlPFC / vertex |
+| `pi_i_tertile` | (N,) | int64 | — | Πⁱ tertile stratum (0=low, 1=mid, 2=high) |
+| `pi_i` | (N,) | float64 | a.u. | Interoceptive precision |
+| `pci` | (N,) | float64 | a.u. | Perturbational complexity index |
+| `hep_amplitude` | (N,) | float64 | μV | HEP amplitude |
+| `hep_pci_coupling` | (N,) | float64 | a.u. | HEP-PCI coupling estimate |
+| `p3b_interoceptive` / `p3b_exteroceptive` | (N,) | float64 | μV | P3b amplitude by attentional focus |
+
+**Metadata keys:** `n_subjects`, `n_sites`, `sites`, `primary_target`,
+`pi_i_tertile_boundaries`, `pci_reduction_ains_vs_vertex`,
+`pci_reduction_dlpfc_vs_vertex`, `kappa`, `alpha`, `beta_initial_estimate`,
+`master_seed`
+
+**CSV summary** (`sim8_tms_pci.csv`): per-subject summary.
+
+---
+
 ## sim6_bifurcation.npz  (~0.05 MB)
 
-**Used by:** Figure 7, `scripts/APGI_LNN_Bifurcation_Analysis.py`  
+**Used by:** Figure 6, `scripts/APGI_LNN_Bifurcation_Analysis.py`  
 **Rows:** 25 simulated subjects  
 **CSD variable:** ignition ratio r_t = Sₜ/θₜ
 

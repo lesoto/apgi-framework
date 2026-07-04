@@ -47,8 +47,8 @@ case "$MODE" in
     # Verify the expected seed files are present before continuing.
     MISSING=()
     for sim in sim0_hep_proxy sim1_ignition_dynamics sim2_parameter_recovery \
-               sim3_liquid_network sim4_hierarchical sim5_doc_biomarker \
-               sim6_bifurcation sim7_metabolic_crossover sim8_tms_pci; do
+               sim3_liquid_network sim4_metabolic_crossover sim5_tms_pci \
+               sim6_bifurcation sim7_doc_biomarker sim8_hierarchical; do
       [[ -f "data/seeds/${sim}.npz" ]] || MISSING+=("${sim}.npz")
     done
     if [[ ${#MISSING[@]} -gt 0 ]]; then
