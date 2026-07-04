@@ -19,7 +19,7 @@
       "confirming_thresholds": {
         "delta_r_squared_primary_minimum": 0.05,
         "lrt_p_threshold": 0.05,
-        "auc_aspirational_secondary": 0.80,
+        "auc_aspirational_secondary": 0.8,
         "secondary_metric_note": "AUC > 0.80 is aspirational secondary metric ONLY — not required for confirmation",
         "outcome": "3-month CRS-R total score"
       },
@@ -37,9 +37,12 @@
         "mcs_vs_uws_p_threshold": 0.05,
         "cohens_d_minimum": 0.5,
         "four_group_gradient": "VS/UWS < MCS < EMCS < controls",
-        "biomarkers": ["HEP amplitude", "PCI"],
+        "biomarkers": [
+          "HEP amplitude",
+          "PCI"
+        ],
         "dmn_pci_r_minimum": 0.5,
-        "dmn_hep_r_maximum": 0.20,
+        "dmn_hep_r_maximum": 0.2,
         "dmn_hep_constraint": "DMN–HEP r < 0.20 (double dissociation: DMN↔PCI r > 0.50 AND DMN↔HEP r < 0.20)"
       },
       "falsifying_thresholds": {
@@ -61,7 +64,11 @@
           "End-tidal CO₂ > 60 mmHg",
           "HR increase > 40 bpm from resting baseline"
         ],
-        "contraindications": ["severe COPD", "active seizure disorder", "hemodynamic instability"],
+        "contraindications": [
+          "severe COPD",
+          "active seizure disorder",
+          "hemodynamic instability"
+        ],
         "contraindicated_patients": "Receive white-noise condition only; analyzed in pre-specified sensitivity analysis",
         "cpt_exclusion": "Cold Pressor Test explicitly excluded from DoC patient cohort on ethical grounds (nociceptive stimulus in population unable to provide meaningful voluntary withdrawal)"
       },
@@ -102,8 +109,8 @@
         "spearman_r_6mo_minimum": 0.4,
         "followup_3mo_status": "PRIMARY CONFIRMATORY",
         "followup_6mo_status": "PRIMARY CONFIRMATORY (both required per DOCX registry update 2026-06-19)",
-        "ppv_minimum": 0.70,
-        "npv_minimum": 0.70,
+        "ppv_minimum": 0.7,
+        "npv_minimum": 0.7,
         "predictive_values_outcome": "6-month recovery status (binary: recovered vs. not)"
       },
       "falsifying_thresholds": {
@@ -138,7 +145,9 @@
       "exploratory_note": "Exploratory prediction. Confirmation not required for primary DoC-Biomarker claims (Pred 7.A–7.D). Tests the downstream behavioral readout of the β_SM → Πⁱ_eff → θₜ pathway at the Tier 3 access level."
     }
   ],
-  "depends_on": ["EP-0"],
+  "depends_on": [
+    "EP-0"
+  ],
   "validation_status": "specified",
   "validation_notes": "Formally specified. Directly supported by Paper 3 Appendix (Disorders of Consciousness Table). Updated 2026-06-19 per DOCX registry (EP-7, Paper 3): n_target increased to 110 (VS/UWS=30, MCS=30, EMCS=20, controls=30); Pred 7.C updated to CCRC protocol (CO₂ rebreathing replacing heartbeat attention task); Pred 7.D updated with JMbayes2 joint modelling and explicit LOCF exclusion; Pred 7.E reframed from somatic-bias-PQS to embodiment-weighting exploratory; 6-month follow-up now primary confirmatory (both 3-mo and 6-mo) per DOCX.",
   "participants": {
@@ -208,12 +217,28 @@
     }
   },
   "eeg_analysis_pipeline": {
-    "bandpass_filter_hz": [0.1, 40],
-    "epoch_window_ms": [-200, 800],
-    "baseline_correction_ms": [-200, 0],
+    "bandpass_filter_hz": [
+      0.1,
+      40
+    ],
+    "epoch_window_ms": [
+      -200,
+      800
+    ],
+    "baseline_correction_ms": [
+      -200,
+      0
+    ],
     "artifact_rejection_threshold_uv": 150,
-    "hep_window_ms": [250, 400],
-    "hep_channels": ["Cz", "FCz", "Fz"],
+    "hep_window_ms": [
+      250,
+      400
+    ],
+    "hep_channels": [
+      "Cz",
+      "FCz",
+      "Fz"
+    ],
     "minimum_clean_epochs": 20,
     "ica_cardiac_artifact": "Automated ICA cardiac component rejection (EEGLAB ADJUST)",
     "pci_computation_software": "Comolatti et al. (2019) open-source toolbox; PCI threshold for consciousness = 0.31",
@@ -241,13 +266,35 @@
   "primary_hypothesis": "A linear model including both HEP amplitude and PCI at enrolment explains ΔR² ≥ 0.05 more variance in 3-month CRS-R total score outcome than either biomarker alone. HEP amplitude and PCI show a four-group gradient (VS/UWS < MCS < EMCS < controls), DMN–PCI r > 0.50 AND DMN–HEP r < 0.20 (double dissociation), interoceptive perturbation increases PCI ≥ 10% in MCS but not VS/UWS with ΔPCI exceeding arousal-matched control, and HEP amplitude correlates with CRS-R total score at 3-month and 6-month follow-up (Spearman r > 0.4).",
   "primary_analysis": "Pred 7.A: Multiple linear regression CRS-R_3mo ~ HEP + PCI + age + etiology + (random site effect); LRT vs. univariate models; ΔR² as primary metric. Ordinal logistic regression for categorical consciousness level (VS/UWS / MCS / EMCS / recovered). Pred 7.B: Mann–Whitney U (MCS vs. VS/UWS); Kruskal-Wallis + Jonckheere–Terpstra across four groups; DMN–PCI and partial DMN–HEP correlations. Pred 7.C: paired t-tests for ΔPCI (CCRC vs. baseline; CCRC vs. white-noise control); Pearson r for PCI–HEP change; group × stimulation interaction. Pred 7.D: JMbayes2 joint model of longitudinal CRS-R total score and time-to-event; MICE (m=50) as sensitivity analysis; pattern-mixture models for MNAR robustness; LOCF explicitly excluded; PPV/NPV from binary recovery classification. Etiology (traumatic vs. hypoxic-ischemic) included as covariate in all models.",
   "power_analysis": {
-    "effect_size_d": 0.6,
+    "design": "four-group mixed-effects ordinal logistic regression (VS/UWS < MCS < EMCS < controls)",
+    "effect_size_or": 2.5,
     "alpha": 0.05,
-    "power": 0.85,
+    "power": 0.8,
     "n_required": 96,
+    "n_per_group": 24,
     "n_target": 110,
-    "software": "G*Power 3.1; Whitehead (1993) proportional odds formula for ordinal logistic regression",
-    "based_on": "Rosanova et al. (2018) PCI in DoC (d = 0.6 for VS/UWS vs. controls); Canales-Johnson et al. (2020) HEP group differences; mixed-effects ordinal logistic regression OR = 2.5 across 4 groups"
+    "software": "Whitehead (1993) proportional-odds formula",
+    "based_on": "Prereg Sample-size-rationale table: primary analysis requires N=24/group (total N=96) to detect OR=2.5, alpha=0.05, power=0.80 (proportional-odds formula, Whitehead 1993). Enrollment target N=110 (30 VS/UWS + 30 MCS + 20 EMCS + 30 controls) is the design ceiling (~15% attrition), exceeding this requirement.",
+    "additional_analyses": {
+      "auc_check": {
+        "design": "joint classifier AUC vs. best univariate biomarker (DeLong method)",
+        "auc_joint_target": 0.8,
+        "auc_univariate_baseline": 0.7,
+        "alpha": 0.05,
+        "power": 0.8,
+        "n_required": 80,
+        "based_on": "OSF Preregistration Sample-size-rationale: N~80 for joint AUC ~0.80 vs best univariate ~0.70."
+      },
+      "secondary_descriptive": {
+        "design": "two-group contrast (VS/UWS vs. controls)",
+        "effect_size_d": 0.6,
+        "alpha": 0.05,
+        "power": 0.85,
+        "n_per_group": 45,
+        "software": "G*Power 3.1",
+        "based_on": "Rosanova et al. (2018) PCI in DoC (d=0.6 for VS/UWS vs controls); Canales-Johnson et al. (2020) HEP group differences. Reported as secondary, descriptive comparison only."
+      }
+    }
   },
   "pre_registration": {
     "platform": "OSF",

@@ -12,7 +12,7 @@
     {
       "name": "Pesochin, Dimitry",
       "affiliation": "",
-      "orcid": "0000-0000-0000-0000"
+      "orcid": "0009-0005-0328-2896"
     }
   ],
 
@@ -52,5 +52,5 @@
     { "identifier": "computational-science" }
   ],
 
-  "notes": "To reproduce all figures: bash reproduce_all.sh. To regenerate seed datasets: python data/generate_seeds.py. All simulations use MASTER_SEED=2025. Replace ORCID, arXiv ID, and OSF URL placeholders before final deposit."
+  "notes": "To reproduce all figures: bash reproduce_all.sh. To regenerate seed datasets: python data/generate_seeds.py (uses MASTER_SEED=2025 for all archived sim0-sim8 datasets). Individual figure-generation scripts (figures/generate_figure*.py) each use their own fixed, documented seed and do not share MASTER_SEED. ORCID confirmed. Replace arXiv ID and OSF URL placeholders before final deposit."
 }

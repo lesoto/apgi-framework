@@ -10,16 +10,19 @@ from numpy.typing import NDArray
 from apgi.core import (
     BETA_SM_DEFAULT,
     DELTA_INFO_DEFAULT,
+    DELTA_RESET_DEFAULT,
     ETA_NE_DEFAULT,
     GAMMA_SIG_DEFAULT,
     KAPPA_META_DEFAULT,
     LAMBDA_THETA_DEFAULT,
+    RHO_RETAIN_DEFAULT,
     TAU_S_DEFAULT,
     THETA_0_DEFAULT,
     accumulate_S_t,
     compute_pi_i_eff,
     compute_S_t,
     ignition_criterion,
+    post_ignition_reset,
     step_theta,
     theta_equilibrium,
 )
@@ -79,6 +82,8 @@ class APGICoreIntegration:
         eta_NE: float = ETA_NE_DEFAULT,
         gamma_sig: float = GAMMA_SIG_DEFAULT,
         tau_S: float = TAU_S_DEFAULT,
+        delta_reset: float = DELTA_RESET_DEFAULT,
+        rho_retain: float = RHO_RETAIN_DEFAULT,
         theta_init: float | None = None,
     ) -> None:
         self.beta_sm = beta_sm
@@ -90,6 +95,8 @@ class APGICoreIntegration:
         self.eta_NE = eta_NE
         self.gamma_sig = gamma_sig
         self.tau_S = tau_S
+        self.delta_reset = delta_reset
+        self.rho_retain = rho_retain
         self._S_acc: float = 0.0
         self._theta: float | None = theta_init
         self._records: list[TrialRecord] = []
@@ -159,12 +166,15 @@ class APGICoreIntegration:
             C_t,
             I_t,
             NE_t=NE_t,
+            fired=fired,
             theta_0=self.theta_0,
             lambda_theta=self.lambda_theta,
             kappa_meta=self.kappa_meta,
             delta_info=self.delta_info,
             eta_NE=self.eta_NE,
+            delta_reset=self.delta_reset,
         )
+        self._S_acc = post_ignition_reset(self._S_acc, fired, rho_retain=self.rho_retain)
         return record
 
     def run_sequence(

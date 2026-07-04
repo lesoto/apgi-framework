@@ -105,14 +105,39 @@
     },
     "power_analysis": {
       "type": "object",
-      "required": ["effect_size_d", "alpha", "power", "n_required"],
+      "description": "Either a classical frequentist power calculation (effect size + alpha + power + n_required) or a Bayesian design declaration (design + n_target + n_minimum + a BF threshold), for protocols whose pre-registered analysis has no classical power calculation.",
+      "oneOf": [
+        {
+          "required": ["alpha", "power", "n_required"],
+          "anyOf": [
+            {"required": ["effect_size_d"]},
+            {"required": ["effect_size_r"]},
+            {"required": ["effect_size_or"]}
+          ]
+        },
+        {
+          "required": ["design", "n_target", "n_minimum"],
+          "anyOf": [
+            {"required": ["bf01_threshold"]},
+            {"required": ["bf10_threshold"]}
+          ]
+        }
+      ],
       "properties": {
         "effect_size_d": {"type": "number", "exclusiveMinimum": 0},
+        "effect_size_r": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "effect_size_or": {"type": "number", "exclusiveMinimum": 0},
         "alpha": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
         "power": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
         "n_required": {"type": "integer", "minimum": 1},
+        "n_target": {"type": "integer", "minimum": 1},
+        "n_minimum": {"type": "integer", "minimum": 1},
+        "design": {"type": "string"},
+        "bf01_threshold": {"type": "number", "exclusiveMinimum": 0},
+        "bf10_threshold": {"type": "number", "exclusiveMinimum": 0},
         "software": {"type": "string"}
-      }
+      },
+      "additionalProperties": true
     },
     "pre_registration": {
       "type": "object",

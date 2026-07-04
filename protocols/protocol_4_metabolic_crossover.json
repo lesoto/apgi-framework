@@ -36,8 +36,15 @@
         "interaction_p_threshold": 0.05,
         "p3b_reduction_interoceptive_vs_exteroceptive_minimum_uv": 1.5,
         "covariate_control": "arousal covariation (pupil diameter and RMSSD) required",
-        "channels": ["Pz", "P3", "P4"],
-        "window_ms": [250, 500]
+        "channels": [
+          "Pz",
+          "P3",
+          "P4"
+        ],
+        "window_ms": [
+          250,
+          500
+        ]
       },
       "falsifying_thresholds": {
         "condition_1": "Uniform P3b suppression across all stimulus types",
@@ -52,7 +59,10 @@
       "confirming_thresholds": {
         "interaction_p_threshold": 0.05,
         "bf10_minimum": 100,
-        "covariates_required": ["trial-level baseline pupil diameter", "RMSSD"],
+        "covariates_required": [
+          "trial-level baseline pupil diameter",
+          "RMSSD"
+        ],
         "covariate_model": "LMM: d′ ~ MetabolicState × InteroceptiveLoad + PupilDiameter + RMSSD + (1 + MetabolicState | Participant) + (1 | Site)"
       },
       "falsifying_thresholds": {
@@ -63,7 +73,10 @@
   ],
   "validation_status": "specified",
   "validation_notes": "Pre-registered crossover design. Depends on EP-0 (HEP proxy validation) and EP-1 (cardiac-EEG) for interoceptive load stimulus validation. Multi-site design (≥ 2 independent laboratories) required for target N ≥ 60.",
-  "depends_on": ["EP-0", "EP-1"],
+  "depends_on": [
+    "EP-0",
+    "EP-1"
+  ],
   "participants": {
     "n_target": 60,
     "n_minimum": 48,
@@ -129,7 +142,10 @@
     "rationale": "Two validated induction modalities to avoid severe motion, sweat, and sympathetic EMG artifacts associated with exhaustive exercise or hypoglycemic clamps"
   },
   "trial_structure": {
-    "isi_ms": [800, 1200],
+    "isi_ms": [
+      800,
+      1200
+    ],
     "fixation_duration_ms": 500,
     "stimulus_streams": [
       {
@@ -156,15 +172,34 @@
     "artifact_monitoring": "Continuous online amplitude threshold ±100 µV; sessions with > 30% trial rejection rate classified as unusable and trigger session-level protocol termination"
   },
   "eeg_analysis_pipeline": {
-    "bandpass_filter_hz": [0.1, 40],
-    "epoch_window_ms": [-200, 800],
-    "baseline_correction_ms": [-200, 0],
+    "bandpass_filter_hz": [
+      0.1,
+      40
+    ],
+    "epoch_window_ms": [
+      -200,
+      800
+    ],
+    "baseline_correction_ms": [
+      -200,
+      0
+    ],
     "artifact_rejection_threshold_uv": 100,
-    "p3b_window_ms": [250, 500],
-    "p3b_channels": ["Pz", "P3", "P4"],
+    "p3b_window_ms": [
+      250,
+      500
+    ],
+    "p3b_channels": [
+      "Pz",
+      "P3",
+      "P4"
+    ],
     "ica_components": "Automated rejection of cardiac and ocular ICA components (EEGLAB ADJUST)",
     "minimum_clean_epochs": 40,
-    "arousal_covariates": ["trial-level baseline pupil diameter (z-scored per session)", "RMSSD (30-s window)"]
+    "arousal_covariates": [
+      "trial-level baseline pupil diameter (z-scored per session)",
+      "RMSSD (30-s window)"
+    ]
   },
   "statistical_model": {
     "behavioral": "d′ ~ MetabolicState × InteroceptiveLoad + PupilDiameter + RMSSD + (1 + MetabolicState | Participant) + (1 | Site)",
@@ -191,12 +226,12 @@
   "power_analysis": {
     "effect_size_d": 0.45,
     "alpha": 0.05,
-    "power": 0.80,
-    "n_required": 52,
+    "power": 0.8,
+    "n_required": 48,
     "n_target_with_attrition": 60,
     "software": "G*Power 3.1",
     "interaction_type": "within-subject 2×2 (Metabolic State × Interoceptive Load)",
-    "based_on": "Moderate interaction effect for metabolic-state modulation of near-threshold perceptual sensitivity; multi-site variance accounted for by (1 | Site) random effect"
+    "based_on": "Prereg Sample-size-rationale table: d=0.45, alpha=0.05, power=0.80 (Metabolic State x Interoceptive Load interaction). N=60 target / N=48 minimum across two independent laboratories; accounts for 15% attrition and multi-site variance via (1|Site) random effect."
   },
   "pre_registration": {
     "platform": "OSF",

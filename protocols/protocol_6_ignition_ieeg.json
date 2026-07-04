@@ -20,12 +20,18 @@
         "hartigan_dip_p_threshold": 0.05,
         "gaussian_bic_delta_minimum": 10,
         "bic_direction": "2-component BIC substantially lower than 1-component",
-        "low_mode_hz_range": [5, 10],
-        "high_mode_hz_range": [40, 60],
+        "low_mode_hz_range": [
+          5,
+          10
+        ],
+        "high_mode_hz_range": [
+          40,
+          60
+        ],
         "both_criteria_required": "Hartigan AND BIC — both must be met for confirmation"
       },
       "falsifying_thresholds": {
-        "hartigan_dip_p_minimum": 0.20,
+        "hartigan_dip_p_minimum": 0.2,
         "condition": "Unimodal continuous distribution — no evidence of bistability"
       }
     },
@@ -57,8 +63,14 @@
         "ac1_permutation_test_n": 10000,
         "ac1_p_threshold": 0.05,
         "ac1_non_detected_requirement": "AC1 trend absent or reversed in non-detected trials",
-        "window_ms": [-500, 0],
-        "high_gamma_band_hz": [70, 150]
+        "window_ms": [
+          -500,
+          0
+        ],
+        "high_gamma_band_hz": [
+          70,
+          150
+        ]
       },
       "falsifying_thresholds": {
         "condition_1": "AC1 flat or decreasing before detected stimuli",
@@ -81,7 +93,9 @@
       }
     }
   ],
-  "depends_on": ["EP-2"],
+  "depends_on": [
+    "EP-2"
+  ],
   "validation_status": "validated",
   "validation_notes": "Fully validated. The APGI_LNN_Bifurcation_Analysis.py script is built, integrated, and passes all benchmarks for automated clinical iEEG state detection, Hartigan's dip bimodality tests, and lag-1 autocorrelation (AC1) pre-ignition slowing indicators. Renamed from EP-5 to EP-6 and moved to Paper 2 per DOCX registry update (2026-06-19). Predictions consolidated to Pred 6.A–6.D; pharmacological arm (propofol, ketamine, psilocybin) removed from confirmatory scope pending separate registration. Pred 6.D replaces the coherence tier-structure prediction with the intermediate-states bistability criterion.",
   "participants": {
@@ -120,12 +134,22 @@
     "ecg_for_hep": "Bipolar ECG lead-II synchronised to iEEG clock for HEP extraction (Pred 6.D criterion 3)"
   },
   "trial_structure": {
-    "isi_ms": [1000, 1500],
+    "isi_ms": [
+      1000,
+      1500
+    ],
     "fixation_duration_ms": 500,
     "target": {
       "type": "Gabor patch, vertical orientation, foveally presented",
       "spatial_frequency_cpd": 3,
-      "contrast_levels": [0.0, 0.02, 0.04, 0.08, 0.16, 0.32],
+      "contrast_levels": [
+        0.0,
+        0.02,
+        0.04,
+        0.08,
+        0.16,
+        0.32
+      ],
       "near_threshold_contrast": "Individual threshold determined by adaptive QUEST procedure in 50-trial pre-session",
       "duration_ms": 33,
       "eccentricity_deg": 0,
@@ -150,10 +174,19 @@
       "Common average re-referencing per electrode array",
       "Manual rejection of ictal and interictal discharge epochs"
     ],
-    "high_gamma_band_hz": [70, 150],
+    "high_gamma_band_hz": [
+      70,
+      150
+    ],
     "high_gamma_extraction": "Bandpass filter + Hilbert analytic signal; amplitude envelope at 10 ms resolution",
-    "epoch_window_ms": [-500, 1000],
-    "baseline_window_ms": [-500, -200],
+    "epoch_window_ms": [
+      -500,
+      1000
+    ],
+    "baseline_window_ms": [
+      -500,
+      -200
+    ],
     "bimodality_test": {
       "primary": "Hartigan's dip test on single-trial high-gamma amplitude distribution at near-threshold contrast; significance threshold p < 0.05",
       "secondary": "2-component vs. 1-component Gaussian mixture model; ΔBIC > 10 required for confirmation (Pred 6.A)",
@@ -161,14 +194,20 @@
     },
     "ac1_analysis": {
       "description": "Autocorrelation coefficient (lag-1) of high-gamma envelope in 500 ms pre-ignition window",
-      "window_ms": [-500, 0],
+      "window_ms": [
+        -500,
+        0
+      ],
       "step_ms": 50,
       "ignition_event_definition": "Single trial classified as detected (seen); near-threshold contrast only",
       "trend_test": "Kendall τ across consecutive 50 ms windows in pre-ignition epoch; comparison detected vs. non-detected via permutation (10,000 permutations)"
     },
     "intermediate_state_detection": {
       "definition": "Single trial high-gamma amplitude between 25% and 75% of bimodal peak separation",
-      "analysis_window_ms": [0, 400],
+      "analysis_window_ms": [
+        0,
+        400
+      ],
       "bout_duration_measurement": "Mean duration of intermediate-state bouts per trial; must be < 100 ms for Pred 6.B confirmation",
       "prevalence_measurement": "Proportion of trial duration spent in intermediate state; must be < 15% for Pred 6.B confirmation"
     },
@@ -179,12 +218,21 @@
     },
     "coherence_analysis": {
       "description": "Long-range gamma coherence between frontoparietal electrode pairs (Pred 6.D)",
-      "frequency_band_hz": [15, 80],
-      "epoch_window_ms": [-200, 800],
+      "frequency_band_hz": [
+        15,
+        80
+      ],
+      "epoch_window_ms": [
+        -200,
+        800
+      ],
       "method": "Multitaper coherence estimation (DPSS, time-bandwidth product 4); imaginary coherence to avoid volume conduction",
       "frontoparietal_pairs": "All pairs between prefrontal and parietal electrode clusters",
       "occipital_pairs": "All pairs involving occipital/V1/V2 electrodes (regional comparison, Pred 6.D criterion 2)",
-      "peak_window_ms": [200, 400],
+      "peak_window_ms": [
+        200,
+        400
+      ],
       "detection_correlation": "Point-biserial r between coherence magnitude and binary detection outcome",
       "hep_coherence_correlation": "Pearson r between single-trial HEP amplitude (250–400 ms, bipolar ECG-referenced) and single-trial frontoparietal coherence in seen trials (Pred 6.D criterion 3, APGI-specific)"
     },
@@ -210,12 +258,12 @@
   "primary_hypothesis": "High-gamma power in frontoparietal iEEG shows a bimodal distribution (Hartigan's dip p < 0.05 AND ΔBIC > 10); AC1 increases monotonically in the 500 ms preceding detected stimuli (Kendall τ > 0.3) with the effect absent or reversed in non-detected trials; bimodality is specific to frontoparietal (not occipital) cortex; and near-threshold stimuli produce stable intermediate high-gamma states > 100 ms in > 15% of near-threshold trials.",
   "primary_analysis": "Pred 6.A: Hartigan's dip test + Gaussian BIC comparison. Pred 6.B: mixed-effects region × bimodality interaction; bout duration and prevalence statistics. Pred 6.C: Kendall τ AC1 trend (permutation, 10,000 permutations). Pred 6.D: proportion test for intermediate-state prevalence > 15% threshold.",
   "power_analysis": {
-    "effect_size_d": 0.7,
-    "alpha": 0.05,
-    "power": 0.80,
-    "n_required": 12,
-    "software": "Custom bootstrap (rare iEEG populations preclude standard power calculators)",
-    "based_on": "Schurger et al. (2012) bistability in iEEG; King et al. (2013) all-or-none frontoparietal dynamics"
+    "design": "hierarchical Bayesian single-subject inference",
+    "bf01_threshold": 6,
+    "n_target": 20,
+    "n_minimum": 12,
+    "software": "Custom bootstrap / hierarchical Bayesian model (rare iEEG populations preclude standard power calculators)",
+    "based_on": "Prereg Sample-size-rationale table: N=20 target / N=12 minimum (clinical feasibility); hierarchical Bayesian single-subject design; BF01 >= 6 required per sub-prediction."
   },
   "pre_registration": {
     "platform": "OSF",
