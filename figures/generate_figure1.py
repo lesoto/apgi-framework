@@ -35,6 +35,7 @@ from figures.utils import (  # noqa: E402
     HALF_WIDTH,
     PALETTE,
     PANEL_HEIGHT,
+    ensure_seed_dataset,
     label_axes,
     make_figure,
     save_figure,
@@ -47,7 +48,7 @@ DATA_DIR = pathlib.Path(
 
 
 def load_data(path: pathlib.Path | None = None) -> dict:
-    npz_path = path or (DATA_DIR / "sim0_hep_proxy.npz")
+    npz_path = path or ensure_seed_dataset(DATA_DIR / "sim0_hep_proxy.npz", "_gen_sim0_hep_proxy")
     d = np.load(npz_path, allow_pickle=True)
     return {k: d[k] for k in d.files}
 
