@@ -1,4 +1,4 @@
-"""Paper 3 — Figure S1: Protocol 6 Clinical Study Design (supplementary).
+"""Paper 3 — Figure S1: Protocol 7 Clinical Study Design (supplementary).
 
 Panel A: 2D scatter schematic (PCI vs HEP) with predicted group clusters.
 Panel B: Longitudinal assessment timeline for four groups.
@@ -64,7 +64,7 @@ def _cov_ellipse(ax, mean, cov, color, nstd=1.0):
 def draw_scatter(ax):
     # Predicted (not observed) clusters: drawn as mean ± 1 SD ellipses rather
     # than simulated dots, which would imply empirical variability not yet
-    # collected for this prospective Protocol 6 trial.
+    # collected for this prospective Protocol 7 trial.
     cov = np.array([[0.015, 0.010], [0.010, 0.015]])
     legend_handles = []
     for g in GROUPS:
@@ -210,14 +210,14 @@ def plot(show: bool = True) -> None:
     draw_timeline(ax2)
     label_axes([ax1, ax2])
     fig.suptitle(
-        "Figure S1 — Protocol 6 Clinical Study Design: Patient Groups and Assessment Timeline\n"
+        "Figure S1 — Protocol 7 Clinical Study Design: Patient Groups and Assessment Timeline\n"
         "(Paper 3, supplementary; cross-referenced from §5.2)",
         fontsize=11,
         fontweight="bold",
         y=1.01,
     )
     fig.tight_layout()
-    save_figure(fig, OUTPUT_DIR / "figS1_protocol6_clinical_design.pdf")
+    save_figure(fig, OUTPUT_DIR / "figS1_protocol7_clinical_design.pdf")
     if show:
         plt.show()
     plt.close(fig)

@@ -28,20 +28,24 @@ RNG = np.random.default_rng(42)
 N_SIMS = 1000
 
 PARAMS = [
-    {"name": r"$\theta_0$", "key": "theta0", "r_true": 0.91, "lo": 0.5, "hi": 2.5},
+    # Well-identified (r > 0.80; §4.7): theta_0, tau_S.
+    # theta_0 range per Table S1 / THETA_0_DEFAULT docstring: [0.25, 0.85] AU.
+    {"name": r"$\theta_0$", "key": "theta0", "r_true": 0.91, "lo": 0.25, "hi": 0.85},
     {"name": r"$\tau_S$", "key": "tau_S", "r_true": 0.88, "lo": 50, "hi": 500},
-    {"name": r"$\Pi^i$", "key": "pi_i", "r_true": 0.85, "lo": 0.3, "hi": 1.8},
+    # Moderately identified (r ~ 0.70-0.75 per §4.7): Pi_i, beta_SM.
+    {"name": r"$\Pi^i$", "key": "pi_i", "r_true": 0.72, "lo": 0.3, "hi": 1.8},
     {
         "name": r"$\beta_{\mathrm{SM}}$",
         "key": "beta_sm",
-        "r_true": 0.82,
+        "r_true": 0.73,
         "lo": 0.0,
         "hi": 3.0,
     },
+    # Poorly identified at the individual level (r ~ 0.55-0.65 per §4.7): gamma_sig.
     {
         "name": r"$\gamma_{\mathrm{sig}}$",
         "key": "gamma",
-        "r_true": 0.79,
+        "r_true": 0.60,
         "lo": 1.0,
         "hi": 15.0,
     },
@@ -49,8 +53,21 @@ PARAMS = [
 
 
 def simulate_recovery(param: dict) -> tuple[np.ndarray, np.ndarray]:
-    true_vals = RNG.uniform(param["lo"], param["hi"], N_SIMS)
-    noise_sd = (param["hi"] - param["lo"]) * (1 - param["r_true"]) * 0.5
+    """Simulate true/recovered parameter pairs whose Pearson r matches
+    ``param["r_true"]`` in expectation.
+
+    For true values drawn from Uniform(lo, hi) and recovered values formed by
+    adding independent Gaussian noise, the analytic correlation is
+    r = sd(X) / sqrt(Var(X) + sigma^2). Inverting for sigma given a target r
+    keeps the *rendered* scatter/correlation consistent with the stated
+    identifiability class, rather than relying on an ad hoc noise-scale
+    heuristic that drifts away from the target at lower r.
+    """
+    lo, hi, r_true = param["lo"], param["hi"], param["r_true"]
+    true_vals = RNG.uniform(lo, hi, N_SIMS)
+    var_x = (hi - lo) ** 2 / 12.0
+    noise_var = var_x * (1.0 / r_true**2 - 1.0)
+    noise_sd = np.sqrt(max(noise_var, 0.0))
     rec_vals = true_vals + RNG.normal(0, noise_sd, N_SIMS)
     return true_vals, rec_vals
 
@@ -77,14 +94,20 @@ def plot(show: bool = True) -> None:
         if i == 0:  # name the identity line once
             ax.legend(loc="lower right", fontsize=8, framealpha=0.85)
 
-    # Sixth panel: collinearity reduction
+    # Sixth panel: collinearity reduction.
+    # Appendix A.4: "Without pre-session M(c,a) estimation, beta_SM and Pi_i
+    # show collinearity r > 0.90 in recovered values; the pre-session
+    # protocol reduces this to r ~= 0.45." So joint (no pre-session M)
+    # estimation is the *problematic*, high-collinearity condition, and
+    # pre-session M estimation is the *reduced*-collinearity condition.
     ax6 = axes_flat[5]
     labels = [
         r"Joint estimation" + "\n" + r"($\beta_{SM} \times \Pi^i$)",
         "Pre-session M\nestimation",
     ]
-    r_vals = [0.45, 0.92]
-    colors = ["#4dac26", "#d6604d"]
+    r_vals = [0.92, 0.45]
+    # Flag the problematic (above-threshold) bar in red; the resolved bar in green.
+    colors = ["#d6604d", "#4dac26"]
     ax6.bar(labels, r_vals, color=colors, width=0.5, edgecolor="#333333", lw=1.2)
     ax6.axhline(0.90, lw=1.2, ls="--", color="#888888")
     ax6.text(1.05, 0.91, "r > 0.90\n(collinearity)", fontsize=7.5, color="#888888")

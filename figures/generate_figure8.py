@@ -1,186 +1,236 @@
-"""Figure 8 — Protocol 6 — DoC-Biomarker: DoC joint biomarker model (Pred 6.a–Pred 6.b).
+"""Figure 8 — Protocol 7 (DoC-Biomarker) study design (Pred 7.A).
 
-Simulates HEP amplitude and PCI scores for four DoC groups from
-protocol_6_doc_biomarker.json and shows:
-  A — HEP amplitude by DoC group (Pred 6.b)
-  B — PCI by DoC group
-  C — Joint model R² vs univariate R² for 3-month GCS-S recovery (Pred 6.a)
+Per OUP-Protocols.txt Figure 8 caption:
+  (A) Predicted joint distribution of the two biomarkers -- perturbational
+      complexity index (PCI, x-axis) and heartbeat-evoked-potential
+      amplitude (HEP, y-axis) -- for the four groups (VS/UWS, N=30; MCS,
+      N=30; EMCS, N=20; controls, N=30); ellipses show group mean +/- 1 SD
+      and the dashed diagonal is the pre-registered joint-classifier
+      decision boundary (target AUC >= 0.80).
+  (B) Longitudinal assessment timeline: every group receives EEG/HEP,
+      TMS-EEG/PCI and CRS-R at baseline, 3 months and 6 months. EMCS
+      occupies the intermediate position in joint HEP-PCI space, making
+      the four-group gradient essential for full-gradient validation.
+
+BUG FIX (this revision): the previous generate_figure8.py implemented only
+THREE groups (VS/UWS, MCS, Controls; N=50 total) and mislabeled itself
+"Protocol 6" in its docstring/title. This rewrite loads the archived
+four-group seed dataset data/seeds/sim5_doc_biomarker.npz directly
+(VS/UWS N=30, MCS N=30, EMCS N=20, Controls N=30; N=110 total, verified via
+its group_labels/subject_id keys), consistent with the audited
+Figure-N <-> Protocol-(N-1) numbering (Figure 8 = Protocol 7).
+
+Judgment call / spec ambiguity: no distinct "Figure 8" caption exists
+anywhere in OUP-OSF-Preregistration.txt or OUP-Protocols.txt beyond the
+Protocol 7 content already assigned to Figure 8 above (OUP-Protocols.txt's
+figure captions run Figure 1..Figure 8 in exact 1:1 correspondence with
+Protocol 0..Protocol 7 -- there is no ninth figure or separate "Figure 8b").
+The previous repo's generate_figure8.py duplicated Protocol 6 content
+(mislabeled) rather than implementing Protocol 7; that duplication is
+removed here. This script is now the sole implementation of Protocol 7 /
+Figure 8, and there is no longer a separate Figure 7 vs Figure 8 collision.
+
+Judgment call on Panel B: the archived sim5_doc_biomarker.npz seed contains
+only a single (baseline) cross-sectional assessment per subject -- it does
+not include simulated 3-month/6-month follow-up values. Since the spec
+requires a longitudinal timeline panel and no seed data exists for the
+follow-up timepoints, Panel B extrapolates plausible recovery trajectories
+from each group's baseline PCI/HEP means (partial recovery for MCS/EMCS,
+near-flat for VS/UWS and Controls) purely for illustrative study-design
+purposes, clearly labeled as such -- consistent with the spec's own
+"Values are illustrative pre-data predictions" caveat for this figure.
 
 Run:
     python figures/generate_figure8.py
     python figures/generate_figure8.py --no-show   # CI mode
 """
 
-import pathlib as _pathlib
-import sys as _sys
-
-_sys.path.insert(0, str(_pathlib.Path(__file__).parent.parent))
+from __future__ import annotations
 
 import argparse
+import os
 import pathlib
+import sys
 
 import numpy as np
+from matplotlib.patches import Ellipse
 
-from apgi.core import BETA_SM_DEFAULT, compute_pi_i_eff
-from figures.utils import (
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+from figures.utils import (  # noqa: E402
     HALF_WIDTH,
     PALETTE,
     PANEL_HEIGHT,
+    ensure_seed_dataset,
     label_axes,
     make_figure,
     save_figure,
 )
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
+DATA_DIR = pathlib.Path(
+    os.environ.get("APGI_DATA_DIR", pathlib.Path(__file__).resolve().parent.parent / "data" / "seeds")
+)
 
-# Protocol 4 APGI parameters
-PI_I_BY_GROUP = {
-    "VS/UWS": 0.3,
-    "MCS": 0.8,
-    "Controls": 1.2,
-}
-N_PER_GROUP = {"VS/UWS": 15, "MCS": 20, "Controls": 15}
+GROUP_ORDER = ["VS_UWS", "MCS", "EMCS", "Controls"]
+GROUP_DISPLAY = {"VS_UWS": "VS/UWS", "MCS": "MCS", "EMCS": "EMCS", "Controls": "Controls"}
+GROUP_N = {"VS_UWS": 30, "MCS": 30, "EMCS": 20, "Controls": 30}
 GROUP_COLORS = {
-    "VS/UWS": PALETTE["theta"],
+    "VS_UWS": PALETTE["theta"],
     "MCS": "#FFCC00",
+    "EMCS": "#FF8C42",
     "Controls": PALETTE["S_t"],
 }
+PCI_THRESHOLD = 0.31
 
 
-def simulate(seed: int = 7) -> dict:
-    rng = np.random.default_rng(seed)
-    hep_by_group, pci_by_group = {}, {}
+def load_data(path: pathlib.Path | None = None) -> dict:
+    npz_path = path or ensure_seed_dataset(
+        DATA_DIR / "sim5_doc_biomarker.npz", "_gen_sim5_doc_biomarker"
+    )
+    d = np.load(npz_path, allow_pickle=True)
+    return {k: d[k] for k in d.files}
 
-    for group, pi_i in PI_I_BY_GROUP.items():
-        n = N_PER_GROUP[group]
-        pi_i_eff = np.array([compute_pi_i_eff(float(pi_i), BETA_SM_DEFAULT, 0.0)] * n)
-        # HEP amplitude ~ Πⁱ_eff + noise
-        hep_by_group[group] = pi_i_eff + rng.normal(0, 0.07, n)
-        # PCI ~ ignition capacity (higher in MCS/controls)
-        pci_base = {"VS/UWS": 0.18, "MCS": 0.35, "Controls": 0.52}[group]
-        pci_by_group[group] = rng.normal(pci_base, 0.06, n)
 
-    # Simulate 3-month GCS-S outcomes for regression (Pred 6.a)
-    all_hep_list: list[float] = []
-    all_pci_list: list[float] = []
-    all_gcs_list: list[float] = []
-    for group in PI_I_BY_GROUP:
-        n = N_PER_GROUP[group]
-        base_gcs = {"VS/UWS": 4.0, "MCS": 9.0, "Controls": 14.5}[group]
-        gcs = base_gcs + 2.0 * hep_by_group[group] + 3.0 * pci_by_group[group]
-        gcs += rng.normal(0, 1.2, n)
-        all_hep_list.extend(hep_by_group[group])
-        all_pci_list.extend(pci_by_group[group])
-        all_gcs_list.extend(gcs)
+def subject_level_summary(data: dict) -> dict:
+    """Collapse trial-level sim5 data to one (hep, pci, group) row per
+    subject (N=110)."""
+    sub = data["subject_id"]
+    gl = data["group_labels"]
+    hep = data["hep_proxy"]
+    pci = data["pci_proxy"]
 
-    all_hep = np.array(all_hep_list)
-    all_pci = np.array(all_pci_list)
-    all_gcs = np.array(all_gcs_list)
-
+    subj_ids = np.unique(sub)
+    out_group, out_hep, out_pci = [], [], []
+    for sid in subj_ids:
+        m = sub == sid
+        out_group.append(gl[m][0])
+        out_hep.append(float(hep[m].mean()))
+        out_pci.append(float(pci[m].mean()))
     return {
-        "hep_by_group": hep_by_group,
-        "pci_by_group": pci_by_group,
-        "all_hep": all_hep,
-        "all_pci": all_pci,
-        "all_gcs": all_gcs,
+        "subject_id": subj_ids,
+        "group": np.array(out_group),
+        "hep": np.array(out_hep),
+        "pci": np.array(out_pci),
     }
 
 
-def r_squared(y_true: np.ndarray, predictors: list[np.ndarray]) -> float:
-    X = np.column_stack([np.ones(len(y_true))] + predictors)
-    beta, *_ = np.linalg.lstsq(X, y_true, rcond=None)
-    y_hat = X @ beta
-    ss_res = np.sum((y_true - y_hat) ** 2)
-    ss_tot = np.sum((y_true - y_true.mean()) ** 2)
-    return float(1 - ss_res / ss_tot)
+def _draw_confidence_ellipse(ax, x: np.ndarray, y: np.ndarray, color: str, label: str) -> None:
+    """Draw a mean +/- 1 SD ellipse (axis-aligned, using per-axis SD; a
+    simple and transparent visual summary matching the spec's 'ellipses
+    show group mean +/- 1 SD' description)."""
+    mean_x, mean_y = x.mean(), y.mean()
+    sd_x, sd_y = x.std(), y.std()
+    ellipse = Ellipse(
+        (mean_x, mean_y), width=2 * sd_x, height=2 * sd_y,
+        facecolor=color, edgecolor=color, alpha=0.18, lw=1.8, zorder=2,
+    )
+    ax.add_patch(ellipse)
+    ax.scatter([mean_x], [mean_y], marker="x", s=70, color=color, linewidths=2.2, zorder=4)
+    ax.scatter(x, y, s=18, alpha=0.55, color=color, edgecolors="white",
+               linewidths=0.3, label=label, zorder=3)
+
+
+def plot_joint_scatter(ax, summary: dict) -> None:
+    for g in GROUP_ORDER:
+        mask = summary["group"] == g
+        _draw_confidence_ellipse(
+            ax, summary["pci"][mask], summary["hep"][mask], GROUP_COLORS[g],
+            f"{GROUP_DISPLAY[g]} (N={GROUP_N[g]})",
+        )
+
+    # Pre-registered joint-classifier decision boundary (illustrative
+    # diagonal separating low-consciousness from high-consciousness
+    # biomarker space; target joint AUC >= 0.80).
+    pci_all, hep_all = summary["pci"], summary["hep"]
+    lo = min(pci_all.min(), hep_all.min()) - 0.05
+    hi = max(pci_all.max(), hep_all.max()) + 0.05
+    # Diagonal boundary roughly separating VS/UWS+MCS from EMCS+Controls.
+    intercept = (
+        np.median(summary["hep"][summary["group"] == "MCS"])
+        + np.median(summary["hep"][summary["group"] == "EMCS"])
+    ) / 2 - 0.5 * (
+        np.median(summary["pci"][summary["group"] == "MCS"])
+        + np.median(summary["pci"][summary["group"] == "EMCS"])
+    ) / 2
+    x_line = np.linspace(lo, hi, 100)
+    ax.plot(x_line, 0.5 * x_line + intercept, ls="--", lw=1.5, color="#333333",
+             label="Decision boundary\n(target joint AUC ≥ 0.80)", zorder=1)
+
+    ax.set_xlabel("PCI (perturbational complexity index)", fontsize=9.5)
+    ax.set_ylabel("HEP amplitude (a.u.)", fontsize=9.5)
+    ax.set_title(
+        "Pred 7.A — Joint PCI–HEP space separates\nfour DoC groups (N=110)", fontsize=10
+    )
+    ax.legend(fontsize=6.5, loc="upper left")
+
+
+def plot_longitudinal(ax, summary: dict) -> None:
+    """Illustrative longitudinal recovery trajectory panel (see module
+    docstring: no follow-up timepoints exist in the archived seed data;
+    trajectories are extrapolated from baseline group means for
+    study-design illustration only)."""
+    timepoints = ["Baseline", "3 months", "6 months"]
+    x = np.arange(len(timepoints))
+
+    # Partial-recovery multipliers per group, applied to a joint composite
+    # biomarker score = 0.5*(z-scored PCI) + 0.5*(z-scored HEP), purely
+    # illustrative.
+    recovery_factor = {"VS_UWS": [1.00, 1.03, 1.05], "MCS": [1.00, 1.18, 1.30],
+                        "EMCS": [1.00, 1.10, 1.16], "Controls": [1.00, 1.00, 1.00]}
+
+    pci_all, hep_all = summary["pci"], summary["hep"]
+    pci_z = (pci_all - pci_all.mean()) / pci_all.std()
+    hep_z = (hep_all - hep_all.mean()) / hep_all.std()
+    composite = 0.5 * pci_z + 0.5 * hep_z
+
+    for g in GROUP_ORDER:
+        mask = summary["group"] == g
+        baseline = composite[mask].mean()
+        baseline_sem = composite[mask].std() / np.sqrt(mask.sum())
+        trajectory = np.array(recovery_factor[g]) * baseline
+        ax.errorbar(
+            x, trajectory, yerr=baseline_sem, marker="o", ms=6, lw=1.8,
+            color=GROUP_COLORS[g], capsize=4, label=GROUP_DISPLAY[g],
+        )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(timepoints, fontsize=9.5)
+    ax.set_ylabel("Composite HEP–PCI score (z, illustrative)", fontsize=9.5)
+    ax.set_title(
+        "Longitudinal assessment timeline\n(EEG/HEP, TMS-EEG/PCI, CRS-R at each timepoint)",
+        fontsize=10,
+    )
+    ax.annotate(
+        "Trajectories are illustrative extrapolations from\n"
+        "baseline-only seed data (no 3/6-month follow-up\n"
+        "measurements exist in the archived dataset).",
+        xy=(0.02, 0.02), xycoords="axes fraction", fontsize=6.5, color="#777777",
+        style="italic",
+    )
+    ax.legend(fontsize=7, loc="upper left")
 
 
 def plot(data: dict, show: bool = True) -> None:
-    fig, axes = make_figure(ncols=3, width=HALF_WIDTH * 3, height=PANEL_HEIGHT)
+    summary = subject_level_summary(data)
+    fig, axes = make_figure(ncols=2, width=HALF_WIDTH * 2.3, height=PANEL_HEIGHT * 1.15)
 
-    groups = list(PI_I_BY_GROUP.keys())
-    x = np.arange(len(groups))
-
-    # Panel A: HEP amplitude by DoC group (Pred 6.b)
-    ax = axes[0]
-    means = [data["hep_by_group"][g].mean() for g in groups]
-    sems = [data["hep_by_group"][g].std() / np.sqrt(N_PER_GROUP[g]) for g in groups]
-    ax.bar(
-        x,
-        means,
-        yerr=sems,
-        color=[GROUP_COLORS[g] for g in groups],
-        alpha=0.85,
-        edgecolor="white",
-        width=0.5,
-        capsize=4,
-    )
-    ax.set_xticks(x)
-    ax.set_xticklabels(groups, fontsize=9)
-    ax.set_ylabel("HEP amplitude (a.u.)", fontsize=10)
-    ax.set_title("Pred 6.b — HEP discriminates\nMCS from VS/UWS", fontsize=10)
-
-    # Panel B: PCI by DoC group
-    ax = axes[1]
-    means_pci = [data["pci_by_group"][g].mean() for g in groups]
-    sems_pci = [data["pci_by_group"][g].std() / np.sqrt(N_PER_GROUP[g]) for g in groups]
-    ax.bar(
-        x,
-        means_pci,
-        yerr=sems_pci,
-        color=[GROUP_COLORS[g] for g in groups],
-        alpha=0.85,
-        edgecolor="white",
-        width=0.5,
-        capsize=4,
-    )
-    ax.axhline(
-        0.31, ls="--", lw=1, color="black", alpha=0.5, label="PCI threshold = 0.31"
-    )
-    ax.set_xticks(x)
-    ax.set_xticklabels(groups, fontsize=9)
-    ax.set_ylabel("PCI", fontsize=10)
-    ax.set_title("PCI by DoC group", fontsize=10)
-    ax.legend(fontsize=7)
-
-    # Panel C: Joint vs univariate R² (Pred 6.a)
-    ax = axes[2]
-    r2_hep = r_squared(data["all_gcs"], [data["all_hep"]])
-    r2_pci = r_squared(data["all_gcs"], [data["all_pci"]])
-    r2_joint = r_squared(data["all_gcs"], [data["all_hep"], data["all_pci"]])
-    model_names = ["HEP only", "PCI only", "HEP + PCI\n(joint)"]
-    r2_vals = [r2_hep, r2_pci, r2_joint]
-    bar_colors = [PALETTE["S_t"], "#9966FF", "#00CC99"]
-    bars = ax.bar(
-        model_names, r2_vals, color=bar_colors, alpha=0.85, edgecolor="white", width=0.5
-    )
-    for bar, val in zip(bars, r2_vals):
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,
-            val + 0.01,
-            f"{val:.3f}",
-            ha="center",
-            va="bottom",
-            fontsize=9,
-        )
-    ax.set_ylabel(r"$R^2$ for GCS-S recovery", fontsize=10)
-    ax.set_title("Pred 6.a — Joint model\noutperforms univariate", fontsize=10)
-    ax.set_ylim(0, 1)
+    plot_joint_scatter(axes[0], summary)
+    plot_longitudinal(axes[1], summary)
 
     label_axes(axes)
     fig.suptitle(
-        "Figure 8 — Protocol 6 — DoC-Biomarker: Disorders of Consciousness Biomarker Model",
+        "Figure 8 — Protocol 7 — DoC-Biomarker: Joint Ignition-Capacity and Interoceptive-Precision Biomarkers (Pred 7.A)",
         fontsize=11,
-        y=1.02,
+        y=1.03,
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure8.pdf")
+
     if show:
         import matplotlib.pyplot as plt
-
         plt.show()
     import matplotlib.pyplot as plt
-
     plt.close(fig)
 
 
@@ -188,7 +238,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 8")
     parser.add_argument("--no-show", action="store_true")
     args = parser.parse_args()
-    plot(simulate(), show=not args.no_show)
+
+    data = load_data()
+    summary = subject_level_summary(data)
+    n_total = len(summary["subject_id"])
+    counts = {g: int((summary["group"] == g).sum()) for g in GROUP_ORDER}
+    print(f"  N={n_total} subjects; group counts: {counts}")
+    for g in GROUP_ORDER:
+        mask = summary["group"] == g
+        print(
+            f"    {GROUP_DISPLAY[g]}: PCI={summary['pci'][mask].mean():.3f}  "
+            f"HEP={summary['hep'][mask].mean():.3f}"
+        )
+    plot(data, show=not args.no_show)
 
 
 if __name__ == "__main__":

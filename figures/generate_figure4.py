@@ -1,10 +1,23 @@
-"""Figure 4 — Protocol 2 — Somatic-AgentSim: Somatic marker agent performance advantage (Pred 2.a–Pred 2.e).
+"""Figure 4 — Protocol 3 (Anticipation-fMRI): predicted vmPFC-posterior-insula
+anticipatory coupling (Pred 3.B-Pred 3.D).
 
-Simulates five agent types from protocol_2_somatic_agent_sim.json
-under three volatility levels and shows reward advantage of the full APGI
-agent with somatic marker M̂ over β-lesion and other-lesion agents (Pred 2.a–Pred 2.d).
-Pred 2.e: full APGI generative model achieves lower BIC than GNWT-only and Standard PP
-when fit to human IGT trial-by-trial choice sequences (ΔBIC ≥ 10).
+Per OUP-Protocols.txt Figure 4 caption:
+  (A) vmPFC-pIC PPI coupling is stronger during anticipation than at outcome
+      (Pred 3.B).
+  (B) vmPFC BOLD is driven by option expected value (valence), not by
+      sensory contrast (Pred 3.C).
+  (C) Coupling is present under a long foreperiod (2000-4000 ms) but
+      abolished without one (Pred 3.D) -- dissociating anticipatory
+      Πⁱ_eff retrieval from outcome-locked εⁱ encoding.
+  Bars show group means +/- SEM; values are illustrative pre-data
+  predictions (no dedicated seed dataset exists for Protocol 3; this
+  protocol's fMRI/PPI measures are simulated from the protocol's specified
+  effect sizes, consistent with the "illustrative pre-data prediction"
+  framing in the spec).
+
+This content was moved here (unchanged in substance) from the previous
+generate_figure5.py to match the Figure-N <-> Protocol-(N-1) numbering
+audited against OUP-Protocols.txt.
 
 Run:
     python figures/generate_figure4.py
@@ -19,13 +32,6 @@ import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from apgi.core import (  # noqa: E402
-    compute_pi_i_eff,
-    compute_S_t,
-    ignition_criterion,
-    step_theta,
-    theta_equilibrium,
-)
 from figures.utils import (  # noqa: E402
     HALF_WIDTH,
     PALETTE,
@@ -37,123 +43,104 @@ from figures.utils import (  # noqa: E402
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
-# Protocol 3 APGI parameters
-ALPHA = 0.3
-BETA = 0.5
-GAMMA_V = 0.6
-GAMMA_A = 0.3
-PI_I_BASELINE = 1.0
-VOLATILITY_LEVELS = [0.1, 0.3, 0.6]
-N_TRIALS = 500
-N_AGENTS = 200
+# Protocol 3 parameters (protocol_3_anticipation_fmri.json)
+N_SUBJECTS = 36
 
 
-def somatic_marker(V_ca: float, A_ca: float) -> float:
-    return GAMMA_V * V_ca + GAMMA_A * A_ca
-
-
-def run_agent(agent_type: str, sigma_env: float, rng: np.random.Generator) -> float:
-    """Run one agent for N_TRIALS and return cumulative normalised reward."""
-    rewards = np.zeros(N_TRIALS)
-    theta_t = theta_equilibrium(1.0, 0.5, lambda_theta=ALPHA, kappa_meta=BETA)
-
-    for t in range(N_TRIALS):
-        C_metabolic = rng.uniform(0.5, 2.0)
-        V_info = rng.uniform(0.1, 1.0)
-        V_ca = rng.uniform(0.2, 0.8)
-        A_ca = rng.uniform(0.1, 0.5)
-
-        if agent_type == "full_apgi":
-            M_hat = somatic_marker(V_ca, A_ca)
-            pi_i_eff = compute_pi_i_eff(PI_I_BASELINE, BETA, M_hat)
-        elif agent_type == "beta_lesion":
-            pi_i_eff = compute_pi_i_eff(
-                PI_I_BASELINE, 0.0, 0.0
-            )  # β = 0: somatic channel disabled
-        elif agent_type == "pi_i_lesion":
-            C_metabolic = 0.0  # metabolic signal suppressed
-            pi_i_eff = PI_I_BASELINE  # Πⁱ_eff held constant
-        elif agent_type == "alpha_lesion":
-            V_info = 0.0  # α = 0
-            pi_i_eff = compute_pi_i_eff(PI_I_BASELINE, 0.0, 0.0)
-        else:  # random
-            rewards[t] = rng.uniform(0, 1) * (1 - sigma_env)
-            continue
-        pi_e = rng.uniform(0.8, 1.5)
-        z_e = rng.uniform(0.2, 1.0) * (1 + sigma_env * rng.standard_normal())
-        z_i = rng.uniform(0.1, 0.8)
-        S_t = compute_S_t(pi_e, z_e, pi_i_eff, z_i)
-        ignited = ignition_criterion(S_t, theta_t)
-        theta_t = step_theta(
-            theta_t, C_metabolic, V_info, lambda_theta=ALPHA, kappa_meta=BETA
-        )
-
-        # Reward: ignition under volatile conditions is harder → higher value when achieved
-        base_reward = rng.binomial(1, max(0.1, 0.7 - sigma_env * 0.5))
-        rewards[t] = float(ignited) * base_reward
-
-    return float(rewards.mean())
-
-
-def simulate(seed: int = 42) -> dict:
+def simulate_ppi(n_subjects: int = N_SUBJECTS, seed: int = 5) -> dict:
     rng = np.random.default_rng(seed)
-    agents = ["full_apgi", "beta_lesion", "pi_i_lesion", "alpha_lesion", "random"]
-    results: dict[str, dict[float, list[float]]] = {
-        a: {v: [] for v in VOLATILITY_LEVELS} for a in agents
+
+    # PPI coefficients: anticipation window > outcome window (Pred 3.b)
+    ppi_anticipation = rng.normal(0.42, 0.12, n_subjects)
+    ppi_outcome = rng.normal(0.11, 0.10, n_subjects)
+
+    # vmPFC BOLD: EV-parametric (valence) vs. contrast-parametric (Pred 3.c)
+    bold_valence = rng.normal(0.55, 0.14, n_subjects)  # sensitive to option EV
+    bold_contrast = rng.normal(0.08, 0.11, n_subjects)  # insensitive to contrast
+
+    # Foreperiod manipulation (Pred 3.d): long vs. 0 ms foreperiod
+    ppi_long_fp = rng.normal(0.44, 0.11, n_subjects)
+    ppi_no_fp = rng.normal(0.09, 0.10, n_subjects)
+
+    return {
+        "ppi_anticipation": ppi_anticipation,
+        "ppi_outcome": ppi_outcome,
+        "bold_valence": bold_valence,
+        "bold_contrast": bold_contrast,
+        "ppi_long_fp": ppi_long_fp,
+        "ppi_no_fp": ppi_no_fp,
     }
-    for agent in agents:
-        for sigma in VOLATILITY_LEVELS:
-            for _ in range(N_AGENTS):
-                r = run_agent(agent, sigma, rng)
-                results[agent][sigma].append(r)
-    return results
 
 
-def plot(results: dict, show: bool = True) -> None:
+def plot(data: dict, show: bool = True) -> None:
     fig, axes = make_figure(ncols=3, width=HALF_WIDTH * 3, height=PANEL_HEIGHT)
 
-    agent_colors = {
-        "full_apgi": PALETTE["S_t"],
-        "beta_lesion": PALETTE["theta"],
-        "pi_i_lesion": "#9966FF",
-        "alpha_lesion": "#FFCC00",
-        "random": "#AAAAAA",
-    }
-    agent_labels = {
-        "full_apgi": "Full APGI",
-        "beta_lesion": "β-lesion",
-        "pi_i_lesion": "Πⁱ-lesion",
-        "alpha_lesion": "α-lesion",
-        "random": "Random",
-    }
+    # Panel A: PPI anticipation vs outcome (Pred 3.b)
+    ax = axes[0]
+    means = [data["ppi_anticipation"].mean(), data["ppi_outcome"].mean()]
+    sems = [
+        data["ppi_anticipation"].std() / np.sqrt(N_SUBJECTS),
+        data["ppi_outcome"].std() / np.sqrt(N_SUBJECTS),
+    ]
+    ax.bar(
+        ["Anticipation", "Outcome"],
+        means,
+        yerr=sems,
+        color=[PALETTE["S_t"], "#9966FF"],
+        alpha=0.85,
+        edgecolor="white",
+        width=0.4,
+        capsize=5,
+    )
+    ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
+    ax.set_ylabel("vmPFC–pIC PPI coefficient", fontsize=10)
+    ax.set_title("Pred 3.b — Anticipatory coupling\npeaks before outcome", fontsize=10)
 
-    for ax, sigma in zip(axes, VOLATILITY_LEVELS):
-        means = {a: np.mean(results[a][sigma]) for a in agent_labels}
-        sems = {a: np.std(results[a][sigma]) / np.sqrt(N_AGENTS) for a in agent_labels}
-        x = np.arange(len(agent_labels))
-        ax.bar(
-            x,
-            [means[a] for a in agent_labels],
-            yerr=[sems[a] for a in agent_labels],
-            color=[agent_colors[a] for a in agent_labels],
-            alpha=0.85,
-            edgecolor="white",
-            width=0.6,
-            capsize=3,
-        )
-        ax.set_xticks(x)
-        ax.set_xticklabels(
-            [agent_labels[a] for a in agent_labels], fontsize=7, rotation=20, ha="right"
-        )
-        ax.set_ylabel(
-            "Mean reward" if sigma == VOLATILITY_LEVELS[0] else "", fontsize=10
-        )
-        ax.set_title(f"σ_env = {sigma}", fontsize=10)
-        ax.set_ylim(0, 0.7)
+    # Panel B: vmPFC BOLD — valence vs contrast (Pred 3.c)
+    ax = axes[1]
+    means_b = [data["bold_valence"].mean(), data["bold_contrast"].mean()]
+    sems_b = [
+        data["bold_valence"].std() / np.sqrt(N_SUBJECTS),
+        data["bold_contrast"].std() / np.sqrt(N_SUBJECTS),
+    ]
+    ax.bar(
+        ["Option EV\n(valence)", "Sensory\ncontrast"],
+        means_b,
+        yerr=sems_b,
+        color=[PALETTE["S_t"], PALETTE["theta"]],
+        alpha=0.85,
+        edgecolor="white",
+        width=0.4,
+        capsize=5,
+    )
+    ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
+    ax.set_ylabel("vmPFC BOLD β (a.u.)", fontsize=10)
+    ax.set_title("Pred 3.c — vmPFC sensitive to\nvalence, not contrast", fontsize=10)
+
+    # Panel C: Foreperiod manipulation (Pred 3.d)
+    ax = axes[2]
+    means_fp = [data["ppi_long_fp"].mean(), data["ppi_no_fp"].mean()]
+    sems_fp = [
+        data["ppi_long_fp"].std() / np.sqrt(N_SUBJECTS),
+        data["ppi_no_fp"].std() / np.sqrt(N_SUBJECTS),
+    ]
+    ax.bar(
+        ["Long foreperiod\n(2000–4000 ms)", "No foreperiod\n(0 ms)"],
+        means_fp,
+        yerr=sems_fp,
+        color=[PALETTE["S_t"], "#AAAAAA"],
+        alpha=0.85,
+        edgecolor="white",
+        width=0.4,
+        capsize=5,
+    )
+    ax.axhline(0, ls="--", lw=0.8, color="black", alpha=0.4)
+    ax.set_ylabel("vmPFC–pIC PPI coefficient", fontsize=10)
+    ax.set_title("Pred 3.d — Anticipation drives\nvmPFC–insula coupling", fontsize=10)
 
     label_axes(axes)
     fig.suptitle(
-        "Figure 4 — Protocol 2 — Somatic-AgentSim: Somatic Marker Advantage (Pred 2.a)",
+        "Figure 4 — Protocol 3 — Anticipation-fMRI: vmPFC–Insula Anticipatory Coupling",
         fontsize=11,
         y=1.02,
     )
@@ -172,9 +159,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 4")
     parser.add_argument("--no-show", action="store_true")
     args = parser.parse_args()
-    print("Simulating agents across volatility levels…")
-    results = simulate()
-    plot(results, show=not args.no_show)
+    plot(simulate_ppi(), show=not args.no_show)
 
 
 if __name__ == "__main__":

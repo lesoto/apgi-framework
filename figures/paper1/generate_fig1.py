@@ -46,19 +46,19 @@ STAGES = [
         "tier": 2,
     },
     {
-        "label": "Stage 3\nSomatic-Marker\nAmplification",
+        "label": "Stage 3\nSomatic-\nMarker Amp.",
         "variable": r"$\Pi^i_{\mathrm{eff}}\,(\uparrow$ via $\beta_{\mathrm{SM}})$",
         "substrate": "vmPFC–VIP pathway",
         "tier": 2,
     },
     {
-        "label": r"Stage 4$\,S_t$" + "\nAccumulation",
+        "label": r"Stage 4" + "\n" + r"$S_t$ Accum.",
         "variable": r"$S_t$",
         "substrate": "L5 pyramidal recruitment",
         "tier": 3,
     },
     {
-        "label": "Stage 5\nIgnition Decision\n/ Global Broadcast",
+        "label": "Stage 5\nIgnition /\nBroadcast",
         "variable": r"$P(B_t{=}1)$",
         "substrate": "frontoparietal–\nthalamic workspace",
         "tier": 3,
@@ -69,7 +69,7 @@ STAGES = [
 def draw_pipeline(ax: plt.Axes) -> None:
     n = len(STAGES)
     # Wider boxes / tighter gaps so labels stay legible at true print width.
-    box_w, box_h = 0.155, 0.30
+    box_w, box_h = 0.175, 0.30
     gap = (1.0 - n * box_w) / (n + 1)
 
     for i, stage in enumerate(STAGES):
@@ -96,10 +96,11 @@ def draw_pipeline(ax: plt.Axes) -> None:
             stage["label"],
             ha="center",
             va="center",
-            fontsize=6.5,
+            fontsize=5.8,
             fontweight="bold",
             transform=ax.transAxes,
             zorder=4,
+            wrap=True,
         )
 
         # Variable annotation below — staggered to two heights (the Stage 3
@@ -207,14 +208,16 @@ def draw_pipeline(ax: plt.Axes) -> None:
 
 
 def draw_sigmoid_inset(ax: plt.Axes) -> None:
-    S = np.linspace(-1, 3, 300)
-    theta = 1.2
+    # theta_0 within the paper's stated range [0.25, 0.85] AU (Table S1),
+    # matching THETA_0_DEFAULT (0.60) from src/apgi/core.py.
+    theta = 0.6
     gamma = 5.0
+    S = np.linspace(-0.4, 1.6, 300)
     P = 1.0 / (1.0 + np.exp(-gamma * (S - theta)))
 
     ax.plot(S, P, lw=2, color=TIER_COLORS[3])
     ax.axvline(theta, lw=1.2, linestyle="--", color="#555555")
-    ax.fill_betweenx([0, 1], theta, 3, alpha=0.12, color=TIER_COLORS[3])
+    ax.fill_betweenx([0, 1], theta, 1.6, alpha=0.12, color=TIER_COLORS[3])
     ax.annotate(
         r"$\theta_t$",
         xy=(theta, 0.5),
@@ -226,7 +229,7 @@ def draw_sigmoid_inset(ax: plt.Axes) -> None:
     ax.set_ylabel(r"$P(\mathrm{ignition}\,|\,S_t, \theta_t)$", fontsize=7)
     ax.set_title("Ignition sigmoid", fontsize=7.5, style="italic")
     ax.set_ylim(-0.05, 1.05)
-    ax.set_xlim(-0.5, 2.8)
+    ax.set_xlim(-0.4, 1.6)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 

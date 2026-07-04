@@ -59,10 +59,12 @@ jobs:
         run: |
           pytest --nbval-lax \
             notebooks/quick_start.ipynb \
+            notebooks/protocol0_hep_proxy_validation.ipynb \
             notebooks/protocol1_cardiac_eeg.ipynb \
             notebooks/protocol2_somatic_agent_sim.ipynb \
             notebooks/protocol3_anticipation_fmri.ipynb \
-            notebooks/protocol4_insula_tms.ipynb \
-            notebooks/protocol5_ignition_ieeg.ipynb \
-            notebooks/protocol6_doc_biomarker.ipynb \
+            notebooks/protocol4_metabolic_crossover.ipynb \
+            notebooks/protocol5_insula_tms.ipynb \
+            notebooks/protocol6_ignition_ieeg.ipynb \
+            notebooks/protocol7_doc_biomarker.ipynb \
             --tb=short -q

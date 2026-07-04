@@ -98,6 +98,34 @@ def make_figure(
     return fig, flat
 
 
+def ensure_seed_dataset(
+    npz_path: pathlib.Path,
+    generator_name: str,
+    seed: int = 2025,
+) -> pathlib.Path:
+    """Return npz_path, generating it on the fly if the archive is absent.
+
+    data/seeds/ is gitignored (the datasets are meant to be fetched from
+    Zenodo or produced by `python data/generate_seeds.py`), so a fresh
+    checkout — e.g. CI — won't have it. Rather than falling back to a
+    separate, potentially-drifting synthetic stub, this calls the same
+    generator function data/generate_seeds.py uses, so the fallback data
+    is produced by the exact same logic as the real archived dataset.
+    """
+    if npz_path.exists():
+        return npz_path
+
+    print(f"[info] {npz_path.name} not found locally; generating via data/generate_seeds.py…")
+    repo_root = pathlib.Path(__file__).resolve().parent.parent
+    sys.path.insert(0, str(repo_root))
+    import importlib
+
+    generate_seeds = importlib.import_module("data.generate_seeds")
+    generator = getattr(generate_seeds, generator_name)
+    generated_path = generator(seed)
+    return pathlib.Path(generated_path)
+
+
 def save_figure(fig: Figure, path: pathlib.Path | str, dpi: int = 300) -> None:
     path = pathlib.Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

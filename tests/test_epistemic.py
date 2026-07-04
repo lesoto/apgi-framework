@@ -1,6 +1,5 @@
 """Regression tests for the three-tier epistemic architecture — Paper 4."""
 
-import math
 
 import pytest
 

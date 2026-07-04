@@ -1,7 +1,15 @@
-"""Paper 1 — Figure 3: Somatic-Marker Disinhibition Circuit (§4.2).
+"""Paper 1 — Figure 3: The Thermodynamic Bridge and the κ Parameter (§4.6).
 
-Schematic microcircuit diagram: vmPFC → insula → VIP+ → SST+ → L2/3 pyramid.
-Two inset panels (resting vs. somatic-marker retrieval state).
+Schematic bridge diagram: Landauer limit (J/bit, kT·ln2 @ 310K) -> ATP/spike
+biological overhead -> the APGI bridge parameter κ (≈100 ATP/bit, conditional
+on the network-state bit count). Explicitly distinguishes the per-bit unit
+conversion cost (κ) from the whole-event thermodynamic inefficiency factor
+(~1,700x the Landauer minimum for κ ≈ 100 ATP/bit), preventing cross-tier
+conflation (§4.6 caption).
+
+The Landauer minimum energy is computed via
+``apgi.extensions.epistemic.landauer_minimum_energy`` rather than hardcoded,
+so this figure stays numerically consistent with the rest of the codebase.
 
 Run:
     python figures/paper1/generate_fig3.py
@@ -18,419 +26,279 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
+from apgi.extensions.epistemic import (
+    BODY_TEMPERATURE_K,
+    KAPPA_ATP_PER_BIT_DEFAULT,
+    landauer_minimum_energy,
+)
 from figures.utils import save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
-# Connection-type palette chosen to NOT collide with the series-wide
-# Tier 1/2/3 colour convention (blue/red/green). These encode connection
-# type, not epistemic tier (see disambiguation note on the main panel).
-_EX = "#000000"  # excitatory  — black
-_IN = "#888888"  # inhibitory  — grey
-_DIS = "#daa520"  # disinhibition — gold
+# ---------------------------------------------------------------------------
+# §4.6 derivation constants (order-of-magnitude bridge, not fitted constants)
+# ---------------------------------------------------------------------------
+ATP_HYDROLYSIS_ENERGY_J = 5.07e-20  # J released per ATP molecule hydrolysed
+ATP_PER_SPIKE = 2.4e9  # ATP molecules per cortical action potential (Lennie 2003)
+SPIKES_PER_IGNITION = 1e9  # ~10^8 active neurons x ~10 spikes over ~500 ms
+TOTAL_ATP_PER_IGNITION = ATP_PER_SPIKE * SPIKES_PER_IGNITION  # ~2.4e18 ATP
+
+# Landauer minimum per bit, computed from the real function (not hardcoded).
+LANDAUER_J_PER_BIT = landauer_minimum_energy(1.0, BODY_TEMPERATURE_K)
+LANDAUER_ATP_PER_BIT = LANDAUER_J_PER_BIT / ATP_HYDROLYSIS_ENERGY_J
+
+# Network-state bit-count convention (§4.6): ~2e16 bits -> kappa ~ 1.2e2 ATP/bit
+NETWORK_STATE_BITS = TOTAL_ATP_PER_IGNITION / KAPPA_ATP_PER_BIT_DEFAULT
+
+# Whole-event thermodynamic inefficiency factor: kappa / Landauer(ATP/bit)
+INEFFICIENCY_FACTOR = KAPPA_ATP_PER_BIT_DEFAULT / LANDAUER_ATP_PER_BIT
 
 
-def _draw_node(ax, xy, label, color="#f7f7f7", edgecolor="#333333", r=0.06, fontsize=8):
-    circ = mpatches.Circle(
-        xy, r, facecolor=color, edgecolor=edgecolor, lw=1.5, zorder=3
+def _box(ax, xy, w, h, text, color, fontsize=8, edgecolor="#333333"):
+    rect = mpatches.FancyBboxPatch(
+        xy,
+        w,
+        h,
+        boxstyle="round,pad=0.012",
+        linewidth=1.5,
+        edgecolor=edgecolor,
+        facecolor=color,
+        zorder=3,
     )
-    ax.add_patch(circ)
+    ax.add_patch(rect)
     ax.text(
-        xy[0],
-        xy[1],
-        label,
+        xy[0] + w / 2,
+        xy[1] + h / 2,
+        text,
         ha="center",
         va="center",
         fontsize=fontsize,
         fontweight="bold",
         zorder=4,
-        wrap=True,
         multialignment="center",
     )
 
 
-def _arrow(ax, src, dst, color, style="->", lw=1.5, label=None, label_offset=(0, 0.04)):
+def _arrow(ax, src, dst, color="#333333", lw=2.0, label=None, label_dy=0.05):
     ax.annotate(
         "",
         xy=dst,
         xytext=src,
-        arrowprops=dict(arrowstyle=style, color=color, lw=lw),
+        arrowprops=dict(arrowstyle="-|>", color=color, lw=lw),
         zorder=5,
     )
     if label:
-        mid = (
-            (src[0] + dst[0]) / 2 + label_offset[0],
-            (src[1] + dst[1]) / 2 + label_offset[1],
-        )
-        ax.text(mid[0], mid[1], label, fontsize=7, color=color, ha="center")
+        mid = ((src[0] + dst[0]) / 2, (src[1] + dst[1]) / 2 + label_dy)
+        ax.text(mid[0], mid[1], label, ha="center", fontsize=7, color=color)
 
 
-def draw_main_circuit(ax):
+def draw_bridge(ax) -> None:
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
 
-    nodes = {
-        "vmPFC": (0.12, 0.75),
-        "aInsula": (0.35, 0.75),
-        "VIP": (0.58, 0.75),
-        "SST": (0.58, 0.45),
-        "L23pyr": (0.82, 0.45),
-    }
+    stage_y = 0.38
+    box_h = 0.22
+    box_w = 0.24
+    gap = (1.0 - 3 * box_w) / 4
 
-    colors = {
-        "vmPFC": "#cce5ff",
-        "aInsula": "#d4edda",
-        "VIP": "#fff3cd",
-        "SST": "#f8d7da",
-        "L23pyr": "#e2d9f3",
-    }
-    labels = {
-        "vmPFC": "vmPFC",
-        "aInsula": "ant.\ninsula",
-        "VIP": "VIP+\ninterneuron",
-        "SST": "SST+\nMartinotti",
-        "L23pyr": "L2/3\npyramidal\n(dendritic)",
-    }
+    x1 = gap
+    x2 = gap + (box_w + gap)
+    x3 = gap + 2 * (box_w + gap)
 
-    for key, xy in nodes.items():
-        _draw_node(ax, xy, labels[key], color=colors[key], r=0.075)
-
-    # vmPFC → aInsula (excitatory)
-    _arrow(
+    _box(
         ax,
-        (nodes["vmPFC"][0] + 0.075, nodes["vmPFC"][1]),
-        (nodes["aInsula"][0] - 0.075, nodes["aInsula"][1]),
-        _EX,
-        label="direct\nprojection",
-        label_offset=(0, 0.06),
+        (x1, stage_y),
+        box_w,
+        box_h,
+        f"Landauer limit\n$kT\\ln2 \\approx$ {LANDAUER_J_PER_BIT:.2e} J/bit\n(310 K)",
+        "#cce5ff",
+        fontsize=7.5,
+    )
+    _box(
+        ax,
+        (x2, stage_y),
+        box_w,
+        box_h,
+        "ATP hydrolysis\n"
+        f"{ATP_PER_SPIKE:.1e} ATP/spike\n"
+        f"$\\approx {LANDAUER_ATP_PER_BIT:.2f}$ ATP/bit\n(thermodynamic floor)",
+        "#d4edda",
+        fontsize=7,
+    )
+    _box(
+        ax,
+        (x3, stage_y),
+        box_w,
+        box_h,
+        r"APGI bridge $\kappa$"
+        f"\n$\\approx {KAPPA_ATP_PER_BIT_DEFAULT:.0f}$ ATP/bit\n"
+        "(network-state\nbit-count convention)",
+        "#fff3cd",
+        fontsize=7.5,
     )
 
-    # aInsula → VIP (excitatory)
     _arrow(
         ax,
-        (nodes["aInsula"][0] + 0.075, nodes["aInsula"][1]),
-        (nodes["VIP"][0] - 0.075, nodes["VIP"][1]),
-        _EX,
+        (x1 + box_w, stage_y + box_h / 2),
+        (x2, stage_y + box_h / 2),
+        color="#2166ac",
+        label="unit\nconversion",
     )
-
-    # VIP → SST (inhibitory)
     _arrow(
         ax,
-        (nodes["VIP"][0], nodes["VIP"][1] - 0.075),
-        (nodes["SST"][0], nodes["SST"][1] + 0.075),
-        _IN,
-        label="inhibition",
-        label_offset=(0.06, 0),
+        (x2 + box_w, stage_y + box_h / 2),
+        (x3, stage_y + box_h / 2),
+        color="#4dac26",
+        label="biological\noverhead",
     )
 
-    # SST → L23pyr (releases inhibition → disinhibition arrow)
-    _arrow(
-        ax,
-        (nodes["SST"][0] + 0.075, nodes["SST"][1]),
-        (nodes["L23pyr"][0] - 0.075, nodes["L23pyr"][1]),
-        _DIS,
-        style="-|>",
-        label="disinhibition\n→ high $\\Pi^i_{\\mathrm{eff}}$",
-        label_offset=(0, -0.08),
+    # Whole-event inefficiency annotation spanning stage 1 -> stage 3.
+    ax.annotate(
+        "",
+        xy=(x3 + box_w / 2, stage_y - 0.10),
+        xytext=(x1 + box_w / 2, stage_y - 0.10),
+        arrowprops=dict(
+            arrowstyle="-",
+            color="#d6604d",
+            lw=1.3,
+            linestyle="--",
+            connectionstyle="bar,fraction=0.15",
+        ),
+        zorder=2,
     )
-
-    # Result annotation
     ax.text(
-        nodes["L23pyr"][0],
-        nodes["L23pyr"][1] - 0.14,
-        r"$\Pi^i_{\mathrm{eff}}$ elevation",
+        (x1 + x3 + box_w) / 2,
+        stage_y - 0.24,
+        f"whole-event thermodynamic inefficiency $\\approx {INEFFICIENCY_FACTOR:,.0f}\\times$\n"
+        "the Landauer minimum (distinct from $\\kappa$, the per-bit unit cost)",
         ha="center",
         va="top",
-        fontsize=8,
-        color=_DIS,
-        fontweight="bold",
+        fontsize=6.8,
+        color="#d6604d",
+        style="italic",
     )
 
-    # Legend
-    for color, label in [
-        (_EX, "Excitatory"),
-        (_IN, "Inhibitory"),
-        (_DIS, "Disinhibition"),
-    ]:
-        ax.plot([], [], color=color, lw=2, label=label)
-    leg = ax.legend(
-        loc="lower left",
-        fontsize=7,
-        framealpha=0.8,
-        title="Connection type (not epistemic tier)",
-        title_fontsize=6.5,
-    )
-    leg.get_title().set_color("#555555")
-
-    ax.set_title(
-        "Proposed circuit — vmPFC→insula→VIP+→SST+→L2/3 pyramid\n(convergent anatomical evidence; causal validation pending)",
-        fontsize=8.5,
-    )
-
-    # Caveat
     ax.text(
         0.5,
-        0.01,
-        "Proposed pathway — causal evidence pending chemogenetic/optogenetic validation (§6.6)",
+        0.98,
+        "Figure 3 — The Thermodynamic Bridge and the $\\kappa$ Parameter (§4.6)",
         ha="center",
-        va="bottom",
-        fontsize=6.5,
-        color="#888888",
+        va="top",
+        fontsize=11,
+        fontweight="bold",
+        transform=ax.transAxes,
+    )
+    ax.text(
+        0.5,
+        0.90,
+        r"$\kappa \approx 100$ ATP/bit is an order-of-magnitude calibration target, not a fitted constant"
+        "\n(conditional on the network-state bit-count convention; falsification window $\\kappa \\in [10, 1{,}000]$ ATP/bit)",
+        ha="center",
+        va="top",
+        fontsize=7.2,
+        color="#555555",
         style="italic",
         transform=ax.transAxes,
     )
 
 
-def draw_state_inset(ax, title, beta_sm_state):
-    """Draw resting (low) or active (high) β_SM state."""
+def draw_ignition_energy_panel(ax) -> None:
+    """Panel B — the ~2x10^18 ATP-per-ignition-event derivation (§4.6 steps 1-3)."""
+    ax.axis("off")
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.axis("off")
 
-    active = beta_sm_state == "high"
-    vip_alpha = 0.9 if active else 0.2
-    sst_alpha = 0.15 if active else 0.8
-    dend_color = _DIS if active else "#aaaaaa"
-
-    items = [
-        (0.25, 0.78, "vmPFC", "#cce5ff", 0.9 if active else 0.3),
-        (0.25, 0.55, "VIP+", "#fff3cd", vip_alpha),
-        (0.25, 0.32, "SST+", "#f8d7da", sst_alpha),
-        (0.75, 0.50, "L2/3\npyr.\ndendrite", dend_color, 0.85),
+    steps = [
+        (
+            "1. ATP per spike",
+            f"{ATP_PER_SPIKE:.1e} ATP\n(Attwell & Laughlin 2001;\nscaled per Lennie 2003)",
+        ),
+        (
+            "2. Spikes per ignition",
+            f"{SPIKES_PER_IGNITION:.0e} spikes\n(~$10^8$ active neurons\n"
+            "x ~10 spikes / ~500 ms)",
+        ),
+        (
+            "3. Total ATP per ignition",
+            f"{TOTAL_ATP_PER_IGNITION:.1e} ATP\n(order-of-magnitude)",
+        ),
     ]
-    for x, y, lbl, col, alpha in items:
-        circ = mpatches.Circle(
-            (x, y),
-            0.10,
-            facecolor=col,
-            edgecolor="#333333",
-            lw=1.2,
-            alpha=alpha,
-            zorder=3,
-        )
-        ax.add_patch(circ)
-        ax.text(
-            x,
-            y,
-            lbl,
-            ha="center",
-            va="center",
-            fontsize=6.5,
-            zorder=4,
-            alpha=min(alpha + 0.2, 1.0),
-            fontweight="bold",
-            multialignment="center",
-        )
+    y = 0.78
+    dy = 0.30
+    for title, body in steps:
+        ax.text(0.02, y, title, fontsize=8, fontweight="bold", va="top")
+        ax.text(0.06, y - 0.09, body, fontsize=7.5, va="top", color="#333333")
+        y -= dy
 
-    # Arrows
-    _arrow(ax, (0.25, 0.68), (0.25, 0.65), _EX if active else "#aaaaaa", lw=1.2)
-    _arrow(ax, (0.25, 0.45), (0.25, 0.42), _IN if not active else "#aaaaaa", lw=1.2)
-    _arrow(ax, (0.35, 0.50), (0.65, 0.50), dend_color, lw=1.5)
-
-    pi_label = (
-        r"high $\Pi^i_{\mathrm{eff}}$" if active else r"low $\Pi^i_{\mathrm{eff}}$"
-    )
     ax.text(
-        0.75,
-        0.35,
-        pi_label,
-        ha="center",
-        fontsize=7,
-        color=dend_color,
-        fontweight="bold",
-    )
-
-    bsm_label = (
-        r"$\beta_{\mathrm{SM}}$ high" if active else r"$\beta_{\mathrm{SM}}$ low"
-    )
-    ax.text(0.5, 0.07, bsm_label, ha="center", fontsize=7.5, color="#7b3294")
-    ax.set_title(title, fontsize=8, fontweight="bold")
-
-
-def draw_l5_pyramid(ax):
-    """Panel C — L5 thick-tufted pyramidal cell: apical vs. basal dendritic
-    mismatch computation with NMDA Ca2+ plateau supporting eps^e / eps^i."""
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
-
-    # Cortical layer reference bands
-    for y0, y1, lbl, col in [
-        (0.84, 1.00, "L1", "#f2f2f2"),
-        (0.42, 0.84, "L2/3", "#fafafa"),
-        (0.08, 0.42, "L5", "#f2f2f2"),
-    ]:
-        ax.add_patch(
-            mpatches.Rectangle(
-                (0.0, y0), 1.0, y1 - y0, facecolor=col, edgecolor="none", zorder=0
-            )
-        )
-        ax.text(
-            0.03,
-            (y0 + y1) / 2,
-            lbl,
-            fontsize=7,
-            color="#999999",
-            va="center",
-            ha="left",
-            style="italic",
-            zorder=1,
-        )
-
-    trunk_x = 0.52
-    soma_y = 0.30
-
-    # Apical trunk (soma -> L1 tuft)
-    ax.plot(
-        [trunk_x, trunk_x], [soma_y + 0.06, 0.88], color="#333333", lw=2.2, zorder=2
-    )
-    # Apical tuft branches in L1
-    for dx in (-0.14, -0.07, 0.0, 0.07, 0.14):
-        ax.plot(
-            [trunk_x, trunk_x + dx], [0.88, 0.97], color="#333333", lw=1.2, zorder=2
-        )
-    # Basal dendrites
-    for dx in (-0.16, -0.08, 0.08, 0.16):
-        ax.plot(
-            [trunk_x, trunk_x + dx],
-            [soma_y - 0.05, soma_y - 0.16],
-            color="#333333",
-            lw=1.2,
-            zorder=2,
-        )
-    # Axon
-    ax.annotate(
-        "",
-        xy=(trunk_x, 0.10),
-        xytext=(trunk_x, soma_y - 0.06),
-        arrowprops=dict(arrowstyle="->", color="#333333", lw=1.5),
-        zorder=2,
-    )
-
-    # Soma
-    ax.add_patch(
-        mpatches.Ellipse(
-            (trunk_x, soma_y),
-            0.13,
-            0.15,
-            facecolor="#e2d9f3",
-            edgecolor="#333333",
-            lw=1.5,
-            zorder=3,
-        )
-    )
-    ax.text(
-        trunk_x,
-        soma_y,
-        "L5\nsoma",
-        ha="center",
-        va="center",
-        fontsize=6.5,
-        fontweight="bold",
-        zorder=4,
-    )
-
-    # NMDA Ca2+ plateau / coincidence-detection zone on apical trunk
-    ax.add_patch(
-        mpatches.Ellipse(
-            (trunk_x, 0.62),
-            0.07,
-            0.10,
-            facecolor=_DIS,
-            edgecolor="#7a5c00",
-            lw=1.0,
-            alpha=0.85,
-            zorder=3,
-        )
-    )
-
-    # Apical input (top-down prediction) — excitatory
-    ax.annotate(
-        "",
-        xy=(trunk_x - 0.10, 0.92),
-        xytext=(0.20, 0.92),
-        arrowprops=dict(arrowstyle="-|>", color=_EX, lw=1.4),
-        zorder=4,
-    )
-    ax.text(
-        0.19,
-        0.92,
-        "top-down\nprediction",
-        ha="right",
-        va="center",
-        fontsize=6.5,
-        color=_EX,
-    )
-
-    # Basal input (bottom-up evidence) — excitatory
-    ax.annotate(
-        "",
-        xy=(trunk_x - 0.10, soma_y - 0.13),
-        xytext=(0.20, soma_y - 0.13),
-        arrowprops=dict(arrowstyle="-|>", color=_EX, lw=1.4),
-        zorder=4,
-    )
-    ax.text(
-        0.19,
-        soma_y - 0.13,
-        "bottom-up\nevidence",
-        ha="right",
-        va="center",
-        fontsize=6.5,
-        color=_EX,
-    )
-
-    # Plateau annotation
-    ax.annotate(
-        "NMDA Ca²⁺ plateau\n(apical–basal\ncoincidence)",
-        xy=(trunk_x + 0.035, 0.62),
-        xytext=(0.72, 0.66),
-        fontsize=6.5,
-        color="#7a5c00",
-        ha="left",
-        va="center",
-        arrowprops=dict(arrowstyle="->", color="#7a5c00", lw=0.9),
-    )
-
-    # Output mismatch annotation
-    ax.text(
-        trunk_x,
-        0.045,
-        r"mismatch $\to\ \varepsilon^e / \varepsilon^i$",
+        0.5,
+        1.0,
+        "Per-ignition energy budget",
         ha="center",
         va="top",
-        fontsize=8,
-        color="#333333",
+        fontsize=9,
         fontweight="bold",
     )
 
-    ax.set_title(
-        "L5 thick-tufted pyramidal cell\napical–basal mismatch computation",
-        fontsize=8,
+
+def draw_bit_count_panel(ax) -> None:
+    """Panel C — network-state vs. percept-level bit-count conventions."""
+    ax.axis("off")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+
+    ax.text(
+        0.5,
+        1.0,
+        "Bit-count convention determines $\\kappa$",
+        ha="center",
+        va="top",
+        fontsize=9,
         fontweight="bold",
+    )
+
+    rows = [
+        ("Percept-level coding\n(~1-2 bits/spike)", "~$10^9$-$10^{10}$ bits", r"$\kappa \approx 10^8$-$10^9$ ATP/bit"),
+        ("Network-state activation\npatterns (~$10^{12}$ synapses)", "~$2\\times10^{16}$ bits", r"$\kappa \approx 10^2$ ATP/bit"),
+    ]
+    y = 0.78
+    dy = 0.36
+    for label, bits, kappa in rows:
+        ax.text(0.02, y, label, fontsize=7.2, va="top", fontweight="bold", color="#333333")
+        ax.text(0.5, y, bits, fontsize=7.5, va="top", ha="center", color="#2166ac")
+        ax.text(0.98, y, kappa, fontsize=7.5, va="top", ha="right", color="#4dac26")
+        y -= dy
+
+    ax.text(
+        0.5,
+        0.05,
+        "Six orders of magnitude apart — the [10, 1,000] ATP/bit\n"
+        "falsification window is conditional on the network-state convention.",
+        ha="center",
+        va="bottom",
+        fontsize=6.8,
+        color="#888888",
+        style="italic",
     )
 
 
 def plot(show: bool = True) -> None:
-    fig = plt.figure(figsize=(14, 8.5))
-    gs = fig.add_gridspec(2, 3, height_ratios=[1.15, 1.0], hspace=0.4, wspace=0.35)
+    fig = plt.figure(figsize=(12, 7.5))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.1, 1.0], hspace=0.35, wspace=0.3)
 
     ax_main = fig.add_subplot(gs[0, :])
-    ax_rest = fig.add_subplot(gs[1, 0])
-    ax_active = fig.add_subplot(gs[1, 1])
-    ax_l5 = fig.add_subplot(gs[1, 2])
+    ax_energy = fig.add_subplot(gs[1, 0])
+    ax_bits = fig.add_subplot(gs[1, 1])
 
-    draw_main_circuit(ax_main)
-    draw_state_inset(ax_rest, "Resting state\n(β_SM low)", "low")
-    draw_state_inset(ax_active, "Somatic-marker\nretrieval (β_SM high)", "high")
-    draw_l5_pyramid(ax_l5)
+    draw_bridge(ax_main)
+    draw_ignition_energy_panel(ax_energy)
+    draw_bit_count_panel(ax_bits)
 
-    # Panel letters
-    for ax, lbl in [(ax_main, "A"), (ax_rest, "B"), (ax_l5, "C")]:
+    for ax, lbl in [(ax_main, "A"), (ax_energy, "B"), (ax_bits, "C")]:
         ax.text(
             -0.02,
-            1.04,
+            1.05,
             lbl,
             transform=ax.transAxes,
             fontsize=13,
@@ -439,14 +307,8 @@ def plot(show: bool = True) -> None:
             ha="right",
         )
 
-    fig.suptitle(
-        "Figure 3 — Proposed Somatic-Marker Disinhibition Circuit (§4.1.2 / §4.2)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.00,
-    )
     fig.tight_layout()
-    save_figure(fig, OUTPUT_DIR / "fig3_somatic_marker_circuit.pdf")
+    save_figure(fig, OUTPUT_DIR / "fig3_thermodynamic_bridge.pdf")
     if show:
         plt.show()
     plt.close(fig)

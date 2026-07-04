@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
+from apgi.extensions.epistemic import evaluate_theory
 from figures.utils import label_axes, save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
@@ -34,17 +35,44 @@ CRITERIA = [
     "C7\nCausal Road.",
 ]
 
-# Scores 0–2; APGI C3 = 1–2 range → midpoint 1.5 ± 0.5
-# Values verified against Table 5. Two prior misplots corrected:
-#   GNWT C2 (Bridge Principles)  = 0  ("no bridge from broadcast to info-reduction")
-#   IIT 3.0 C7 (Causal Roadmap)  = 0  ("no causal manipulation predictions at scale")
+# Scores 0-2, transcribed verbatim from the spec's Table 5 prose (verified
+# directly against OUP-Paper4-EpistemicArchitecture.txt, the row beginning
+# "Criterion | GNWT | IIT 3.0 | PP/FEP | APGI (self-audit)"):
+#
+#   1. Tier Transparency:       GNWT=1, IIT=1, PP/FEP=1, APGI=2
+#   2. Bridge Principles:       GNWT=0, IIT=0, PP/FEP=1, APGI=1
+#   3. Quantitative Benchmarks: GNWT=1, IIT=0, PP/FEP=1, APGI=1-2 (T3:2, T1:0-1)
+#   4. Falsification Conditions:GNWT=1, IIT=0, PP/FEP=1, APGI=1-2 (T3:2, T1:1)
+#   5. Alternative Comparison:  GNWT=1, IIT=1, PP/FEP=1, APGI=1
+#   6. Evolutionary Plausibility:GNWT=1, IIT=0, PP/FEP=1, APGI=1
+#   7. Causal Roadmap:          GNWT=1, IIT=0, PP/FEP=1, APGI=2
+#
+# APGI's C3 and C4 are reported as tier-resolved ranges, not point scores:
+# C3 spans Tier1=0 (Tier 1: 0-1 proxy only, plotted at its lower bound) to
+# Tier3=2, midpoint 1.0; C4 spans Tier1=1 to Tier3=2, midpoint 1.5.
 FRAMEWORKS = {
-    "GNWT": [1.5, 0.0, 1.5, 1.5, 1.0, 1.0, 2.0],
-    "IIT 3.0": [1.0, 0.5, 1.0, 1.0, 1.0, 1.5, 0.0],
-    "PP/FEP": [1.5, 1.0, 1.0, 1.5, 1.5, 1.5, 2.0],
-    "APGI": [1.5, 1.5, 1.5, 1.5, 1.5, 1.0, 2.0],  # midpoints
+    "GNWT": [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    "IIT 3.0": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+    "PP/FEP": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    "APGI": [2.0, 1.0, 1.0, 1.5, 1.0, 1.0, 2.0],  # C3/C4 plotted at range midpoints
 }
-APGI_ERRORS = [0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0]  # C3 range bar
+# Visible error bars for APGI's tier-resolved ranges: C3 spans 0-2 (midpoint
+# 1.0, half-range 1.0); C4 spans 1-2 (midpoint 1.5, half-range 0.5).
+APGI_ERRORS = [0.0, 0.0, 1.0, 0.5, 0.0, 0.0, 0.0]
+
+# Demonstrate the real evaluate_theory() implementation is consistent with
+# the plotted APGI self-audit bars, using the midpoint raw scores above
+# (raw 0/1/2 scale; see apgi.extensions.epistemic.CRITERIA for ordering).
+_APGI_RAW_SCORES = {
+    "tier_transparency": 2,
+    "bridge_principles": 1,
+    "quantitative_benchmarks": 1,
+    "falsification_conditions": 2,  # Tier-3 sub-score, the higher end of the 1-2 range
+    "alternative_comparison": 1,
+    "evolutionary_plausibility": 1,
+    "causal_roadmap": 2,
+}
+APGI_EVALUATION = evaluate_theory(_APGI_RAW_SCORES)
 
 COLORS = {
     "GNWT": "#6baed6",
@@ -133,7 +161,7 @@ def plot(show: bool = True) -> None:
     )
     ax_bars.text(
         0.5,
-        -0.12,
+        -0.065,
         "APGI scores are self-audit values (§3.4, §7.2–7.3), "
         "applied with identical standards as competitor audits.",
         ha="center",
@@ -141,6 +169,21 @@ def plot(show: bool = True) -> None:
         color="#666666",
         style="italic",
         transform=ax_bars.transAxes,
+    )
+    ax_bars.text(
+        0.99,
+        0.97,
+        f"evaluate_theory() self-check (apgi.extensions.epistemic): "
+        f"composite={APGI_EVALUATION['composite']:.1f}/100, "
+        f"verdict={APGI_EVALUATION['verdict']}, "
+        f"gate_triggered={APGI_EVALUATION['foundational_gate_triggered']}",
+        ha="right",
+        va="top",
+        fontsize=6.5,
+        color="#555555",
+        style="italic",
+        transform=ax_bars.transAxes,
+        bbox=dict(facecolor="white", edgecolor="#cccccc", alpha=0.85, pad=3),
     )
 
     # ── Inset: Primary Falsification Gap strip ────────────────────────────

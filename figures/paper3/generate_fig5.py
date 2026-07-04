@@ -19,16 +19,47 @@ import numpy as np
 from scipy.special import expit
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
+from figures.paper3.generate_fig2 import LEVEL_TAUS
 from figures.utils import save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
-# Level maturation inflection ages and spectral crossovers
+
+def _fmt_freq(fc: float) -> str:
+    if fc >= 1:
+        return f"~{fc:.2g} Hz"
+    return f"~{fc:.1g} Hz"
+
+
+# Level maturation inflection ages and spectral crossovers. Corner
+# frequencies are derived from the same corrected LEVEL_TAUS used in Figure 2
+# (fig2's canonical geometric series, common ratio ≈ 133) so the two figures
+# never drift apart: f_c = 1/(2*pi*tau_lo) at each level boundary.
 INFLECTIONS = [
-    {"level": "L1", "age": 2, "freq": "~10 Hz", "color": "#fdcc8a"},
-    {"level": "L2", "age": 7, "freq": "~0.6 Hz", "color": "#fc8d59"},
-    {"level": "L3", "age": 13, "freq": "~0.01 Hz", "color": "#de2d26"},
-    {"level": "L4", "age": 25, "freq": "~10⁻⁴ Hz", "color": "#a50f15"},
+    {
+        "level": "L0/L1",
+        "age": 2,
+        "freq": _fmt_freq(1.0 / (2 * np.pi * LEVEL_TAUS["L0"])),
+        "color": "#fdcc8a",
+    },
+    {
+        "level": "L2",
+        "age": 7,
+        "freq": _fmt_freq(1.0 / (2 * np.pi * LEVEL_TAUS["L1"])),
+        "color": "#fc8d59",
+    },
+    {
+        "level": "L3",
+        "age": 13,
+        "freq": _fmt_freq(1.0 / (2 * np.pi * LEVEL_TAUS["L2"])),
+        "color": "#de2d26",
+    },
+    {
+        "level": "L4",
+        "age": 25,
+        "freq": _fmt_freq(1.0 / (2 * np.pi * LEVEL_TAUS["L3"])),
+        "color": "#a50f15",
+    },
 ]
 
 

@@ -1,129 +1,147 @@
-"""Figure 1 — APGI ignition dynamics.
+"""Figure 1 — Protocol 0 (HEP Proxy Validation): predicted validation of the
+heartbeat-evoked-potential (HEP) amplitude as a proxy for interoceptive
+precision (Πⁱ).
 
-Plots Sₜ and θₜ over a simulated trial sequence, highlighting ignition events.
+Per OUP-Protocols.txt Figure 1 caption:
+  (A) HEP amplitude (250-400 ms post-R) correlates with an orthogonal
+      behavioural interoceptive-precision index (heartbeat-discrimination
+      d'); the proxy is retained only if r >= 0.35 (Pred 0.A).
+  (B) Physostigmine (cholinergic probe) raises HEP amplitude by >= 15%
+      relative to placebo in a double-blind crossover (Pred 0.B).
+  (C) Trial-by-trial anterior-insula (aINS) BOLD tracks HEP amplitude at
+      r >= 0.30 after arousal control (Pred 0.C).
+
+Loads the archived seed dataset data/seeds/sim0_hep_proxy.npz (N=60: 30 main
++ 30 independent replication subjects) rather than inventing data inline.
 
 Run:
     python figures/generate_figure1.py
     python figures/generate_figure1.py --no-show   # CI mode
 """
 
+from __future__ import annotations
+
 import argparse
+import os
 import pathlib
 import sys
 
-import matplotlib.patches as mpatches
 import numpy as np
+from scipy.stats import pearsonr
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from apgi.core import (  # noqa: E402
-    BETA_SM_DEFAULT,
-    compute_pi_i_eff,
-    compute_S_t,
-    ignition_criterion,
-    step_theta,
-    theta_equilibrium,
+from figures.utils import (  # noqa: E402
+    HALF_WIDTH,
+    PALETTE,
+    PANEL_HEIGHT,
+    ensure_seed_dataset,
+    label_axes,
+    make_figure,
+    save_figure,
 )
-from figures.utils import PALETTE, make_figure, save_figure, vlines_ignition  # noqa: E402
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
+DATA_DIR = pathlib.Path(
+    os.environ.get("APGI_DATA_DIR", pathlib.Path(__file__).resolve().parent.parent / "data" / "seeds")
+)
 
 
-def simulate(
-    n_steps: int = 200,
-    seed: int = 0,
-) -> dict:
-    rng = np.random.default_rng(seed)
-
-    pi_e = rng.uniform(0.8, 1.5, n_steps)
-    z_e = rng.uniform(0.2, 1.0, n_steps)
-    pi_i = rng.uniform(0.5, 1.5, n_steps)
-    z_i = rng.uniform(0.1, 0.8, n_steps)
-    C_metabolic = rng.uniform(0.5, 2.0, n_steps)
-    V_information = rng.uniform(0.1, 1.0, n_steps)
-
-    alpha, beta = 0.3, 0.7
-    theta_t = theta_equilibrium(
-        C_metabolic[0], V_information[0], lambda_theta=alpha, kappa_meta=beta
-    )
-
-    S_t_series = np.empty(n_steps)
-    theta_series = np.empty(n_steps)
-    ignition_series = np.zeros(n_steps, dtype=bool)
-
-    for t in range(n_steps):
-        pi_i_eff = compute_pi_i_eff(float(pi_i[t]), BETA_SM_DEFAULT, 0.0)
-        S_t = compute_S_t(float(pi_e[t]), float(z_e[t]), pi_i_eff, float(z_i[t]))
-        S_t_series[t] = S_t
-        theta_series[t] = theta_t
-        ignition_series[t] = ignition_criterion(S_t, theta_t)
-        theta_t = step_theta(
-            theta_t,
-            float(C_metabolic[t]),
-            float(V_information[t]),
-            lambda_theta=alpha,
-            kappa_meta=beta,
-        )
-
-    return {
-        "S_t": S_t_series,
-        "theta": theta_series,
-        "ignition": ignition_series,
-    }
+def load_data(path: pathlib.Path | None = None) -> dict:
+    npz_path = path or ensure_seed_dataset(DATA_DIR / "sim0_hep_proxy.npz", "_gen_sim0_hep_proxy")
+    d = np.load(npz_path, allow_pickle=True)
+    return {k: d[k] for k in d.files}
 
 
 def plot(data: dict, show: bool = True) -> None:
-    fig, (ax,) = make_figure(ncols=1, width=10, height=4)
-    t = np.arange(len(data["S_t"]))
+    fig, axes = make_figure(ncols=3, width=HALF_WIDTH * 3, height=PANEL_HEIGHT)
 
-    ax.plot(
-        t,
-        data["S_t"],
-        lw=1.5,
-        color=PALETTE["S_t"],
-        label=r"$S_t$ (global integration)",
+    # ---- Panel A: HEP amplitude vs interoceptive d' (Pred 0.A, r >= 0.35) ----
+    ax = axes[0]
+    hep = data["hep_amplitude"]
+    dprime = data["d_prime"]
+    labels = data["sample_label"]
+    r, _ = pearsonr(hep, dprime)
+    for lbl, marker, color in [
+        ("main", "o", PALETTE["S_t"]),
+        ("replication", "^", PALETTE["theta"]),
+    ]:
+        mask = labels == lbl
+        ax.scatter(
+            hep[mask], dprime[mask], s=26, alpha=0.75, color=color,
+            edgecolors="white", linewidths=0.4, marker=marker, label=lbl.capitalize(),
+        )
+    m, b = np.polyfit(hep, dprime, 1)
+    x_line = np.linspace(hep.min(), hep.max(), 100)
+    ax.plot(x_line, m * x_line + b, color="#333333", lw=1.3, ls="--")
+    ax.annotate(f"r = {r:.3f}\n(threshold r ≥ 0.35)", xy=(0.05, 0.86),
+                xycoords="axes fraction", fontsize=8.5)
+    ax.set_xlabel("HEP amplitude, 250–400 ms (μV)", fontsize=9.5)
+    ax.set_ylabel("Heartbeat-discrimination d′", fontsize=9.5)
+    ax.set_title("Pred 0.A — HEP tracks\ninteroceptive precision", fontsize=10)
+    ax.legend(fontsize=7, loc="lower right")
+
+    # ---- Panel B: physostigmine vs placebo HEP effect (Pred 0.B, >=15%) ----
+    ax = axes[1]
+    placebo = data["hep_placebo"]
+    physo = data["hep_physostigmine"]
+    means = [placebo.mean(), physo.mean()]
+    sems = [placebo.std() / np.sqrt(len(placebo)), physo.std() / np.sqrt(len(physo))]
+    ax.bar(
+        ["Placebo", "Physostigmine"], means, yerr=sems,
+        color=[PALETTE["theta"], PALETTE["S_t"]], alpha=0.85, edgecolor="white",
+        width=0.5, capsize=5,
     )
-    ax.plot(
-        t,
-        data["theta"],
-        lw=1.5,
-        color=PALETTE["theta"],
-        linestyle="--",
-        label=r"$\theta_t$ (threshold)",
+    delta_pct = float(data["physo_delta_pct"].mean())
+    ax.annotate(
+        f"Δ = {delta_pct:+.1f}% (threshold ≥ 15%)",
+        xy=(0.5, 0.94), xycoords="axes fraction",
+        ha="center", fontsize=8.5,
     )
+    ax.set_ylabel("HEP amplitude (μV)", fontsize=9.5)
+    ax.set_ylim(0, max(means) * 1.35)
+    ax.set_title("Pred 0.B — Cholinergic\nelevation of HEP", fontsize=10)
 
-    vlines_ignition(ax, t, data["ignition"])
+    # ---- Panel C: HEP-aINS BOLD coupling (Pred 0.C, r >= 0.30) ----
+    ax = axes[2]
+    coupling = data["ains_coupling"]
+    ax.hist(coupling, bins=16, color=PALETTE["S_t"], alpha=0.8, edgecolor="white")
+    mean_coupling = float(coupling.mean())
+    ax.axvline(mean_coupling, color="#333333", lw=1.5, ls="--",
+               label=f"mean r = {mean_coupling:.3f}")
+    ax.axvline(0.30, color=PALETTE["theta"], lw=1.3, ls=":",
+               label="threshold r ≥ 0.30")
+    ax.set_xlabel("Trial-level HEP–aINS BOLD coupling (r)", fontsize=9.5)
+    ax.set_ylabel("Subjects", fontsize=9.5)
+    ax.set_title("Pred 0.C — HEP tracks\naINS BOLD trial-by-trial", fontsize=10)
+    ax.legend(fontsize=7)
 
-    patch = mpatches.Patch(
-        color=PALETTE["ignition"], alpha=0.4, label="Ignition events"
+    label_axes(axes)
+    fig.suptitle(
+        "Figure 1 — Protocol 0 — HEP Proxy Validation (Pred 0.A–Pred 0.C)",
+        fontsize=11, y=1.02,
     )
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles=handles + [patch], fontsize=9, loc="upper right")
-
-    ax.set_xlabel("Trial", fontsize=11)
-    ax.set_ylabel("Signal", fontsize=11)
-    ax.set_title("APGI Ignition Dynamics — Figure 1", fontsize=12)
     fig.tight_layout()
-
     save_figure(fig, OUTPUT_DIR / "figure1.pdf")
 
     if show:
         import matplotlib.pyplot as plt
-
         plt.show()
     import matplotlib.pyplot as plt
-
     plt.close(fig)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Figure 1")
-    parser.add_argument(
-        "--no-show", action="store_true", help="Skip plt.show() (CI mode)"
-    )
+    parser.add_argument("--no-show", action="store_true", help="Skip plt.show() (CI mode)")
     args = parser.parse_args()
 
-    data = simulate()
+    data = load_data()
+    print(
+        f"  r(HEP,d') main={pearsonr(data['hep_amplitude'], data['d_prime'])[0]:.3f}  "
+        f"physo_delta={float(data['physo_delta_pct'].mean()):.1f}%  "
+        f"mean_ains_coupling={float(data['ains_coupling'].mean()):.3f}"
+    )
     plot(data, show=not args.no_show)
 
 
