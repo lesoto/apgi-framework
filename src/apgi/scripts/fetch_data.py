@@ -20,44 +20,61 @@ ZENODO_BASE = "https://zenodo.org/record/XXXXXXX/files"
 
 DATA_DIR = pathlib.Path(__file__).parent / "cache"
 
-# Registry: name → (filename, sha256, description)
 # Registry: name → (filename, sha256, description, approx_size_mb)
 DATASETS: dict[str, tuple[str, str, str, str]] = {
+    "sim0_hep_proxy": (
+        "sim0_hep_proxy.npz",
+        "160d19715985eea2b488e145a10be5de44a62a1ff2fcecb1877285571d430ead",
+        "HEP proxy validation (behavioral, pharmacological, fMRI-EEG) — Figure 0, Protocol 0",
+        "~0.1 MB",
+    ),
     "sim1_ignition_dynamics": (
         "sim1_ignition_dynamics.npz",
-        "213c3aad7c9c5f8198f30f985c470cfd7dd647e2cd78c0783fc18ad53b5d0b9e",
+        "975c608534c72424bab023f64a2bf0205379fa3a76a401e853766b632dad7946",
         "Ignition dynamics simulation for Figure 1 (n=10 000 trials)",
         "~1.5 MB",
     ),
     "sim2_parameter_recovery": (
         "sim2_parameter_recovery.npz",
-        "279c81899e413d648a657c679157108cb56de441004d8d8ad7d9c6fa0279eb5a",
+        "bca75d35b6445bfc2058fda562cf6313e8ce9b2a1ff0d5dbdb02479a9dfb53bb",
         "Parameter recovery simulation results for Figure 2 (n=1 000 runs)",
         "~0.1 MB",
     ),
     "sim3_liquid_network": (
         "sim3_liquid_network.npz",
-        "11fd84ada6e39004db536e12dcc6718df071bb744f7898859236a5e2808275d5",
-        "LNN reservoir state trajectories — Paper 2 supplementary (~40 MB, largest dataset)",
-        "~40 MB",
+        "b61cc629f35ad83edf2f1c4aff165fef8b30814461bdb64e5be67d5e6d35a1b1",
+        "LNN reservoir state trajectories — Paper 2 supplementary (~8 MB, largest dataset)",
+        "~8 MB",
     ),
     "sim4_hierarchical": (
         "sim4_hierarchical.npz",
-        "50c10976ace922726e23cf27cdb60e47b96c0b3a5e0c6c2a8b6cab37d79bc7cf",
-        "Five-level hierarchy prediction-error series — Paper 3",
-        "~2 MB",
+        "fc9ec5decb337dcf190fa164ced6a8aaaf4523b1c7f2f6d2d2409ac1cb0c23aa",
+        "Five-level hierarchy prediction-error series — Figure 4 (Paper 1)",
+        "~0.5 MB",
     ),
     "sim5_doc_biomarker": (
         "sim5_doc_biomarker.npz",
-        "8b1e69f3b58c760ca8c7a76b9d974eb716435fef38689aca39a78489f235f49c",
-        "DoC biomarker simulation (VS/UWS, MCS, Controls) — Figure 6, Protocol 6",
-        "~1 MB",
+        "bd8bfca71010781ff08dd96e278187b53fc76400f42598cc8c84d3c8f365a56d",
+        "DoC biomarker simulation (VS/UWS, MCS, EMCS, Controls) — Figure 7, Protocol 7",
+        "~0.2 MB",
     ),
     "sim6_bifurcation": (
         "sim6_bifurcation.npz",
-        "4eefebf97fb01870178e53a2f6bb43a890ce75aa36a232cc55ba37e6cd943aec",
-        "LNN bifurcation CSD signatures — Figure 7, bifurcation analysis script",
+        "9aa0badbfd58ef8f760105115f76c8ce613afb17313a54f70df8efbe78c0e293",
+        "LNN bifurcation CSD signatures — Figure 6, bifurcation analysis script",
         "~0.05 MB",
+    ),
+    "sim7_metabolic_crossover": (
+        "sim7_metabolic_crossover.npz",
+        "654b7bd8a6cc5b48af14f82d6c5d7511aaf6c2805797d40ed502b6bca9df6759",
+        "2x2 metabolic crossover simulation — Figure 4b, Protocol 4",
+        "~0.02 MB",
+    ),
+    "sim8_tms_pci": (
+        "sim8_tms_pci.npz",
+        "b235616778670083cc4c78e18cf969132ce6d221a63921ac823b40af7cbe8012",
+        "TMS/tFUS site comparison (aINS/dlPFC/vertex) PCI+HEP — Figure 5, Protocol 5",
+        "~0.01 MB",
     ),
 }
 
