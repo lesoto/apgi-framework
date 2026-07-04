@@ -23,8 +23,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
-from figures.utils import label_axes, save_figure
 from apgi.extensions.liquid_network import LiquidNeuralNetwork
+from figures.utils import label_axes, save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 

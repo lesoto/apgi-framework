@@ -86,7 +86,7 @@ def plot(data: dict, show: bool = True) -> None:
     physo = data["hep_physostigmine"]
     means = [placebo.mean(), physo.mean()]
     sems = [placebo.std() / np.sqrt(len(placebo)), physo.std() / np.sqrt(len(physo))]
-    bars = ax.bar(
+    ax.bar(
         ["Placebo", "Physostigmine"], means, yerr=sems,
         color=[PALETTE["theta"], PALETTE["S_t"]], alpha=0.85, edgecolor="white",
         width=0.5, capsize=5,

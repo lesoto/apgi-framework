@@ -20,8 +20,8 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
-from figures.utils import save_figure
 from apgi.extensions.epistemic import landauer_minimum_energy
+from figures.utils import save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 

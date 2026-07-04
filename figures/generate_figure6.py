@@ -122,8 +122,6 @@ def plot(data: dict, show: bool = True) -> None:
 
     site = data["site"]
     pci = data["pci"]
-    hep = data["hep_amplitude"]
-    p3b_intero = data["p3b_interoceptive"]
     coupling = data["hep_pci_coupling"]
     tertile = data["pi_i_tertile"]
 

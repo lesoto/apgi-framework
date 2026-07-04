@@ -19,8 +19,8 @@ import numpy as np
 from scipy.special import expit
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
-from figures.utils import save_figure
 from figures.paper3.generate_fig2 import LEVEL_TAUS
+from figures.utils import save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 

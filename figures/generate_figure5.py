@@ -105,7 +105,7 @@ def _plot_interaction(ax, stats: dict, ylabel: str, title: str) -> None:
             label=STATE_LABELS[state],
         )
     ax.set_xticks(x)
-    ax.set_xticklabels([LOAD_LABELS[l] for l in LOAD_ORDER], fontsize=9)
+    ax.set_xticklabels([LOAD_LABELS[load] for load in LOAD_ORDER], fontsize=9)
     ax.set_xlabel("Interoceptive load", fontsize=9.5)
     ax.set_ylabel(ylabel, fontsize=9.5)
     ax.set_title(title, fontsize=10)
