@@ -4,6 +4,19 @@ Structured visual matrix: P1–P12 grouped by tier (T3 green, T2 amber, T1 red).
 Columns: Prediction, Protocol, Effect-size target, Falsification criterion,
 Feasibility horizon, Current status.
 
+Note on caption numbering: the spec text (OUP-Paper4-EpistemicArchitecture.txt)
+is internally inconsistent about whether this content is captioned "Figure 3"
+(§7.4, appearing right after the twelve-predictions narrative) or "Figure S1"
+(cross-referenced from §7.4 as Table S4). We keep this script's existing
+filename/numbering (figS1_twelve_prediction_matrix) to avoid breaking other
+cross-references, and surface both captions in the on-figure title.
+
+The twelve predictions themselves (P1-P12), their tiers, and their
+falsification criteria are transcribed verbatim from the spec's §7.4
+"Testable Predictions by Tier" narrative (Tier 3 = P1-P4, Tier 2 = P5-P8,
+Tier 1 = P9-P12) - NOT from any other hypothesis register (H-series/EP/
+Pred-x.y) in the spec, which belongs to a different document's content.
+
 Run:
     python figures/paper4/generate_figS1.py
     python figures/paper4/generate_figS1.py --no-show
@@ -33,129 +46,139 @@ STATUS_COLORS = {
     "Speculative": "#888888",
 }
 
+# Verbatim from spec §7.4 "Testable Predictions by Tier":
+#   Tier 3 (P1-P4): testable now with TMS-EEG and pharmacology.
+#   Tier 2 (P5-P8): require multi-voxel information-theoretic analyses
+#     achievable with current neuroimaging.
+#   Tier 1 (P9-P12): require metabolic calorimetry paradigms not yet
+#     standardized -- the most demanding frontier.
+# All twelve derive from the canonical relation Sₜ = Πᵉ|zᵉ| + Πᵢ_eff|zᵢ| > θₜ.
+# Status column: none of P1-P12 have been empirically run per the spec text
+# (§7.4 explicitly distinguishes these forward-looking predictions from the
+# self-audit's "what has [been confirmed]"), so all twelve are marked
+# "Pending" -- there is no per-prediction confirmed/partial status given in
+# the spec to justify otherwise.
 PREDICTIONS = [
-    # P1–P4 Tier 3
+    # P1–P4 Tier 3 (testable now)
     (
         "P1",
         "T3",
-        "HEP amplitude predicts P3b\ntrial-by-trial (Πⁱ proxy)",
-        "EEG cardiac-phase",
-        "r≥0.35",
-        "HEP–P3b r<0.10",
+        "Nicotinic agonist lowers\neffective threshold",
+        "Pharmacology + EEG",
+        "improved detection,\nearlier P3b",
+        "No change",
         "Now",
-        "Partial",
+        "Pending",
     ),
     (
         "P2",
         "T3",
-        "Detection rate higher\nat diastole vs. systole",
-        "EEG cardiac-phase",
-        "d'≥0.5",
-        "Null cardiac-phase effect",
+        "Near-threshold stimuli elicit\nbistable percepts, critical slowing",
+        "Psychophysics + EEG",
+        "bistable regime\nw/ critical slowing",
+        "Continuous graded relationship",
         "Now",
         "Pending",
     ),
     (
         "P3",
         "T3",
-        "Somatic-marker agent out-\nperforms β-lesion under volatility",
-        "Agent simulation",
-        "η²≥0.25",
-        "No reward advantage",
+        "TMS (200–300ms) to frontoparietal\ncortex selectively abolishes report",
+        "TMS-EEG",
+        "report abolished,\npriming spared",
+        "Disrupts both equally, or\naccess persists",
         "Now",
-        "Confirmed",
+        "Pending",
     ),
     (
         "P4",
         "T3",
-        "vmPFC–insula PPI higher in\nanticipation > outcome",
-        "fMRI PPI",
-        "β≥0.20",
-        "PPI null in anticipation",
+        "Sₜ>θₜ predicts access at\nd′≥0.5, single-trial",
+        "Single-trial EEG,\nLOPO-CV",
+        "d′≥0.5; partial R²≥0.05\nfor Πᵉ and Πⁱ_eff",
+        "d′<0.5, or stimulus intensity\nalone matches within Δd′ 0.05",
         "Now",
         "Pending",
     ),
-    # P11 is a computational model property (Monte Carlo–confirmed bistability),
-    # so it is classified Tier 3 (computational/algorithmic) and grouped here.
-    (
-        "P11",
-        "T3",
-        "Bistability preserved\nacross 94% of parameter space",
-        "Monte Carlo",
-        "94.2%",
-        "<80% bistability",
-        "Now",
-        "Confirmed",
-    ),
-    # P5–P8 Tier 2
+    # P5–P8 Tier 2 (multi-voxel information-theoretic analyses)
     (
         "P5",
         "T2",
-        "High-gamma bimodal at\nfrontoparietal threshold",
-        "iEEG",
-        "BF≥10",
-        "Unimodal gamma",
+        "Attentional cueing raises\nstimulus–response MI by ≥1 bit",
+        "Information-theoretic\nneuroimaging",
+        "ΔMI≥1 bit",
+        "No increase",
         "2–5 yr",
         "Pending",
     ),
     (
         "P6",
         "T2",
-        "pIC TMS abolishes\nHEP–PCI coupling",
-        "TMS-EEG",
-        "ΔPCI≥0.10",
-        "No TMS dissociation",
+        "Conscious bandwidth asymptotes\nnear 40 bits/s across modalities",
+        "Cross-modal\ninformation analysis",
+        "~40 bits/s\nplateau",
+        "Systematic modality variation, or\nsustained >100 bits/s after training",
         "2–5 yr",
         "Pending",
     ),
     (
         "P7",
         "T2",
-        "Masking effectiveness\n∝ ρ_crit (not stimulus energy)",
-        "Visual masking LNN",
-        "AUC≥0.80",
-        "ρ_crit null predictor",
+        "Empirical θₜ approximates the\nNeyman–Pearson optimum",
+        "Signal-detection\nanalysis",
+        "within 2 SD of\nNP-optimal θₜ",
+        "Systematic deviation >2 SD",
         "2–5 yr",
-        "Speculative",
+        "Pending",
     ),
     (
         "P8",
         "T2",
-        "1/f exponent inflections at\nL1–L4 maturation ages",
-        "Developmental EEG",
-        "H inflection Δ≥0.05",
-        "Absent/out-of-sequence",
+        "Interoceptive transfer entropy to\naccess report exceeds exteroceptive",
+        "Transfer-entropy\nanalysis",
+        "ΔTE≥0.05\nbits/trial",
+        "TE_intero ≤ TE_extero",
         "2–5 yr",
-        "Speculative",
+        "Pending",
     ),
-    # P9–P12 Tier 1
+    # P9–P12 Tier 1 (metabolic calorimetry paradigms)
     (
         "P9",
         "T1",
-        "κ (ATP/bit) within\n10¹³–10¹⁴ range",
-        "³¹P-MRS + iEEG",
-        "95% CI overlaps range",
-        "κ outside range",
+        "Ignition trials cost more\nfrontoparietal energy",
+        "CMRO₂/glucose\nmeasurement",
+        "metabolic\ndifferential > 0",
+        "No differential after controls",
         "5–10 yr",
-        "Speculative",
+        "Pending",
     ),
     (
         "P10",
         "T1",
-        "BOLD-calibrated fMRI\nmatches double-bridge estimate",
-        "Calibrated fMRI",
-        "r²≥0.60",
-        "Systematic deviation",
+        "Threshold-gated processing is more\nenergy-efficient than continuous",
+        "Matched\nspiking-network sim.",
+        "threshold-gated\n< continuous cost",
+        "Continuous matches or beats it",
         "5–10 yr",
-        "Speculative",
+        "Pending",
+    ),
+    (
+        "P11",
+        "T1",
+        "Metabolic depletion\nelevates θₜ",
+        "Metabolic\ndepletion + EEG",
+        "higher detection\nthreshold, reduced P3b",
+        "No effect, or depletion\nlowers thresholds",
+        "5–10 yr",
+        "Pending",
     ),
     (
         "P12",
         "T1",
-        "Post-block θ elevation\nin DoC patients",
-        "DoC iEEG",
-        "Cohen's d≥0.8",
-        "No threshold re-elevation",
+        "Single-ignition metabolic cost exceeds\nLandauer minimum by ~10¹⁸× (κ≈100 ATP/bit)",
+        "BOLD proxy, then\n³¹P-MRS",
+        "within 1 order\nof magnitude of κ",
+        "Measured per-bit cost departs from κ\nby >1 order of magnitude, or BOLD/\n³¹P-MRS diverge by >10×",
         "5–10 yr",
         "Pending",
     ),
@@ -201,8 +224,11 @@ def plot(show: bool = True) -> None:
         )
 
     # ── Tier group labels ─────────────────────────────────────────────────
-    # T3 gains P11 (5 rows: P1–P4, P11); T1 drops to 3 rows (P9, P10, P12).
-    tier_row_ranges = {"T3": (0, 4), "T2": (5, 8), "T1": (9, 11)}
+    # Per spec §7.4: Tier 3 = P1-P4 (rows 0-3), Tier 2 = P5-P8 (rows 4-7),
+    # Tier 1 = P9-P12 (rows 8-11). Note P11 (metabolic depletion elevates
+    # theta_t) is Tier 1 in the spec, NOT Tier 3 as a prior version of this
+    # script incorrectly classified it.
+    tier_row_ranges = {"T3": (0, 3), "T2": (4, 7), "T1": (8, 11)}
     tier_labels = {
         "T3": "Tier 3\nComputational",
         "T2": "Tier 2\nInfo-Theoretic",
@@ -283,8 +309,10 @@ def plot(show: bool = True) -> None:
     )
 
     ax.set_title(
-        "Figure S1 / Table S4 — APGI Twelve-Prediction Matrix by Tier\n"
-        "(Paper 4, supplementary; cross-referenced from §7.4)\n"
+        "Figure S1 (spec also captions this Figure 3) / Table S4 — "
+        "APGI Twelve-Prediction Matrix by Tier\n"
+        "(Paper 4, §7.4; predictions P1–P12 verbatim from "
+        "\"Testable Predictions by Tier\")\n"
         r"Canonical equation: $S_t = \Pi^e |z^e| + \Pi^i_{\mathrm{eff}} |z^i| > \theta_t$",
         fontsize=10,
         fontweight="bold",

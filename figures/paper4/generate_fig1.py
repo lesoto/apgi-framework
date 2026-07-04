@@ -12,6 +12,7 @@ Run:
 from __future__ import annotations
 
 import argparse
+import math
 import pathlib
 import sys
 
@@ -20,8 +21,27 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
 from figures.utils import save_figure
+from apgi.extensions.epistemic import landauer_minimum_energy
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
+
+# Landauer minimum, computed from the real implementation rather than
+# hardcoded, so the figure and apgi.extensions.epistemic cannot drift apart.
+_LANDAUER_J_PER_BIT = landauer_minimum_energy(n_bits=1, temperature_k=310.0)
+
+
+def _format_landauer(value: float) -> str:
+    """Format a small energy value as "a×10^b J" to match the figure's display precision."""
+    exponent = math.floor(math.log10(value))
+    mantissa = value / (10 ** exponent)
+    return f"≈{mantissa:.0f}×10{_superscript(exponent)} J"
+
+
+_SUPERSCRIPT_MAP = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
+
+
+def _superscript(n: int) -> str:
+    return str(n).translate(_SUPERSCRIPT_MAP)
 
 TIERS = [
     {
@@ -49,14 +69,19 @@ TIERS = [
 
 BRIDGES = [
     {
-        "label": "T3→T2: κ bridge (ATP/bit)\napprox. inference → MI optimisation\nStatus: grounded, κ unmeasured",
+        # Spec §3.2.2 / Table 1: the T3->T2 bridge is the "Approximate-Inference
+        # Bridge" (variational F minimisation -> MI maximisation). Kappa (the
+        # ATP/bit metabolic-cost parameter) is EXCLUSIVELY a Tier2->Tier1
+        # quantity (Glossary: "kappa is a Tier 2-> Tier 1 quantity") and must
+        # not appear on this bridge's label.
+        "label": "T3→T2: Approximate-Inference Bridge\nvariational F minimisation → MI maximisation\nStatus: derived in ML, unconverged in vivo",
         "y_from": 0.72,
         "y_to": 0.52,
         "valid": True,
         "color": "#4dac26",
     },
     {
-        "label": "T2→T1: Landauer bridge\nE ≥ kT·ln2 per bit erased\nStatus: theoretically bounded, κ unmeasured",
+        "label": "T2→T1: Landauer bridge (κ, ATP/bit)\nE ≥ kT·ln2 per bit erased\nStatus: theoretically bounded, κ unmeasured",
         "y_from": 0.42,
         "y_to": 0.22,
         "valid": True,
@@ -68,7 +93,13 @@ BRIDGES = [
         "y_to": 0.22,
         "valid": True,
         "color": "#888888",
-        "offset_x": -0.25,
+        # Arc this curve outward to the RIGHT of the solid-bridge column
+        # (x0=0.60) rather than left, where it previously crossed through the
+        # dashed upward-bridge arrows plotted at x=0.30. The label is placed
+        # below the other bridge labels (fixed y) so it never overlaps the
+        # arc itself or the other two bridge labels.
+        "curve_rad": -0.55,
+        "label_pos": (0.60, 0.05),
     },
 ]
 
@@ -79,7 +110,7 @@ ABSENT_BRIDGES = [
 
 CALC_STEPS = [
     "(1) Bits processed per ignition",
-    "(2) × Landauer min. (3×10⁻²¹ J at 310K)",
+    f"(2) × Landauer min. ({_format_landauer(_LANDAUER_J_PER_BIT)} at 310K)",
     "(3) × neural inefficiency (~10¹³–10¹⁴)",
     "(4) compare to PET/BOLD expenditure",
 ]
@@ -150,9 +181,9 @@ def plot(show: bool = True) -> None:
     )
 
     # ── Valid bridges ─────────────────────────────────────────────────────
+    x0 = 0.60
     for br in BRIDGES:
-        offset = br.get("offset_x", 0.0)
-        x0 = 0.60 + offset
+        rad = br.get("curve_rad", 0.0)
         ax_bridges.annotate(
             "",
             xy=(x0, br["y_to"] + 0.10),
@@ -161,14 +192,18 @@ def plot(show: bool = True) -> None:
                 arrowstyle="->",
                 color=br["color"],
                 lw=2.0,
-                connectionstyle="arc3,rad=0.15" if offset != 0 else "arc3,rad=0.0",
+                connectionstyle=f"arc3,rad={rad}",
             ),
             zorder=5,
         )
-        mid_y = (br["y_from"] + br["y_to"] + 0.10) / 2
+        if "label_pos" in br:
+            label_x, label_y = br["label_pos"]
+        else:
+            mid_y = (br["y_from"] + br["y_to"] + 0.10) / 2
+            label_x, label_y = x0 + 0.08, mid_y
         ax_bridges.text(
-            x0 + 0.08 + offset,
-            mid_y,
+            label_x,
+            label_y,
             br["label"],
             ha="left",
             va="center",

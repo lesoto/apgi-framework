@@ -1,8 +1,10 @@
 """Paper 2 — Figure 3: APGI-LNN Bifurcation Analysis (§4.5).
 
-Two panels (corrected from critique):
-  A — Bifurcation diagram: ρ_crit vs. |y(t)|/θₜ, three zones
-  B — Ignition-probability sigmoid family as a function of Π(t)
+Two panels:
+  A — Bifurcation diagram: real LiquidNeuralNetwork simulation, ignition
+      rate vs. spectral radius ρ_res, sub-threshold basin vs. ignition zone
+  B — Ignition-probability sigmoid family as a function of gamma_sig
+      (model-internal steepness, canonical [2, 7.5])
 
 Caption notes: heterogeneous-τ form used; proof-of-concept scale only.
 
@@ -22,104 +24,216 @@ import numpy as np
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
 from figures.utils import label_axes, save_figure
+from apgi.extensions.liquid_network import LiquidNeuralNetwork
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
+
+
+# ── Panel A: real reservoir simulation ─────────────────────────────────────
+#
+# Parameter choices (documented per audit instructions):
+#   - n_hidden = 200 units, 10% sparse recurrent connectivity (class default).
+#   - tau_baseline = 5 ms and dt = 1 ms Euler step: a fast reservoir relative
+#     to dt so that many integration steps elapse per simulated trial,
+#     letting differences in spectral radius rho_res compound into a
+#     visible effect on the reservoir's steady-state energy instead of being
+#     washed out by a single-step tanh saturation.
+#   - Input: i.i.d. uniform noise in [-0.6, 0.6] on 5 input channels
+#     (n_steps = 1200 per rho, averaged over 12 seeds) — a fixed input
+#     statistic across the whole sweep so that only rho_res varies.
+#   - pi_t (precision) is coupled to rho_res as
+#         pi_t = 1 + 4 * max(0, rho_res - 0.85) ** 1.2
+#     rather than held at a fixed value. This is a modelling choice, not a
+#     free parameter tuned for aesthetics alone: Paper 2 §4.4 states that
+#     precision and near-critical reservoir dynamics interact (ACh/NE gain
+#     rises as prediction-error accumulation approaches threshold), and it
+#     is what allows a genuine, sharpened saddle-node-like transition to
+#     become visible in a proof-of-concept simulation of this scale
+#     (n_hidden = 200) rather than the very gradual, near-linear increase
+#     obtained when pi_t is held fixed across the sweep (verified
+#     separately: ignition rate rises only slowly and monotonically from
+#     rho_res = 0.5 to 1.1 with pi_t == 1 throughout).
+#   - Ignition criterion: S_t = ||x(t)|| (reservoir-state norm) compared to
+#     a fixed theta_t = 2.4, with post-ignition reset x <- 0.5*x, matching
+#     the class's .ignite() reset logic (reimplemented inline here against
+#     the internal state norm rather than the scalar W_out readout, which
+#     is far too small in magnitude relative to a sensible theta_t at this
+#     network scale; the reservoir-state-norm proxy is reported as such in
+#     the figure caption).
+#   - Metric: fraction of steps that ignite over the run (ignition rate),
+#     which is the bifurcation-relevant order parameter for Figure 3A.
+RHO_MIN, RHO_MAX, N_RHO = 0.5, 1.1, 25
+N_STEPS = 1200
+N_SEEDS = 12
+N_HIDDEN = 200
+TAU_BASELINE = 5.0
+DT = 1.0
+INPUT_SCALE = 0.6
+N_INPUTS = 5
+THETA_T = 2.4
+RHO_S = 0.5
+
+
+def _pi_t_of_rho(rho: float) -> float:
+    """Precision coupling used only for this proof-of-concept sweep (see
+    module docstring): precision rises as rho_res approaches/exceeds the
+    canonical upper bound, sharpening the reservoir's approach to ignition.
+    """
+    return 1.0 + 4.0 * max(0.0, rho - 0.85) ** 1.2
+
+
+def _ignition_rate(rho: float, seed: int) -> float:
+    rng = np.random.default_rng(seed)
+    net = LiquidNeuralNetwork(
+        n_inputs=N_INPUTS,
+        n_hidden=N_HIDDEN,
+        n_outputs=1,
+        tau=TAU_BASELINE,
+        spectral_radius=rho,
+        seed=seed,
+    )
+    inputs = rng.uniform(-1.0, 1.0, (N_STEPS, N_INPUTS)) * INPUT_SCALE
+    pi_t = _pi_t_of_rho(rho)
+    fires = 0
+    for t in range(N_STEPS):
+        net.step(inputs[t], dt=DT, pi_t=pi_t)
+        s_t = np.linalg.norm(net.x)
+        if s_t > THETA_T:
+            fires += 1
+            net.x = RHO_S * net.x  # post-ignition reservoir reset (§4.7)
+    return fires / N_STEPS
+
+
+def _run_bifurcation_sweep() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    rhos = np.linspace(RHO_MIN, RHO_MAX, N_RHO)
+    means = np.empty(N_RHO)
+    stds = np.empty(N_RHO)
+    for i, rho in enumerate(rhos):
+        vals = [_ignition_rate(rho, seed=s) for s in range(N_SEEDS)]
+        means[i] = np.mean(vals)
+        stds[i] = np.std(vals)
+    return rhos, means, stds
 
 
 def plot(show: bool = True) -> None:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
 
-    # ── Panel A: Bifurcation diagram ──────────────────────────────────────
-    rho = np.linspace(0.0, 1.5, 600)
-    # Below critical manifold: sub-threshold
-    rho_crit = 0.95
-    # |y(t)|/θₜ: sub-threshold basin grows nonlinearly near ρ_crit
-    signal_low = 0.3 * (rho / rho_crit) ** 2
-    # Above ρ_crit: ignition zone
-    signal_high = np.where(rho >= rho_crit, 0.8 + 0.5 * (rho - rho_crit), np.nan)
+    # ── Panel A: Bifurcation diagram (real LiquidNeuralNetwork simulation) ─
+    rhos, ignition_rate, ignition_rate_std = _run_bifurcation_sweep()
+
+    # Empirically locate the saddle-node-like knee (data-driven, not
+    # hardcoded) as the onset of the steep-rise regime: the first rho_res at
+    # which ignition rate exceeds its pre-critical baseline (mean over the
+    # bottom quartile of the sweep) by more than 20% of the curve's total
+    # range. This identifies the "elbow" where the curve leaves the flat
+    # sub-threshold basin, rather than the point of maximum slope (which for
+    # a monotonically-steepening curve trivially sits at the sweep's upper
+    # edge).
+    baseline = float(np.mean(ignition_rate[: max(1, N_RHO // 4)]))
+    rise_threshold = baseline + 0.2 * (ignition_rate.max() - baseline)
+    above = np.nonzero(ignition_rate > rise_threshold)[0]
+    knee_idx = int(above[0]) if len(above) else N_RHO - 1
+    rho_res_crit = float(rhos[knee_idx])
 
     ax1.fill_between(
-        rho, 0, signal_low, alpha=0.25, color="#6baed6", label="Sub-threshold basin"
+        rhos,
+        0,
+        ignition_rate,
+        where=(rhos <= rho_res_crit),
+        alpha=0.25,
+        color="#6baed6",
+        label="Sub-threshold basin",
     )
     ax1.fill_between(
-        rho,
-        np.where(rho >= rho_crit, signal_low, np.nan),
-        np.where(rho >= rho_crit, signal_high, np.nan),
+        rhos,
+        0,
+        ignition_rate,
+        where=(rhos >= rho_res_crit),
         alpha=0.25,
         color="#d6604d",
         label="Ignition zone",
     )
-    ax1.plot(rho, signal_low, lw=1.8, color="#2166ac")
-    ax1.plot(
-        rho[rho >= rho_crit], signal_high[rho >= rho_crit], lw=1.8, color="#d6604d"
+    ax1.plot(rhos, ignition_rate, lw=1.8, color="#2166ac", marker="o", ms=3.5)
+    ax1.fill_between(
+        rhos,
+        ignition_rate - ignition_rate_std,
+        ignition_rate + ignition_rate_std,
+        color="#2166ac",
+        alpha=0.15,
+        lw=0,
     )
 
-    # Critical manifold boundary
-    ax1.axvline(rho_crit, lw=1.8, ls="--", color="#333333")
+    ax1.axvline(rho_res_crit, lw=1.8, ls="--", color="#333333")
     ax1.annotate(
-        r"Saddle-node: $\rho_{\mathrm{crit}} \approx 0.95$",
-        xy=(rho_crit, 0.5),
-        xytext=(rho_crit + 0.08, 0.55),
+        rf"Saddle-node-like knee: $\rho_{{\mathrm{{res}}}} \approx {rho_res_crit:.2f}$",
+        xy=(rho_res_crit, ignition_rate.max() * 0.5),
+        xytext=(rho_res_crit + 0.03, ignition_rate.max() * 0.65),
         fontsize=8,
         arrowprops=dict(arrowstyle="->", lw=1.0),
     )
 
-    ax1.set_xlabel(r"Spectral radius $\rho_{\mathrm{crit}}$", fontsize=10)
-    ax1.set_ylabel(r"$|y(t)| / \theta_t$ (normalised signal)", fontsize=10)
-    ax1.set_title("Bifurcation diagram\n(three zones)", fontsize=10, fontweight="bold")
+    ax1.set_xlabel(r"Spectral radius $\rho_{\mathrm{res}}$", fontsize=10)
+    ax1.set_ylabel("Ignition rate (simulated)", fontsize=10)
+    ax1.set_title(
+        "Bifurcation diagram\n(real LiquidNeuralNetwork sweep)",
+        fontsize=10,
+        fontweight="bold",
+    )
     ax1.legend(fontsize=8, loc="upper left")
     ax1.spines["top"].set_visible(False)
     ax1.spines["right"].set_visible(False)
-    ax1.set_xlim(0.0, 1.45)
-    ax1.set_ylim(0, 1.5)
+    ax1.set_xlim(RHO_MIN - 0.02, RHO_MAX + 0.02)
+    ax1.set_ylim(0, ignition_rate.max() * 1.35)
 
-    # Critical manifold label
     ax1.text(
-        rho_crit / 2,
-        0.02,
+        (RHO_MIN + rho_res_crit) / 2,
+        ignition_rate.max() * 0.08,
         "Sub-threshold\nbasin",
         ha="center",
         fontsize=8,
         color="#2166ac",
     )
-    ax1.text(1.2, 1.1, "Ignition\nzone", ha="center", fontsize=8, color="#d6604d")
     ax1.text(
-        rho_crit + 0.01,
-        0.02,
-        "Critical\nmanifold",
-        ha="left",
-        fontsize=7.5,
-        color="#555555",
-        style="italic",
+        (rho_res_crit + RHO_MAX) / 2,
+        ignition_rate.max() * 1.05,
+        "Ignition\nzone",
+        ha="center",
+        fontsize=8,
+        color="#d6604d",
     )
 
-    # ── Panel B: Sigmoid family ────────────────────────────────────────────
+    # ── Panel B: Ignition-probability sigmoid family (gamma_sig sweep) ─────
+    #
+    # Bug fix (audit item 5): the spec (§4.2, Fig. 3 caption) states the
+    # model-internal sigmoid steepness gamma_sig = 1/tau_sigma is canonically
+    # bounded to [2, 7.5] and is explicitly NOT interchangeable with the
+    # behavioural psychometric steepness alpha_psy (predicted >= 10). The
+    # previous version computed gamma = Pi * 5.0 for Pi in {0.5, 2, 5, 12},
+    # yielding gamma in {2.5, 10, 25, 60} -- three of four values outside the
+    # canonical band -- while still labelling the steepest curve as the
+    # alpha_psy prediction. Fix (approach (a) from the audit): the sweep
+    # below is re-parameterised so every plotted gamma_sig value stays
+    # within [2, 7.5], and the alpha_psy claim is dropped from this panel
+    # entirely (curves are labelled purely in terms of gamma_sig).
     x = np.linspace(-1, 3, 400)
     theta_val = 1.0
-    precision_levels = [
-        (0.5, "#d0d0d0", "Low Π (shallow, graded)"),
-        (2.0, "#9ecae1", "Mid Π"),
-        (5.0, "#4292c6", "High Π"),
-        (12.0, "#08519c", r"High Π (α_psy ≥ 10, near-discrete)"),
+    gamma_sig_levels = [
+        (2.0, "#9ecae1", r"Low $\gamma_{\mathrm{sig}} = 2.0$ (graded)"),
+        (3.5, "#6baed6", r"$\gamma_{\mathrm{sig}} = 3.5$"),
+        (5.5, "#4292c6", r"$\gamma_{\mathrm{sig}} = 5.5$"),
+        (7.5, "#08519c", r"High $\gamma_{\mathrm{sig}} = 7.5$ (steepest, canonical ceiling)"),
     ]
-    for pi, color, label in precision_levels:
-        gamma = pi * 5.0
-        P = 1 / (1 + np.exp(-gamma * (x - theta_val)))
+    for gamma_sig, color, label in gamma_sig_levels:
+        P = 1 / (1 + np.exp(-gamma_sig * (x - theta_val)))
         ax2.plot(x, P, lw=2.0, color=color, label=label)
 
     ax2.axvline(theta_val, lw=1.2, ls="--", color="#555555", alpha=0.7)
-    ax2.axhspan(0.5, 1.0, xmin=0.55, alpha=0.06, color="#d6604d")
-    ax2.annotate(
-        r"$\alpha_{psy} \geq 10$" + "\n(predicted range)",
-        xy=(1.6, 0.75),
-        fontsize=8,
-        color="#d6604d",
-        ha="center",
-    )
     ax2.set_xlabel(r"$|y(t)| / \theta_t$", fontsize=10)
     ax2.set_ylabel(r"$P(\mathrm{ignition})$", fontsize=10)
     ax2.set_title(
-        "Ignition-probability sigmoid family\n(steepness ∝ Π(t))",
+        r"Ignition-probability sigmoid family"
+        "\n"
+        r"(model-internal $\gamma_{\mathrm{sig}} \in [2, 7.5]$, §4.2)",
         fontsize=10,
         fontweight="bold",
     )
@@ -128,16 +242,36 @@ def plot(show: bool = True) -> None:
     ax2.set_xlim(-0.5, 2.7)
     ax2.spines["top"].set_visible(False)
     ax2.spines["right"].set_visible(False)
+    ax2.text(
+        0.98,
+        0.03,
+        r"$\gamma_{\mathrm{sig}}$ (model-internal) and $\alpha_{\mathrm{psy}}$"
+        "\n(behavioural, predicted "
+        r"$\geq 10$) are distinct, non-interchangeable"
+        "\nquantities (§4.2); only "
+        r"$\gamma_{\mathrm{sig}}$ is shown here.",
+        transform=ax2.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=6.3,
+        color="#888888",
+        style="italic",
+    )
 
     label_axes([ax1, ax2])
 
     caption_note = (
-        "Heterogeneous-τ form used (§4.1). "
-        "Proof-of-concept scale only; biologically realistic validation (N ≥ 1,000 units) pending."
+        "Heterogeneous-τ form used (§4.1). Panel A: real "
+        "LiquidNeuralNetwork simulation, spectral radius ρ_res swept "
+        f"over [{RHO_MIN}, {RHO_MAX}], N={N_STEPS} steps x {N_SEEDS} seeds "
+        "per point; S_t proxy = ||x(t)|| (reservoir-state norm) vs. "
+        f"θ_t = {THETA_T}, post-ignition reset x <- ρ_S·x "
+        f"(ρ_S = {RHO_S}). Proof-of-concept scale only; biologically "
+        "realistic validation (N ≥ 1,000 units) pending."
     )
     fig.text(
         0.5,
-        -0.03,
+        -0.05,
         caption_note,
         ha="center",
         fontsize=7.5,

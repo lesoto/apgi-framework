@@ -33,15 +33,16 @@ DISORDERS = [
         "name": "MDD",
         "color": "#2166ac",
         "levels": [
-            {"theta": +2, "pi": -1, "primary": False},
-            {"theta": +2, "pi": -1, "primary": True},  # L3: primary HPA-driven
-            {"theta": +1, "pi": -1, "primary": False},
-            {"theta": +1, "pi": -1, "primary": False},  # L1: secondary propagation
+            {"theta": +2, "pi": 0, "primary": False},
+            {"theta": +2, "pi": 0, "primary": True},  # L3: primary HPA-driven
+            {"theta": +1, "pi": -1, "primary": False},  # L2: propagated Pi blunting
+            {"theta": +1, "pi": -1, "primary": False},  # L1: propagated Pi blunting
             {"theta": 0, "pi": 0, "primary": False},
         ],
-        "cascade_from": 1,  # L3 → L1 via α₃₁
+        "cascade_from": 1,  # L3 → L1 via nearest-neighbour kappa cascade
         "cascade_to": 3,
-        "caption": "Primary: L3/L4 (HPA θ↑)\n→ α₃₁ propagation to L1",
+        "caption": "Primary: L3/L4 (HPA θ↑)\n→ κ cascade propagation raises θ\n"
+        "and blunts Π at L1–L2",
     },
     {
         "name": "Schizophrenia",

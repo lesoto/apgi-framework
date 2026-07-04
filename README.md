@@ -141,15 +141,18 @@ jupyter lab notebooks/
 ## Reproducing figures
 
 ```bash
-python figures/generate_figure1.py   # ignition dynamics
-python figures/generate_figure2.py   # parameter recovery scatter
-python figures/generate_figure3.py   # Protocol 1 — Cardiac-EEG: HEP cardiac-phase detection
-python figures/generate_figure4.py   # Protocol 4 — Insula-TMS: TMS-induced PCI reduction
-python figures/generate_figure5.py   # Protocol 2 — Somatic-AgentSim: somatic marker agent advantage
-python figures/generate_figure6.py   # Protocol 6 — DoC-Biomarker: DoC joint biomarker model
-python figures/generate_figure7.py   # Protocol 3 — Anticipation-fMRI: vmPFC–insula anticipatory coupling
-python figures/generate_figure8.py   # Protocol 5 — Ignition-iEEG: iEEG bimodality + AC1 slowing
+python figures/generate_figure1.py   # Protocol 0 — HEP Proxy Validation (Pred 0.A–Pred 0.C)
+python figures/generate_figure2.py   # Protocol 1 — Cardiac-EEG: trial-timeline schematic
+python figures/generate_figure3.py   # Protocol 2 — Somatic-AgentSim: somatic marker agent advantage
+python figures/generate_figure4.py   # Protocol 3 — Anticipation-fMRI: vmPFC–insula anticipatory coupling
+python figures/generate_figure5.py   # Protocol 4 — Metabolic-State Crossover: allostatic threshold modulation
+python figures/generate_figure6.py   # Protocol 5 — Insula-TMS: causal PCI/HEP dissociation + stimulation montage
+python figures/generate_figure7.py   # Protocol 6 — Ignition-iEEG: iEEG bimodality + AC1 slowing
+python figures/generate_figure8.py   # Protocol 7 — DoC-Biomarker: joint PCI–HEP model (four-group, N=110)
 ```
+
+Figure numbering follows Figure N ↔ Protocol (N-1), matching the captions in
+`OUP-Protocols.txt` / the OSF preregistration exactly.
 
 Output PDFs land in `figures/output/`.
 

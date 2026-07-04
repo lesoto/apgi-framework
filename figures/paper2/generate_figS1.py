@@ -1,7 +1,7 @@
 """Paper 2 — Figure S1: EP-2 and EP-6 Protocol Schematics.
 
 Panel A: Brain-surface rendering with TMS targets (EP-2).
-Panel B: iEEG trial timeline for ρ_crit estimation (EP-6).
+Panel B: iEEG trial timeline for ρ_res estimation (EP-6).
 
 Run:
     python figures/paper2/generate_figS1.py
@@ -26,7 +26,10 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 def draw_brain_panel(ax):
     """Schematic lateral brain with TMS target markers."""
     ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
+    # Extended above 1.0 (audit fix) so the repositioned vertex-sham marker
+    # and label sit clearly above the brain outline instead of overlapping
+    # it near the top edge.
+    ax.set_ylim(0, 1.12)
     ax.axis("off")
     ax.set_title(
         "A — EP-2: TMS Targets\n(lateral brain surface)", fontsize=9, fontweight="bold"
@@ -59,11 +62,18 @@ def draw_brain_panel(ax):
     ax.text(0.31, 0.69, "PFC", ha="center", fontsize=7.5, color="#555555")
 
     # Target markers
+    # Vertex sham repositioned (audit fix): the marker previously sat at
+    # (0.50, 0.88), directly above/behind the frontal-lobe box and brain
+    # outline, so its grey label washed out against the cream frontal-box
+    # fill. Moved further above the brain outline (y = 0.97, outside the
+    # ellipse) and given a small white halo behind its label so all four
+    # TMS conditions remain legible regardless of z-order with the brain
+    # patches.
     targets = [
-        (0.48, 0.38, "#d6604d", "pIC\n[40,−6,−4]", "right posterior insula"),
+        (0.48, 0.38, "#d6604d", "aINS\n[34,14,0]", "right anterior insula"),
         (0.28, 0.72, "#2166ac", "dlPFC\n[−44,36,20]", "left dlPFC"),
         (0.68, 0.68, "#4dac26", "PPC (bilateral)\n[±28,−60,46]", "bilateral PPC"),
-        (0.50, 0.88, "#888888", "Vertex\nsham", "vertex sham"),
+        (0.50, 0.97, "#666666", "Vertex\nsham", "vertex sham"),
     ]
     for x, y, color, short, long_name in targets:
         # Bilateral PPC: show a faint contralateral (out-of-plane) homolog marker
@@ -94,23 +104,34 @@ def draw_brain_panel(ax):
             (x, y), 0.04, facecolor=color, edgecolor="white", lw=1.5, zorder=5
         )
         ax.add_patch(marker)
+        is_vertex = short.startswith("Vertex")
+        # Vertex sham now sits above the brain outline (see repositioning
+        # note above): label centred above the marker with a white
+        # background box, rather than to the right at marker height, so it
+        # stays legible against whatever is behind it and doesn't collide
+        # with the frontal-lobe box.
         ax.text(
-            x + 0.06,
-            y,
+            x if is_vertex else x + 0.06,
+            y + 0.075 if is_vertex else y,
             short,
-            ha="left",
-            va="center",
+            ha="center" if is_vertex else "left",
+            va="bottom" if is_vertex else "center",
             fontsize=6.5,
             color=color,
             fontweight="bold",
-            zorder=6,
+            zorder=8,
+            bbox=(
+                dict(facecolor="white", edgecolor="none", alpha=0.85, pad=1.2)
+                if is_vertex
+                else None
+            ),
         )
 
     # Predicted dissociation
     ax.text(
         0.50,
         0.05,
-        "pIC → HEP/P3b dissociation\ndlPFC/PPC → global ignition reduction",
+        "aINS → HEP/P3b dissociation\ndlPFC/PPC → global ignition reduction",
         ha="center",
         va="bottom",
         fontsize=7,
@@ -136,7 +157,7 @@ def draw_ieeg_panel(ax):
     ax.set_ylim(-0.5, 3.8)
     ax.axis("off")
     ax.set_title(
-        "B — EP-6: iEEG Trial Timeline\n(ρ_crit estimation)",
+        "B — EP-6: iEEG Trial Timeline\n(ρ_res estimation)",
         fontsize=9,
         fontweight="bold",
     )
@@ -184,7 +205,7 @@ def draw_ieeg_panel(ax):
         },
     ]
     rho_win = {
-        "label": r"$\rho_{\mathrm{crit}}$ estimation" + "\n(pre-stim period)",
+        "label": r"$\rho_{\mathrm{res}}$ estimation" + "\n(pre-stim period)",
         "t": 0,
         "dur": 500,
         "color": "#f2f0fb",
@@ -214,7 +235,7 @@ def draw_ieeg_panel(ax):
             multialignment="center",
         )
 
-    # ρ_crit window
+    # ρ_res window
     rect_rho = mpatches.FancyBboxPatch(
         (rho_win["t"], rho_win["y"]),
         rho_win["dur"],

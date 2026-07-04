@@ -1,14 +1,14 @@
-"""Figure 7 — Protocol 5 — Ignition-iEEG: iEEG all-or-none ignition dynamics (Pred 5.a–Pred 5.d).
+"""Figure 7 — Protocol 6 — Ignition-iEEG: iEEG all-or-none ignition dynamics (Pred 6.a–Pred 6.d).
 
-Simulates intracranial EEG predictions from protocol_5_ignition_ieeg.json:
-  A — Bimodal high-gamma distribution in frontoparietal electrodes at threshold (Pred 5.a)
-  B — Regional specificity: frontoparietal bimodal vs. occipital graded (Pred 5.b)
-  C — AC1 pre-ignition slowing: detected vs. non-detected trials (Pred 5.c — bifurcation criterion)
-  D — Long-range gamma coherence (15–80 Hz) predicts detection (Pred 5.d — three-tier confirmation):
+Simulates intracranial EEG predictions from protocol_6_ignition_ieeg.json:
+  A — Bimodal high-gamma distribution in frontoparietal electrodes at threshold (Pred 6.a)
+  B — Regional specificity: frontoparietal bimodal vs. occipital graded (Pred 6.b)
+  C — AC1 pre-ignition slowing: detected vs. non-detected trials (Pred 6.c — bifurcation criterion)
+  D — Long-range gamma coherence (15–80 Hz) predicts detection (Pred 6.d — three-tier confirmation):
       Criteria (1+2) = GNW-consistent; criteria (1+2+3) with HEP–coherence r > 0.25 = APGI-specific.
 
-Pred 5.c is the bifurcation falsification criterion distinguishing APGI from standard GWT.
-Pred 5.d is the APGI-specific extension via HEP–coherence coupling (criterion 3).
+Pred 6.c is the bifurcation falsification criterion distinguishing APGI from standard GWT.
+Pred 6.d is the APGI-specific extension via HEP–coherence coupling (criterion 3).
 
 Run:
     python figures/generate_figure7.py
@@ -44,7 +44,7 @@ AC1_WINDOW_BINS = 10  # 10 × 50 ms windows in 500 ms pre-ignition epoch
 def simulate_ieeg(seed: int = 9) -> dict:
     rng = np.random.default_rng(seed)
 
-    # --- Frontoparietal: bimodal at near-threshold contrast (Pred 5.a)
+    # --- Frontoparietal: bimodal at near-threshold contrast (Pred 6.a)
     # Detected trials cluster at high gamma, non-detected at low gamma
     n_detected = N_NEAR_THRESHOLD // 2
     n_missed = N_NEAR_THRESHOLD - n_detected
@@ -52,10 +52,10 @@ def simulate_ieeg(seed: int = 9) -> dict:
     hg_missed = rng.normal(0.21, 0.07, n_missed)  # low state
     hg_fp = np.concatenate([hg_detected, hg_missed])  # bimodal
 
-    # --- Occipital: graded (unimodal) — Pred 5.b
+    # --- Occipital: graded (unimodal) — Pred 6.b
     hg_occ = rng.normal(0.45, 0.18, N_NEAR_THRESHOLD)  # unimodal
 
-    # --- AC1 pre-ignition slowing (Pred 5.c)
+    # --- AC1 pre-ignition slowing (Pred 6.c)
     # Detected trials: AC1 increases in 500 ms window before ignition
     # Non-detected: AC1 flat
     time_bins = np.linspace(-500, 0, AC1_WINDOW_BINS)
@@ -66,7 +66,7 @@ def simulate_ieeg(seed: int = 9) -> dict:
     )
     ac1_missed = 0.22 + rng.normal(0, 0.025, AC1_WINDOW_BINS)
 
-    # --- Pred 5.d: Long-range frontoparietal gamma coherence (15–80 Hz) predicts detection
+    # --- Pred 6.d: Long-range frontoparietal gamma coherence (15–80 Hz) predicts detection
     # Criterion 1: frontoparietal coherence r > 0.4, peaking 200–400 ms
     # Criterion 2: occipital coherence r < 0.20 (frontoparietal specificity)
     # Criterion 3 (APGI-specific): HEP–coherence r > 0.25 in seen trials
@@ -106,7 +106,7 @@ def simulate_ieeg(seed: int = 9) -> dict:
 def plot(data: dict, show: bool = True) -> None:
     fig, axes = make_figure(ncols=4, width=HALF_WIDTH * 4, height=PANEL_HEIGHT)
 
-    # Panel A: Bimodal frontoparietal high-gamma (Pred 5.a)
+    # Panel A: Bimodal frontoparietal high-gamma (Pred 6.a)
     ax = axes[0]
     ax.hist(
         data["hg_detected"],
@@ -128,10 +128,10 @@ def plot(data: dict, show: bool = True) -> None:
     )
     ax.set_xlabel("High-gamma amplitude (a.u.)", fontsize=10)
     ax.set_ylabel("Density", fontsize=10)
-    ax.set_title("Pred 5.a — Frontoparietal\nbimodal distribution", fontsize=10)
+    ax.set_title("Pred 6.a — Frontoparietal\nbimodal distribution", fontsize=10)
     ax.legend(fontsize=7)
 
-    # Panel B: Regional specificity — fp bimodal vs occipital graded (Pred 5.b)
+    # Panel B: Regional specificity — fp bimodal vs occipital graded (Pred 6.b)
     ax = axes[1]
     ax.hist(
         data["hg_fp"],
@@ -154,11 +154,11 @@ def plot(data: dict, show: bool = True) -> None:
     ax.set_xlabel("High-gamma amplitude (a.u.)", fontsize=10)
     ax.set_ylabel("Density", fontsize=10)
     ax.set_title(
-        "Pred 5.b — Regional specificity:\nFP bimodal, occipital graded", fontsize=10
+        "Pred 6.b — Regional specificity:\nFP bimodal, occipital graded", fontsize=10
     )
     ax.legend(fontsize=7)
 
-    # Panel C: AC1 pre-ignition slowing (Pred 5.c — bifurcation criterion)
+    # Panel C: AC1 pre-ignition slowing (Pred 6.c — bifurcation criterion)
     ax = axes[2]
     ax.plot(
         data["time_bins"],
@@ -182,12 +182,12 @@ def plot(data: dict, show: bool = True) -> None:
     ax.set_xlabel("Time before ignition (ms)", fontsize=10)
     ax.set_ylabel("AC1 (lag-1 autocorrelation)", fontsize=10)
     ax.set_title(
-        "Pred 5.c — Critical slowing:\nAC1 ↑ before ignition\n(APGI vs. GWT criterion)",
+        "Pred 6.c — Critical slowing:\nAC1 ↑ before ignition\n(APGI vs. GWT criterion)",
         fontsize=10,
     )
     ax.legend(fontsize=7)
 
-    # Panel D: Long-range gamma coherence predicts detection (Pred 5.d — three-tier)
+    # Panel D: Long-range gamma coherence predicts detection (Pred 6.d — three-tier)
     ax = axes[3]
     ax.plot(
         data["time_post"],
@@ -226,14 +226,14 @@ def plot(data: dict, show: bool = True) -> None:
     ax.set_xlabel("Time post-stimulus (ms)", fontsize=10)
     ax.set_ylabel("Coherence (15–80 Hz)", fontsize=10)
     ax.set_title(
-        "Pred 5.d — Gamma coherence predicts detection\n(1+2=GNW; +HEP–coh r>0.25=APGI)",
+        "Pred 6.d — Gamma coherence predicts detection\n(1+2=GNW; +HEP–coh r>0.25=APGI)",
         fontsize=9,
     )
     ax.legend(fontsize=6)
 
     label_axes(axes)
     fig.suptitle(
-        "Figure 7 — Protocol 5 — Ignition-iEEG: iEEG All-or-None Ignition Dynamics (Pred 5.a–Pred 5.d)",
+        "Figure 7 — Protocol 6 — Ignition-iEEG: iEEG All-or-None Ignition Dynamics (Pred 6.a–Pred 6.d)",
         fontsize=11,
         y=1.02,
     )

@@ -130,7 +130,7 @@ def plot(show: bool = True) -> None:
     ax.text(
         0.55,
         0.88,
-        r"Pathway A — Fast NE  ($\alpha_{3\to1}$)",
+        r"Pathway A — Fast NE  ($\kappa_{3,2}\!\cdot\!\kappa_{2,1}$, net L3→L1)",
         fontsize=9,
         fontweight="bold",
         color=NE_COLOR,
@@ -208,7 +208,7 @@ def plot(show: bool = True) -> None:
     ax.text(
         0.55,
         0.50,
-        r"Pathway B — Slow Cortisol  ($\alpha_{4\to1}$)",
+        r"Pathway B — Slow Cortisol  ($\kappa_{4,3}\!\cdot\!\kappa_{3,2}\!\cdot\!\kappa_{2,1}$, net L4→L1)",
         fontsize=9,
         fontweight="bold",
         color=CRT_COLOR,

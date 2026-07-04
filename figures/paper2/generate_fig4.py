@@ -2,7 +2,7 @@
 
 Two panels:
   A — S(t) trajectory curves (short/critical/long ISI) with θₜ dashed
-  B — Critical ISI parameter sensitivity (Π_target, θₜ, ρ_crit)
+  B — Critical ISI parameter sensitivity (Π_target, θₜ, ρ_res)
 
 Caption: simulated with heterogeneous-τ form; quantitative ISI values indicative.
 
@@ -172,7 +172,7 @@ def plot(show: bool = True) -> None:
 
     crit_ISI_pi = 80 + 60 * (1.0 - param_range)  # higher Π → shorter ISI
     crit_ISI_theta = 50 + 100 * (param_range - 0.5)  # higher θ → longer ISI
-    crit_ISI_rho = 40 + 110 * (param_range - 0.5)  # higher ρ_crit → longer ISI
+    crit_ISI_rho = 40 + 110 * (param_range - 0.5)  # higher ρ_res → longer ISI
 
     ax2.plot(
         param_range,
@@ -193,14 +193,14 @@ def plot(show: bool = True) -> None:
         crit_ISI_rho,
         lw=2,
         color="#4dac26",
-        label=r"$\rho_{\mathrm{crit}}$ ↑ → critical ISI ↑",
+        label=r"$\rho_{\mathrm{res}}$ ↑ → critical ISI ↑",
     )
 
     ax2.set_xlabel("Parameter value (normalised)", fontsize=10)
     ax2.set_ylabel("Critical ISI (ms, indicative)", fontsize=10)
     ax2.set_title(
         "Critical ISI parameter sensitivity\n"
-        "(distinguishing prediction: masking ∝ ρ_crit)",
+        "(distinguishing prediction: masking ∝ ρ_res)",
         fontsize=10,
         fontweight="bold",
     )
