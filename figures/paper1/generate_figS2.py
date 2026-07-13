@@ -22,15 +22,16 @@ from figures.utils import label_axes, save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
-# Ranked by influence magnitude (±% change in P(ignition), ±50% parameter sweep)
+# Ranked by influence magnitude (±% change in P(ignition), ±50% parameter
+# sweep). Values verbatim from the spec's Source Data & Statistics for
+# Figure S2: theta_0 most influential (+/-34% P(ignition)); lambda_Pi least
+# (+/-2%). Exactly these six parameters -- no extra invented parameters.
 PARAMS = [
     (r"$\theta_0$", 34),
     (r"$\Pi^i_{\mathrm{baseline}}$", 22),
-    (r"$\beta_{\mathrm{SM}}$", 18),
-    (r"$\tau_S$", 12),
-    (r"$\gamma_{\mathrm{sig}}$", 8),
-    (r"$\kappa_{\mathrm{meta}}$", 5),
-    (r"$\lambda_\theta$", 3),
+    (r"$\beta_{\mathrm{SM}}$", 15),
+    (r"$\gamma_{\mathrm{sig}}$", 9),
+    (r"$\tau_S$", 5),
     (r"$\lambda_\Pi$", 2),
 ]
 
@@ -133,12 +134,6 @@ def plot(show: bool = True) -> None:
         )
 
     label_axes([ax1, ax2])
-    fig.suptitle(
-        "Figure S2 — Parameter Sensitivity Tornado Plot (Appendix A.5)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS2_sensitivity_tornado.pdf")
     if show:

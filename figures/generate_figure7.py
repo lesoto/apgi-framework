@@ -232,11 +232,6 @@ def plot(data: dict, show: bool = True) -> None:
     ax.legend(fontsize=6)
 
     label_axes(axes)
-    fig.suptitle(
-        "Figure 7 — Protocol 6 — Ignition-iEEG: iEEG All-or-None Ignition Dynamics (Pred 6.a–Pred 6.d)",
-        fontsize=11,
-        y=1.02,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure7.pdf")
     if show:

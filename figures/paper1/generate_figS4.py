@@ -157,12 +157,6 @@ def plot(show: bool = True) -> None:
         ax.plot([t, t], [-0.10, -0.07], lw=1, color="#333")
     ax.text(4.2, -0.28, "Time (s)", ha="center", fontsize=9)
 
-    ax.set_title(
-        "Figure S4 — Protocol 3 fMRI Trial-Structure Schematic (Appendix D.3)",
-        fontsize=11,
-        fontweight="bold",
-    )
-
     # ── Bottom: SCR trace ─────────────────────────────────────────────────
     ax_scr.set_xlim(-0.1, 8.5)
     ax_scr.set_ylim(-0.1, 1.3)

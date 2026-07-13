@@ -202,61 +202,63 @@ def plot(show: bool = True) -> None:
         color="#d6604d",
     )
 
-    # ── Panel B: Ignition-probability sigmoid family (gamma_sig sweep) ─────
+    # ── Panel B: Ignition-probability sigmoid family (precision Π(t) sweep) ─
     #
-    # Bug fix (audit item 5): the spec (§4.2, Fig. 3 caption) states the
-    # model-internal sigmoid steepness gamma_sig = 1/tau_sigma is canonically
-    # bounded to [2, 7.5] and is explicitly NOT interchangeable with the
-    # behavioural psychometric steepness alpha_psy (predicted >= 10). The
-    # previous version computed gamma = Pi * 5.0 for Pi in {0.5, 2, 5, 12},
-    # yielding gamma in {2.5, 10, 25, 60} -- three of four values outside the
-    # canonical band -- while still labelling the steepest curve as the
-    # alpha_psy prediction. Fix (approach (a) from the audit): the sweep
-    # below is re-parameterised so every plotted gamma_sig value stays
-    # within [2, 7.5], and the alpha_psy claim is dropped from this panel
-    # entirely (curves are labelled purely in terms of gamma_sig).
+    # Per the Fig. 3 spec/prompt: the y-axis MUST be a literal 0-1
+    # "Ignition probability" scale -- never labelled/scaled in units of
+    # gamma_sig or alpha_psy. Curves are parameterised by precision Π(t)
+    # (illustrative; §4.4 -- precision sharpens the approach to ignition),
+    # ranging from a shallow, graded curve at low Π(t) to a near-discrete
+    # all-or-none transition at high Π(t). The empirically observable
+    # psychometric steepness alpha_psy is annotated ON the curves (not as
+    # an axis), together with the predicted alpha_psy >= 10 regime as a
+    # shaded band -- distinct from, and not interchangeable with, the
+    # model-internal sigmoid steepness gamma_sig = 1/tau_sigma (canonical
+    # range [2, 7.5]), which is defined separately in the abbreviation key
+    # and is not what is swept in this panel.
     x = np.linspace(-1, 3, 400)
     theta_val = 1.0
-    gamma_sig_levels = [
-        (2.0, "#9ecae1", r"Low $\gamma_{\mathrm{sig}} = 2.0$ (graded)"),
-        (3.5, "#6baed6", r"$\gamma_{\mathrm{sig}} = 3.5$"),
-        (5.5, "#4292c6", r"$\gamma_{\mathrm{sig}} = 5.5$"),
-        (7.5, "#08519c", r"High $\gamma_{\mathrm{sig}} = 7.5$ (steepest, canonical ceiling)"),
+    pi_levels = [
+        (0.3, "#9ecae1", r"Low $\Pi(t) = 0.3$ (graded)"),
+        (1.0, "#4dac26", r"$\Pi(t) = 1$"),
+        (3.0, "#d6604d", r"$\Pi(t) = 3$"),
+        (10.0, "#7b3294", r"$\Pi(t) = 10$"),
+        (30.0, "#08306b", r"High $\Pi(t) = 30$ (near-discrete)"),
     ]
-    for gamma_sig, color, label in gamma_sig_levels:
-        P = 1 / (1 + np.exp(-gamma_sig * (x - theta_val)))
+    for pi_val, color, label in pi_levels:
+        P = 1 / (1 + np.exp(-pi_val * (x - theta_val)))
         ax2.plot(x, P, lw=2.0, color=color, label=label)
 
+    # Shaded "predicted regime alpha_psy >= 10" band: high-precision curves
+    # (Pi(t) >= 10) are steep enough that the empirically observable
+    # psychometric slope is predicted to be near-discrete/all-or-none.
+    ax2.axvspan(1.0, 1.35, color="#7b3294", alpha=0.10, zorder=0)
+    ax2.text(
+        1.37, 0.30, "Predicted regime\n" + r"$\alpha_{\mathrm{psy}} \geq 10$",
+        fontsize=7.2, color="#7b3294", va="center",
+    )
+    # alpha_psy annotation on the steepest (near-vertical) curve.
+    ax2.annotate(
+        r"$\alpha_{\mathrm{psy}}$" + "\n(steepness of\npsychometric curve)",
+        xy=(1.04, 0.85), xytext=(0.35, 0.98),
+        fontsize=6.8, color="#08306b", ha="center", va="top",
+        arrowprops=dict(arrowstyle="->", color="#08306b", lw=0.9),
+    )
+
     ax2.axvline(theta_val, lw=1.2, ls="--", color="#555555", alpha=0.7)
-    ax2.set_xlabel(r"$|y(t)| / \theta_t$", fontsize=10)
-    ax2.set_ylabel(r"$P(\mathrm{ignition})$", fontsize=10)
+    ax2.set_xlabel(r"Normalised drive / effective input $S_t/\theta_t$", fontsize=10)
+    ax2.set_ylabel("Ignition probability (0–1)", fontsize=10)
     ax2.set_title(
-        r"Ignition-probability sigmoid family"
-        "\n"
-        r"(model-internal $\gamma_{\mathrm{sig}} \in [2, 7.5]$, §4.2)",
+        "Ignition-probability sigmoid family\n"
+        r"(parameterised by precision $\Pi(t)$, illustrative)",
         fontsize=10,
         fontweight="bold",
     )
-    ax2.legend(fontsize=7.5, loc="upper left")
+    ax2.legend(fontsize=7.2, loc="lower right", title="Precision Π(t) (illustrative)", title_fontsize=7)
     ax2.set_ylim(-0.05, 1.08)
     ax2.set_xlim(-0.5, 2.7)
     ax2.spines["top"].set_visible(False)
     ax2.spines["right"].set_visible(False)
-    ax2.text(
-        0.98,
-        0.03,
-        r"$\gamma_{\mathrm{sig}}$ (model-internal) and $\alpha_{\mathrm{psy}}$"
-        "\n(behavioural, predicted "
-        r"$\geq 10$) are distinct, non-interchangeable"
-        "\nquantities (§4.2); only "
-        r"$\gamma_{\mathrm{sig}}$ is shown here.",
-        transform=ax2.transAxes,
-        ha="right",
-        va="bottom",
-        fontsize=6.3,
-        color="#888888",
-        style="italic",
-    )
 
     label_axes([ax1, ax2])
 
@@ -267,7 +269,11 @@ def plot(show: bool = True) -> None:
         "per point; S_t proxy = ||x(t)|| (reservoir-state norm) vs. "
         f"θ_t = {THETA_T}, post-ignition reset x <- ρ_S·x "
         f"(ρ_S = {RHO_S}). Proof-of-concept scale only; biologically "
-        "realistic validation (N ≥ 1,000 units) pending."
+        "realistic validation (N ≥ 1,000 units) pending. Panel B: "
+        "γ_sig (model-internal steepness, = 1/τ_σ, canonical range [2, 7.5]) "
+        "and α_psy (behavioural psychometric steepness, predicted ≥ 10) are "
+        "related but NOT interchangeable (§4.2); curves are parameterised "
+        "by precision Π(t), illustrative pre-data predictions."
     )
     fig.text(
         0.5,
@@ -279,13 +285,6 @@ def plot(show: bool = True) -> None:
         style="italic",
     )
 
-    fig.suptitle(
-        "Figure 3 — APGI-LNN Bifurcation Analysis: Parameter Sweep and Ignition Manifold\n"
-        "(Paper 2, §4.5)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig3_bifurcation_analysis.pdf")
     if show:

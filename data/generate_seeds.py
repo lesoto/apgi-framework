@@ -601,6 +601,9 @@ def _gen_sim5_doc_biomarker(seed: int) -> pathlib.Path:
     all_ignition = []
     all_hep_proxy = []  # HEP amplitude proxy: pi_i_eff × Gaussian noise
     all_pci_proxy = []  # PCI proxy: ignition rate × complexity term
+    subject_group = []  # per-subject group label, for clinical-scale calibration below
+    subject_hep_raw = []
+    subject_pci_raw = []
 
     subject_id = 0
     for group, cfg in GROUP_CONFIG.items():
@@ -650,12 +653,52 @@ def _gen_sim5_doc_biomarker(seed: int) -> pathlib.Path:
             all_ignition.extend(ignition.tolist())
             all_hep_proxy.extend([hep] * N_TRIALS_PER_SUBJECT)
             all_pci_proxy.extend([pci] * N_TRIALS_PER_SUBJECT)
+            subject_group.append(group)
+            subject_hep_raw.append(hep)
+            subject_pci_raw.append(pci)
             subject_id += 1
 
     group_labels = np.array(all_groups)
     group_codes = np.array(
         [GROUP_CONFIG[g]["code"] for g in all_groups], dtype=np.int32
     )
+
+    # Clinical-scale calibration (Protocol 7 spec, §Fig 8/Fig S1): the raw
+    # hep_proxy/pci_proxy above live on an internal, uncalibrated precision
+    # scale (VS/UWS ignition rate ~0 -> PCI proxy exactly 0.0; HEP proxy on a
+    # sub-1 pi_i_eff scale) which is NOT the clinical PCI (bounded, roughly
+    # 0-0.85, never exactly 0 in vivo) or HEP-amplitude-in-microvolts scale
+    # the figures must render. Rescale each group's per-subject raw values
+    # (z-score within group, then affine-map to the target clinical mean/SD)
+    # so that within-group individual differences and the HEP<->PCI
+    # correlation structure are preserved while group means land on the
+    # illustrative pre-data targets specified for Protocol 7.
+    CLINICAL_TARGETS = {
+        # group: (pci_mean, pci_sd, hep_uV_mean, hep_uV_sd)
+        "VS_UWS":   (0.125, 0.02, 1.5, 0.3),
+        "MCS":      (0.30, 0.03, 3.75, 0.4),
+        "EMCS":     (0.50, 0.04, 7.0, 0.6),
+        "Controls": (0.65, 0.04, 10.5, 0.7),
+    }
+    subject_group_arr = np.array(subject_group)
+    subject_hep_raw_arr = np.array(subject_hep_raw)
+    subject_pci_raw_arr = np.array(subject_pci_raw)
+    subject_pci_cal = np.empty_like(subject_pci_raw_arr)
+    subject_hep_cal = np.empty_like(subject_hep_raw_arr)
+    for group, (pci_mean, pci_sd, hep_mean, hep_sd) in CLINICAL_TARGETS.items():
+        m = subject_group_arr == group
+        pci_raw_g = subject_pci_raw_arr[m]
+        hep_raw_g = subject_hep_raw_arr[m]
+        pci_z = (pci_raw_g - pci_raw_g.mean()) / max(pci_raw_g.std(), 1e-9)
+        hep_z = (hep_raw_g - hep_raw_g.mean()) / max(hep_raw_g.std(), 1e-9)
+        subject_pci_cal[m] = np.clip(pci_mean + pci_z * pci_sd, 0.02, 0.80)
+        subject_hep_cal[m] = np.clip(hep_mean + hep_z * hep_sd, 0.1, 14.0)
+
+    # Expand subject-level calibrated values back to trial-level to match
+    # the shape of the other per-trial arrays (constant within subject, as
+    # for the raw hep_proxy/pci_proxy fields above).
+    pci_calibrated = np.repeat(subject_pci_cal, N_TRIALS_PER_SUBJECT)
+    hep_calibrated_uv = np.repeat(subject_hep_cal, N_TRIALS_PER_SUBJECT)
 
     dest = _save(
         "sim5_doc_biomarker.npz",
@@ -668,6 +711,8 @@ def _gen_sim5_doc_biomarker(seed: int) -> pathlib.Path:
             "ignition": np.array(all_ignition, dtype=bool),
             "hep_proxy": np.array(all_hep_proxy),
             "pci_proxy": np.array(all_pci_proxy),
+            "pci": pci_calibrated,
+            "hep_amplitude_uv": hep_calibrated_uv,
         },
         metadata={
             "n_subjects_vs_uws": GROUP_CONFIG["VS_UWS"]["n"],

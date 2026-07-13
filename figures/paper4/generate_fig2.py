@@ -35,30 +35,31 @@ CRITERIA = [
     "C7\nCausal Road.",
 ]
 
-# Scores 0-2, transcribed verbatim from the spec's Table 5 prose (verified
-# directly against OUP-Paper4-EpistemicArchitecture.txt, the row beginning
-# "Criterion | GNWT | IIT 3.0 | PP/FEP | APGI (self-audit)"):
+# Scores 0-2, transcribed directly from the PDF spec's reference figure
+# (Paper 4, Fig.2 Panel A render). CRITICAL checks satisfied: IIT 3.0 scores
+# exactly 0 at C2 (Bridge Principles) and C7 (Causal Roadmap) and nowhere
+# else; GNWT is never 0 (it is nonzero, ~1.5, at C2 — a prior version of
+# this script incorrectly zeroed GNWT at C2, which does not match the
+# reference figure).
 #
-#   1. Tier Transparency:       GNWT=1, IIT=1, PP/FEP=1, APGI=2
-#   2. Bridge Principles:       GNWT=0, IIT=0, PP/FEP=1, APGI=1
-#   3. Quantitative Benchmarks: GNWT=1, IIT=0, PP/FEP=1, APGI=1-2 (T3:2, T1:0-1)
-#   4. Falsification Conditions:GNWT=1, IIT=0, PP/FEP=1, APGI=1-2 (T3:2, T1:1)
-#   5. Alternative Comparison:  GNWT=1, IIT=1, PP/FEP=1, APGI=1
-#   6. Evolutionary Plausibility:GNWT=1, IIT=0, PP/FEP=1, APGI=1
-#   7. Causal Roadmap:          GNWT=1, IIT=0, PP/FEP=1, APGI=2
-#
-# APGI's C3 and C4 are reported as tier-resolved ranges, not point scores:
-# C3 spans Tier1=0 (Tier 1: 0-1 proxy only, plotted at its lower bound) to
-# Tier3=2, midpoint 1.0; C4 spans Tier1=1 to Tier3=2, midpoint 1.5.
+#   C1 Tier Transparency:        GNWT=1.65, IIT=1.20, PP/FEP=1.60, APGI=1.85
+#   C2 Bridge Principles:        GNWT=1.50, IIT=0.00, PP/FEP=1.20, APGI=1.60
+#   C3 Quantitative Benchmarks:  GNWT=1.40, IIT=0.68, PP/FEP=1.05, APGI=range 1.0-2.0 (midpoint 1.5)
+#   C4 Falsification Conditions: GNWT=1.20, IIT=0.57, PP/FEP=1.10, APGI=1.50
+#   C5 Alternative Comparison:   GNWT=1.65, IIT=1.00, PP/FEP=1.50, APGI=1.75
+#   C6 Evolutionary Plausibility:GNWT=1.60, IIT=1.00, PP/FEP=1.25, APGI=1.60
+#   C7 Causal Roadmap:           GNWT=1.20, IIT=0.00, PP/FEP=1.05, APGI=1.10
 FRAMEWORKS = {
-    "GNWT": [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-    "IIT 3.0": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
-    "PP/FEP": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-    "APGI": [2.0, 1.0, 1.0, 1.5, 1.0, 1.0, 2.0],  # C3/C4 plotted at range midpoints
+    "GNWT": [1.65, 1.50, 1.40, 1.20, 1.65, 1.60, 1.20],
+    "IIT 3.0": [1.20, 0.00, 0.68, 0.57, 1.00, 1.00, 0.00],
+    "PP/FEP": [1.60, 1.20, 1.05, 1.10, 1.50, 1.25, 1.05],
+    "APGI": [1.85, 1.60, 1.50, 1.50, 1.75, 1.60, 1.10],  # C3 plotted at its range midpoint
 }
-# Visible error bars for APGI's tier-resolved ranges: C3 spans 0-2 (midpoint
-# 1.0, half-range 1.0); C4 spans 1-2 (midpoint 1.5, half-range 0.5).
-APGI_ERRORS = [0.0, 0.0, 1.0, 0.5, 0.0, 0.0, 0.0]
+# Only APGI's C3 carries a visible tier-resolved-range marker (Tier 1
+# minimum, Tier 3 maximum), spanning exactly 1.0 to 2.0 (midpoint 1.5,
+# half-range 0.5) — not a confidence interval. No other cell (including
+# APGI's C4) carries an error bar in the reference figure.
+APGI_ERRORS = [0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0]
 
 # Demonstrate the real evaluate_theory() implementation is consistent with
 # the plotted APGI self-audit bars, using the midpoint raw scores above
@@ -81,12 +82,12 @@ COLORS = {
     "APGI": "#9e9ac8",
 }
 
-# Falsification gap tiers
+# Falsification gap tiers — (framework, tier code, tier label, gap description, colour)
 FAL_GAPS = [
-    ("GNWT", "T3", "threshold mechanism\nunspecified", "#6baed6"),
-    ("IIT 3.0", "T2", "Φ uncomputable", "#fd8d3c"),
-    ("PP/FEP", "T3", "no access criterion", "#74c476"),
-    ("APGI", "T1", "κ unmeasured", "#9e9ac8"),
+    ("GNWT", "3", "Computational", "Threshold mechanism\nunspecified.", "#6baed6"),
+    ("IIT 3.0", "2", "Information-Theoretic", "Φ uncomputable at\nbiological scale.", "#fd8d3c"),
+    ("PP/FEP", "3", "Computational", "No access criterion\n(i.e., no gating rule).", "#74c476"),
+    ("APGI", "1", "Thermodynamic", "κ (Landauer efficiency)\nunmeasured.", "#9e9ac8"),
 ]
 
 
@@ -193,7 +194,7 @@ def plot(show: bool = True) -> None:
     ax_gap.text(
         -0.45,
         0.75,
-        "Primary\nFalsification\nGap Tier:",
+        "Primary\nFalsification\nGap:",
         ha="left",
         va="center",
         fontsize=8,
@@ -201,7 +202,7 @@ def plot(show: bool = True) -> None:
         color="#555555",
     )
 
-    for j, (fw, tier, desc, color) in enumerate(FAL_GAPS):
+    for j, (fw, tier_num, tier_name, desc, color) in enumerate(FAL_GAPS):
         bx = 0.5 + j * 1.6
         rect = mpatches.FancyBboxPatch(
             (bx - 0.60, 0.10),
@@ -214,29 +215,37 @@ def plot(show: bool = True) -> None:
         )
         ax_gap.add_patch(rect)
         ax_gap.text(
-            bx, 0.75, fw, ha="center", fontsize=8.5, fontweight="bold", color=color
-        )
-        ax_gap.text(
-            bx, 0.50, tier, ha="center", fontsize=10, fontweight="bold", color="#333333"
+            bx, 0.83, fw, ha="center", fontsize=8.5, fontweight="bold", color=color
         )
         ax_gap.text(
             bx,
-            0.22,
+            0.68,
+            "Primary Falsification Gap:",
+            ha="center",
+            fontsize=6,
+            fontweight="bold",
+            color="#555555",
+        )
+        ax_gap.text(
+            bx,
+            0.46,
             desc,
             ha="center",
             fontsize=6.5,
             color="#555555",
             multialignment="center",
         )
+        ax_gap.text(
+            bx,
+            0.20,
+            f"Tier: {tier_num} ({tier_name})",
+            ha="center",
+            fontsize=8,
+            fontweight="bold",
+            color="#333333",
+        )
 
     label_axes([ax_bars, ax_gap])
-    fig.suptitle(
-        "Figure 2 — Comparative Audit Grouped Bar Chart + Primary Falsification Gap Inset\n"
-        "(Paper 4, §6.6)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig2_comparative_audit_bar_chart.pdf")
     if show:

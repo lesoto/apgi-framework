@@ -25,12 +25,21 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
 RNG = np.random.default_rng(99)
 
+# Group PCI/HEP(uV) targets and APGI semantic-palette colours per the
+# Protocol 7 figure spec's CRITICAL correction: PCI must stay within 0-0.8
+# (never extend to/beyond 1.0) and HEP must be realistic microvolts (not a
+# sub-1 normalized scale). Values match the calibrated sim5_doc_biomarker
+# clinical-scale fields used by figures/generate_figure8.py (Protocol 7's
+# other, "identical design", figure) so the two stay numerically consistent.
 GROUPS = [
-    {"name": "VS/UWS", "N": 30, "pci": 0.15, "hep": 0.20, "color": "#a50f15"},
-    {"name": "MCS", "N": 30, "pci": 0.40, "hep": 0.45, "color": "#fc8d59"},
-    {"name": "EMCS", "N": 20, "pci": 0.65, "hep": 0.68, "color": "#2166ac"},
-    {"name": "Controls", "N": 30, "pci": 0.85, "hep": 0.88, "color": "#4dac26"},
+    {"name": "VS/UWS", "N": 30, "pci": 0.125, "hep": 1.5, "color": "#D7263D"},   # Interoceptive Red
+    {"name": "MCS", "N": 30, "pci": 0.30, "hep": 3.75, "color": "#E8A400"},      # Amber
+    {"name": "EMCS", "N": 20, "pci": 0.50, "hep": 7.0, "color": "#7B3FE4"},      # Workspace Purple
+    {"name": "Controls", "N": 30, "pci": 0.65, "hep": 10.5, "color": "#2E9E5B"}, # Neuromodulator Green
 ]
+PCI_STAR = 0.31  # canonical PCI consciousness threshold
+PCI_AXIS_MAX = 0.8
+HEP_AXIS_MAX_UV = 14.0
 
 TIMEPOINTS = [
     {"label": "Baseline\n(wk 0)", "x": 0.15},
@@ -61,13 +70,26 @@ def _cov_ellipse(ax, mean, cov, color, nstd=1.0):
     ax.add_patch(ell)
 
 
+# Per-group (PCI SD, HEP-uV SD) — same order of magnitude as the calibrated
+# sim5_doc_biomarker fields; the two axes have very different numeric
+# ranges (PCI 0-0.8 vs. HEP 0-14 uV) so a single shared covariance (as for
+# a normalized 0-1x0-1 scale) is no longer appropriate.
+GROUP_SD = {
+    "VS/UWS": (0.02, 0.3),
+    "MCS": (0.03, 0.4),
+    "EMCS": (0.04, 0.6),
+    "Controls": (0.04, 0.7),
+}
+
+
 def draw_scatter(ax):
     # Predicted (not observed) clusters: drawn as mean ± 1 SD ellipses rather
     # than simulated dots, which would imply empirical variability not yet
     # collected for this prospective Protocol 7 trial.
-    cov = np.array([[0.015, 0.010], [0.010, 0.015]])
     legend_handles = []
     for g in GROUPS:
+        pci_sd, hep_sd = GROUP_SD[g["name"]]
+        cov = np.array([[pci_sd ** 2, 0.0], [0.0, hep_sd ** 2]])
         _cov_ellipse(ax, [g["pci"], g["hep"]], cov, g["color"], nstd=1.0)
         ax.plot(
             g["pci"],
@@ -87,22 +109,33 @@ def draw_scatter(ax):
             )
         )
 
-    # Decision boundary (linear diagonal)
-    x_dec = np.linspace(0, 1, 200)
+    # Decision boundary: an illustrative diagonal separating low-consciousness
+    # (VS/UWS, MCS) from high-consciousness (EMCS, Controls) biomarker space
+    # (target joint AUC >= 0.80). Drawn in axes-fraction coordinates so it
+    # renders as a clean corner-to-corner diagonal regardless of the very
+    # different PCI vs. HEP(uV) numeric ranges.
     (bound,) = ax.plot(
-        x_dec,
-        x_dec * 0.95 + 0.05,
+        [0.05, 0.95],
+        [0.05, 0.95],
         "k--",
         lw=1.5,
         alpha=0.6,
+        transform=ax.transAxes,
         label="Joint AUC ≥ 0.80 decision boundary",
     )
     legend_handles.append(bound)
 
+    # PCI* = 0.31 canonical consciousness threshold (vertical reference line).
+    thresh = ax.axvline(
+        PCI_STAR, ls=":", lw=1.3, color="#333333", alpha=0.7,
+        label=f"PCI* = {PCI_STAR} threshold",
+    )
+    legend_handles.append(thresh)
+
     ax.set_xlabel("PCI (perturbational complexity index)", fontsize=10)
-    ax.set_ylabel("HEP amplitude (norm.)", fontsize=10)
-    ax.set_xlim(-0.05, 1.05)
-    ax.set_ylim(-0.05, 1.15)
+    ax.set_ylabel("HEP amplitude (µV)", fontsize=10)
+    ax.set_xlim(0, PCI_AXIS_MAX)
+    ax.set_ylim(0, HEP_AXIS_MAX_UV)
     ax.set_title(
         "A — Predicted group clusters\n(PCI × HEP joint biomarker)",
         fontsize=9,
@@ -209,13 +242,6 @@ def plot(show: bool = True) -> None:
     draw_scatter(ax1)
     draw_timeline(ax2)
     label_axes([ax1, ax2])
-    fig.suptitle(
-        "Figure S1 — Protocol 7 Clinical Study Design: Patient Groups and Assessment Timeline\n"
-        "(Paper 3, supplementary; cross-referenced from §5.2)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS1_protocol7_clinical_design.pdf")
     if show:

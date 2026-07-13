@@ -37,7 +37,7 @@ def _fmt_freq(fc: float) -> str:
 # never drift apart: f_c = 1/(2*pi*tau_lo) at each level boundary.
 INFLECTIONS = [
     {
-        "level": "L0/L1",
+        "level": "L1",
         "age": 2,
         "freq": _fmt_freq(1.0 / (2 * np.pi * LEVEL_TAUS["L0"])),
         "color": "#fdcc8a",
@@ -159,12 +159,6 @@ def plot(show: bool = True) -> None:
     )
 
     ax.legend(fontsize=9, loc="upper left")
-    ax.set_title(
-        "Figure 5 — Developmental Maturation × Spectral Crossover: Dual-Axis Timeline\n"
-        "(Paper 3, §5.4 — sequence L1→L2→L3→L4)",
-        fontsize=11,
-        fontweight="bold",
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig5_developmental_maturation_spectral.pdf")
     if show:

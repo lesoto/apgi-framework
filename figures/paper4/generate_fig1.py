@@ -20,7 +20,11 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent.parent))
-from apgi.extensions.epistemic import landauer_minimum_energy
+from apgi.extensions.epistemic import (
+    KAPPA_ATP_PER_BIT_DEFAULT,
+    inefficiency_ratio,
+    landauer_minimum_energy,
+)
 from figures.utils import save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
@@ -29,12 +33,39 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 # hardcoded, so the figure and apgi.extensions.epistemic cannot drift apart.
 _LANDAUER_J_PER_BIT = landauer_minimum_energy(n_bits=1, temperature_k=310.0)
 
+# CRITICAL (spec Fig.1 prompt): the double-bridge chain's step-3 neural-
+# inefficiency factor is the bandwidth-derived whole-event ratio (~20
+# transmitted bits/event vs ~1e-1 J actual energy), which evaluates to
+# ≈1.7e18 — the framework's primary Tier-1 falsification target. This is
+# numerically and conceptually DISTINCT from the ~1e13-1e14 general
+# synaptic-energy overhead factor (Attwell & Laughlin 2001) and must never
+# be substituted for it in this figure.
+_N_BITS_PER_IGNITION = 20.0
+_ACTUAL_ENERGY_J_PER_IGNITION = 1e-1
+_INEFFICIENCY_FACTOR = inefficiency_ratio(
+    actual_energy_j=_ACTUAL_ENERGY_J_PER_IGNITION, n_bits=_N_BITS_PER_IGNITION
+)
+
+# kappa: the per-bit ATP metabolic-conversion cost (Tier2->Tier1 Landauer
+# bridge quantity), converted to joules/bit for display. ~5e-18 J/bit at
+# ~50 zJ/ATP hydrolysis energy. Distinct from the whole-event inefficiency
+# factor above (different quantity: per-bit unit cost vs whole-event ratio).
+_JOULES_PER_ATP = 5e-20
+_KAPPA_J_PER_BIT = KAPPA_ATP_PER_BIT_DEFAULT * _JOULES_PER_ATP
+
 
 def _format_landauer(value: float) -> str:
     """Format a small energy value as "a×10^b J" to match the figure's display precision."""
     exponent = math.floor(math.log10(value))
     mantissa = value / (10 ** exponent)
     return f"≈{mantissa:.0f}×10{_superscript(exponent)} J"
+
+
+def _format_sci(value: float, mantissa_fmt: str = "{:.0f}") -> str:
+    """Format a value as "a×10^b" (no unit) using the same superscript style."""
+    exponent = math.floor(math.log10(value))
+    mantissa = value / (10 ** exponent)
+    return f"≈{mantissa_fmt.format(mantissa)}×10{_superscript(exponent)}"
 
 
 _SUPERSCRIPT_MAP = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
@@ -81,7 +112,11 @@ BRIDGES = [
         "color": "#4dac26",
     },
     {
-        "label": "T2→T1: Landauer bridge (κ, ATP/bit)\nE ≥ kT·ln2 per bit erased\nStatus: theoretically bounded, κ unmeasured",
+        "label": (
+            "T2→T1: Landauer bridge\nE ≥ kT·ln2 per bit erased\n"
+            f"κ ≈ {KAPPA_ATP_PER_BIT_DEFAULT:.0f} ATP/bit {_format_sci(_KAPPA_J_PER_BIT)} J/bit\n"
+            "Status: theoretically bounded, κ unmeasured"
+        ),
         "y_from": 0.42,
         "y_to": 0.22,
         "valid": True,
@@ -108,12 +143,18 @@ ABSENT_BRIDGES = [
     {"y_from": 0.42, "y_to": 0.72, "label": "T2→T3\nNot yet specified"},
 ]
 
+# CRITICAL (spec Fig.1 prompt): step (3) MUST render the inefficiency factor
+# EXACTLY as "≈1.7×10¹⁸×" — never 10¹³, 10¹⁶, nor the separate ~10¹²–10¹⁴
+# synaptic-overhead bound (kept out of this list; see module docstring above
+# double_bridge_energy_estimate for that distinct secondary quantity).
 CALC_STEPS = [
-    "(1) Bits processed per ignition",
-    f"(2) × Landauer min. ({_format_landauer(_LANDAUER_J_PER_BIT)} at 310K)",
-    "(3) × neural inefficiency (~10¹³–10¹⁴)",
-    "(4) compare to PET/BOLD expenditure",
+    "(1) Bits processed per ignition\n(~20 transmitted bits/event, bandwidth-derived)",
+    f"(2) × Landauer minimum\n({_format_landauer(_LANDAUER_J_PER_BIT)}/bit at 310K; precisely {_format_sci(_LANDAUER_J_PER_BIT, '{:.2f}')} J/bit)",
+    f"(3) × neural-inefficiency factor {_format_sci(_INEFFICIENCY_FACTOR, '{:.1f}')}×\n"
+    "(the framework's primary Tier-1 falsification target)",
+    "(4) compare with PET/BOLD expenditure\n(currently unvalidated)",
 ]
+CALC_STEP_COLORS = ["#2166ac", "#4dac26", "#d6604d", "#7b3fe4"]
 
 
 def plot(show: bool = True) -> None:
@@ -169,7 +210,7 @@ def plot(show: bool = True) -> None:
     ax_tiers.text(
         0.50,
         0.03,
-        "L4 (phenomenal) deliberately excluded from this architecture (§8.4)",
+        "Footnote: phenomenal level L4 (Φ-boundary) is excluded by design (§8.4)",
         ha="center",
         fontsize=7,
         color="#888888",
@@ -263,9 +304,10 @@ def plot(show: bool = True) -> None:
         color="#555555",
     )
     for i, step in enumerate(CALC_STEPS):
-        y = 0.80 - i * 0.17
+        y = 0.82 - i * 0.20
+        step_color = CALC_STEP_COLORS[i]
         circ = mpatches.Circle(
-            (0.13, y), 0.05, facecolor="#333333", edgecolor="white", lw=1.0, zorder=3
+            (0.13, y), 0.055, facecolor=step_color, edgecolor="white", lw=1.0, zorder=3
         )
         ax_calc.add_patch(circ)
         ax_calc.text(
@@ -285,25 +327,40 @@ def plot(show: bool = True) -> None:
             step,
             ha="left",
             va="center",
-            fontsize=7.5,
+            fontsize=7.2,
             color="#333333",
             multialignment="left",
         )
         if i < len(CALC_STEPS) - 1:
             ax_calc.annotate(
                 "",
-                xy=(0.13, y - 0.07),
-                xytext=(0.13, y - 0.02),
+                xy=(0.13, y - 0.10),
+                xytext=(0.13, y - 0.025),
                 arrowprops=dict(arrowstyle="->", color="#555555", lw=1.2),
             )
 
-    fig.suptitle(
-        "Figure 1 — Three-Tier Epistemic Architecture with Canonical Bridge Principles\n"
-        "(Paper 4, §3.2)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
+    # ── Compact shared legend (arrow meaning + tier/comparison colour key) ──
+    legend_handles = [
+        mpatches.FancyArrow(
+            0, 0, 0, -1, width=0.001, color="#333333", label="Downward bridge (specified)"
+        ),
+        mpatches.FancyArrow(
+            0, 0, 0, 1, width=0.001, color="#cc0000", label="Upward bridge (deliberately unspecified)"
+        ),
+        mpatches.Patch(facecolor="#2166ac", label="Computational (Tier 3)"),
+        mpatches.Patch(facecolor="#4dac26", label="Information-theoretic (Tier 2)"),
+        mpatches.Patch(facecolor="#d6604d", label="Thermodynamic (Tier 1)"),
+        mpatches.Patch(facecolor="#7b3fe4", label="Empirical comparison"),
+    ]
+    fig.legend(
+        handles=legend_handles,
+        loc="lower center",
+        ncol=3,
+        fontsize=7,
+        frameon=False,
+        bbox_to_anchor=(0.5, -0.06),
     )
+
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig1_three_tier_epistemic_architecture.pdf")
     if show:

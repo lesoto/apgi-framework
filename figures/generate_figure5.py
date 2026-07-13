@@ -140,11 +140,6 @@ def plot(data: dict, show: bool = True) -> None:
     )
 
     label_axes(axes)
-    fig.suptitle(
-        "Figure 5 — Protocol 4 — Metabolic-State Crossover: Allostatic Threshold Modulation (Pred 4.A–Pred 4.C)",
-        fontsize=11,
-        y=1.02,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure5.pdf")
 

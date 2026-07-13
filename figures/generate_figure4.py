@@ -46,6 +46,8 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 # Protocol 3 parameters (protocol_3_anticipation_fmri.json)
 N_SUBJECTS = 36
 
+WORKSPACE_PURPLE = "#7B3FE4"  # APGI semantic palette (shared rendering spec)
+
 
 def simulate_ppi(n_subjects: int = N_SUBJECTS, seed: int = 5) -> dict:
     rng = np.random.default_rng(seed)
@@ -86,7 +88,7 @@ def plot(data: dict, show: bool = True) -> None:
         ["Anticipation", "Outcome"],
         means,
         yerr=sems,
-        color=[PALETTE["S_t"], "#9966FF"],
+        color=[PALETTE["S_t"], WORKSPACE_PURPLE],
         alpha=0.85,
         edgecolor="white",
         width=0.4,
@@ -139,11 +141,6 @@ def plot(data: dict, show: bool = True) -> None:
     ax.set_title("Pred 3.d — Anticipation drives\nvmPFC–insula coupling", fontsize=10)
 
     label_axes(axes)
-    fig.suptitle(
-        "Figure 4 — Protocol 3 — Anticipation-fMRI: vmPFC–Insula Anticipatory Coupling",
-        fontsize=11,
-        y=1.02,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure4.pdf")
     if show:

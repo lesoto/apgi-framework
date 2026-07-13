@@ -168,6 +168,18 @@ def draw_main_circuit(ax):
         fontsize=8.5,
     )
 
+    # Source data & statistics box formula: Pi^i_eff = Pi^i_baseline . exp(beta_SM . M(c,a))
+    ax.text(
+        0.5,
+        0.93,
+        r"$\Pi^i_{\mathrm{eff}} = \Pi^i_{\mathrm{baseline}} \cdot \exp(\beta_{\mathrm{SM}} \cdot M(c,a))$",
+        ha="center",
+        va="top",
+        fontsize=8,
+        color="#555555",
+        style="italic",
+    )
+
     # Caveat
     ax.text(
         0.5,
@@ -439,12 +451,8 @@ def plot(show: bool = True) -> None:
             ha="right",
         )
 
-    fig.suptitle(
-        "Figure 2 — Proposed Somatic-Marker Disinhibition Circuit (§4.1.2 / §4.2)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.00,
-    )
+    # No baked figure title/number per the shared rendering specification;
+    # the caption is supplied separately in the manuscript.
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig2_somatic_marker_circuit.pdf")
     if show:

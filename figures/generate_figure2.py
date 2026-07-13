@@ -42,17 +42,20 @@ CONDITIONS = [
 
 EPOCHS = [
     {
+        # Pred 0/1 window: HEP epoch is 250-400 ms post-R (Pi^i_eff window).
         "label": "HEP epoch (250–400 ms post-R)\n"
         r"$\Pi^i_{\mathrm{eff}}$ measurement window",
         "t": 0.25,
-        "dur": 0.18,
+        "dur": 0.15,
         "color": "#9ecae1",
     },
     {
-        "label": "P3b epoch (300–600 ms post-stim)\n"
+        # CRITICAL correction: P3b epoch is 250-500 ms post-stimulus (matches
+        # the shared "time post R-peak" axis here), NOT 300-600 ms.
+        "label": "P3b epoch (250–500 ms post-stim)\n"
         r"$S_t > \theta_t$ ignition-detection window",
-        "t": 0.60,
-        "dur": 0.30,
+        "t": 0.25,
+        "dur": 0.25,
         "color": "#a1d99b",
     },
 ]
@@ -60,14 +63,15 @@ EPOCHS = [
 PHASES = [
     {"label": "R-peak\ndetection", "t": 0.00, "dur": 0.08, "color": "#fee8c8"},
     {
-        "label": "Cardiac-phase\nwindow assignment\n(systole vs diastole)",
+        "label": "Cardiac-phase window assignment\n"
+        "(systole 0–150 ms vs diastole 300–500 ms)",
         "t": 0.08,
-        "dur": 0.22,
+        "dur": 0.42,
         "color": "#fdd49e",
     },
-    {"label": "Gabor patch\nonset (QUEST)", "t": 0.30, "dur": 0.05, "color": "#fc8d59"},
-    {"label": "Response\nwindow", "t": 0.35, "dur": 0.25, "color": "#d7301f"},
-    {"label": "ITI", "t": 0.60, "dur": 0.40, "color": "#f0f0f0"},
+    {"label": "Gabor patch\nonset (QUEST)", "t": 0.30, "dur": 0.03, "color": "#fc8d59"},
+    {"label": "Response\nwindow", "t": 0.50, "dur": 0.30, "color": "#d7301f"},
+    {"label": "ITI", "t": 0.80, "dur": 0.20, "color": "#f0f0f0"},
 ]
 
 
@@ -154,8 +158,8 @@ def plot(show: bool = True) -> None:
         arrowprops=dict(arrowstyle="->", lw=1.5, color="#333333"),
     )
     tick_labels = {
-        0: "0 ms", 0.08: "~80", 0.30: "~300", 0.35: "~350", 0.60: "~600",
-        1.00: "~1000 ms",
+        0: "0 ms", 0.08: "~80", 0.15: "~150", 0.25: "~250", 0.30: "~300",
+        0.40: "~400", 0.50: "~500", 0.80: "~800", 1.00: "~1000 ms",
     }
     for t, lbl in tick_labels.items():
         ax.text(t, -0.10, lbl, ha="center", va="top", fontsize=7.5)
@@ -174,11 +178,6 @@ def plot(show: bool = True) -> None:
     ax.annotate("vs. diastole", xy=(0.25, 3.45), fontsize=7.5, color="#555555",
                 ha="center", style="italic")
 
-    ax.set_title(
-        "Figure 2 — Protocol 1 — Cardiac-EEG Trial-Timeline Schematic",
-        fontsize=12,
-        fontweight="bold",
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure2.pdf")
     if show:

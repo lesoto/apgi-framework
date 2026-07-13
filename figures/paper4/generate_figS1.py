@@ -39,157 +39,163 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
 TIER_COLORS = {"T3": "#d4edda", "T2": "#fff3cd", "T1": "#f8d7da"}
 TIER_EDGE = {"T3": "#28a745", "T2": "#856404", "T1": "#721c24"}
+# CRITICAL (spec Fig.3 prompt): every Validation-status cell must read ONLY
+# "Theoretically specified" or "Pending" -- no "Confirmed", "Partial", or
+# "Speculative" anywhere. Those three legacy labels are removed entirely
+# (previously present here as dead/misleading legend entries that never
+# actually appeared in the table, which was itself a labelling-accuracy bug).
 STATUS_COLORS = {
-    "Confirmed": "#28a745",
-    "Partial": "#2166ac",
+    "Theoretically specified": "#28a745",
     "Pending": "#856404",
-    "Speculative": "#888888",
 }
 
-# Verbatim from spec §7.4 "Testable Predictions by Tier":
-#   Tier 3 (P1-P4): testable now with TMS-EEG and pharmacology.
-#   Tier 2 (P5-P8): require multi-voxel information-theoretic analyses
-#     achievable with current neuroimaging.
-#   Tier 1 (P9-P12): require metabolic calorimetry paradigms not yet
-#     standardized -- the most demanding frontier.
-# All twelve derive from the canonical relation Sₜ = Πᵉ|zᵉ| + Πᵢ_eff|zᵢ| > θₜ.
-# Status column: none of P1-P12 have been empirically run per the spec text
-# (§7.4 explicitly distinguishes these forward-looking predictions from the
-# self-audit's "what has [been confirmed]"), so all twelve are marked
-# "Pending" -- there is no per-prediction confirmed/partial status given in
-# the spec to justify otherwise.
+# Verbatim from the PDF spec's reference table (Paper 4, Fig.3 "APGI's
+# twelve falsifiable predictions by tier"). Columns: Prediction | Measurement
+# protocol | Target effect size | Falsification criterion | Feasibility
+# horizon | Validation status. Tier 3 (P1-P4) = testable "now" and marked
+# "Theoretically specified" (sufficient theoretical grounding exists); Tier 2
+# (P5-P8, "2-5 years") and Tier 1 (P9-P12, "5-10 years") = "Pending" (awaits
+# empirical measurement). All twelve derive from the canonical relation
+# Sₜ = Πᵉ|zᵉ| + Πᵢ_eff|zᵢ| > θₜ.
 PREDICTIONS = [
     # P1–P4 Tier 3 (testable now)
     (
         "P1",
         "T3",
         "Nicotinic agonist lowers\neffective threshold",
-        "Pharmacology + EEG",
-        "improved detection,\nearlier P3b",
-        "No change",
-        "Now",
-        "Pending",
+        "Nicotine or α4β2 agonist vs placebo;\npsychophysics (d′) and EEG (P3b amplitude)",
+        "d′ increase ≥ 0.3;\nP3b amplitude increase ≥ 20%",
+        "No change in detection/P3b.",
+        "now",
+        "Theoretically specified",
     ),
     (
         "P2",
         "T3",
-        "Near-threshold stimuli elicit\nbistable percepts, critical slowing",
-        "Psychophysics + EEG",
-        "bistable regime\nw/ critical slowing",
-        "Continuous graded relationship",
-        "Now",
-        "Pending",
+        "Near-threshold bistability\nwith critical slowing",
+        "Staircase near threshold; trial-to-trial\nRT/EEG; estimate lag-1 autocorrelation (AC1)",
+        "AC1 increase ≥ 0.2\nwithin 10% of threshold",
+        "A continuous graded relationship.",
+        "now",
+        "Theoretically specified",
     ),
     (
         "P3",
         "T3",
-        "TMS (200–300ms) to frontoparietal\ncortex selectively abolishes report",
-        "TMS-EEG",
-        "report abolished,\npriming spared",
-        "Disrupts both equally, or\naccess persists",
-        "Now",
-        "Pending",
+        "200–300 ms frontoparietal\nTMS abolishes report, spares priming",
+        "TMS at 200–300 ms over frontoparietal\ncortex; measure report (d′) and priming",
+        "Report d′ drop ≥ 0.8; priming\neffect preserved (≤ 20% reduction)",
+        "Both disrupted equally\nor access persists.",
+        "now",
+        "Theoretically specified",
     ),
     (
         "P4",
         "T3",
-        "Sₜ>θₜ predicts access at\nd′≥0.5, single-trial",
-        "Single-trial EEG,\nLOPO-CV",
-        "d′≥0.5; partial R²≥0.05\nfor Πᵉ and Πⁱ_eff",
-        "d′<0.5, or stimulus intensity\nalone matches within Δd′ 0.05",
-        "Now",
-        "Pending",
+        "Sₜ > θₜ predicts access\nat d′ ≥ 0.5",
+        "Single-trial decoding of Sₜ and θₜ\n(EEG/iEEG); predict access on held-out trials",
+        "AUC ≥ 0.80; accuracy\nimprovement ≥ 10% over chance",
+        "d′ < 0.5 (N ≥ 2,000).",
+        "now",
+        "Theoretically specified",
     ),
     # P5–P8 Tier 2 (multi-voxel information-theoretic analyses)
     (
         "P5",
         "T2",
-        "Attentional cueing raises\nstimulus–response MI by ≥1 bit",
-        "Information-theoretic\nneuroimaging",
-        "ΔMI≥1 bit",
-        "No increase",
-        "2–5 yr",
+        "Attentional cueing raises\nmutual information by ≥1 bit",
+        "Cue vs no-cue; estimate stimulus–\nbrain mutual information (MI)",
+        "ΔMI ≥ 1 bit",
+        "No increase.",
+        "2–5 years",
         "Pending",
     ),
     (
         "P6",
         "T2",
-        "Conscious bandwidth asymptotes\nnear 40 bits/s across modalities",
-        "Cross-modal\ninformation analysis",
-        "~40 bits/s\nplateau",
-        "Systematic modality variation, or\nsustained >100 bits/s after training",
-        "2–5 yr",
+        "Conscious bandwidth\nasymptotes ~40 bits/s",
+        "Rapid RSVP across modalities; estimate\ninformation rate (bits/s) vs stimulation rate",
+        "Asymptote = 30–50 bits/s;\nfit saturating curve",
+        "Modality variation or\nsustained > 100 bits/s.",
+        "2–5 years",
         "Pending",
     ),
     (
         "P7",
         "T2",
-        "Empirical θₜ approximates the\nNeyman–Pearson optimum",
-        "Signal-detection\nanalysis",
-        "within 2 SD of\nNP-optimal θₜ",
-        "Systematic deviation >2 SD",
-        "2–5 yr",
+        "θₜ approximates the\nNeyman–Pearson optimum",
+        "Model-based ROC analysis; compare\nθₜ to NP-optimal criterion",
+        "Criterion within 2 SD\nof NP optimum",
+        "Deviation > 2 SD.",
+        "2–5 years",
         "Pending",
     ),
     (
         "P8",
         "T2",
-        "Interoceptive transfer entropy to\naccess report exceeds exteroceptive",
-        "Transfer-entropy\nanalysis",
-        "ΔTE≥0.05\nbits/trial",
-        "TE_intero ≤ TE_extero",
-        "2–5 yr",
+        "Interoceptive transfer entropy\n> exteroceptive by ≥ 0.05 bits/trial",
+        "iEEG/EEG; compute TE from interoceptive vs\nexteroceptive regions to frontoparietal cortex",
+        "ΔTE ≥ 0.05 bits/trial",
+        "TE_intero ≤ TE_extero.",
+        "2–5 years",
         "Pending",
     ),
     # P9–P12 Tier 1 (metabolic calorimetry paradigms)
     (
         "P9",
         "T1",
-        "Ignition trials cost more\nfrontoparietal energy",
-        "CMRO₂/glucose\nmeasurement",
-        "metabolic\ndifferential > 0",
-        "No differential after controls",
-        "5–10 yr",
+        "Ignition trials cost more\nfrontoparietal energy (CMRO₂/glucose)",
+        "Simultaneous fMRI/PET (CMRO₂ or glucose);\ncompare ignition vs matched sub-threshold trials",
+        "ΔCMRO₂ or Δglucose\n≥ 10% after controls",
+        "No differential after controls.",
+        "5–10 years",
         "Pending",
     ),
     (
         "P10",
         "T1",
-        "Threshold-gated processing is more\nenergy-efficient than continuous",
-        "Matched\nspiking-network sim.",
-        "threshold-gated\n< continuous cost",
-        "Continuous matches or beats it",
-        "5–10 yr",
+        "Threshold-gated processing more\nenergy-efficient than continuous",
+        "Adaptive (threshold-gated) vs continuous\nstimulation/task; energy per bit or per correct report",
+        "≥ 20% lower\nenergy cost",
+        "Continuous matches or beats it.",
+        "5–10 years",
         "Pending",
     ),
     (
         "P11",
         "T1",
         "Metabolic depletion\nelevates θₜ",
-        "Metabolic\ndepletion + EEG",
-        "higher detection\nthreshold, reduced P3b",
-        "No effect, or depletion\nlowers thresholds",
-        "5–10 yr",
+        "Induce metabolic depletion (hypercapnia/\nhypoxia or TMS); measure θₜ via staircases",
+        "θₜ increase ≥ 0.3 SD",
+        "No effect or lowered threshold.",
+        "5–10 years",
         "Pending",
     ),
     (
         "P12",
         "T1",
-        "Single-ignition metabolic cost exceeds\nLandauer minimum by ~10¹⁸× (κ≈100 ATP/bit)",
-        "BOLD proxy, then\n³¹P-MRS",
-        "within 1 order\nof magnitude of κ",
-        "Measured per-bit cost departs from κ\nby >1 order of magnitude, or BOLD/\n³¹P-MRS diverge by >10×",
-        "5–10 yr",
+        "Single-ignition cost exceeds the\nLandauer minimum by κ (≈100 ATP/bit)",
+        "Estimate energy cost per ignition (ATP\nequivalents); compare to Landauer limit (k_BT ln 2)",
+        "κ ≥ 100 ATP/bit\n(~4×10⁻²⁰ J/bit)",
+        "κ below the canonical floor or\nBOLD/direct diverge > 10×.",
+        "5–10 years",
         "Pending",
     ),
 ]
 
-COLS = ["Prediction", "Protocol", "Effect target", "Falsification", "Horizon", "Status"]
-COL_WIDTHS = [0.28, 0.14, 0.12, 0.16, 0.08, 0.10]  # fractions of table width
+COLS = [
+    "Prediction",
+    "Measurement protocol",
+    "Target effect size",
+    "Falsification criterion",
+    "Feasibility\nhorizon",
+    "Validation\nstatus",
+]
+COL_WIDTHS = [0.19, 0.23, 0.15, 0.19, 0.07, 0.11]  # fractions of table width
 
 
 def plot(show: bool = True) -> None:
-    fig, ax = plt.subplots(figsize=(16, 11))
+    fig, ax = plt.subplots(figsize=(19, 12))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
@@ -266,7 +272,7 @@ def plot(show: bool = True) -> None:
                 cell_text,
                 ha="center",
                 va="center",
-                fontsize=6.5,
+                fontsize=6.2,
                 zorder=4,
                 color=cell_color,
                 fontweight="bold" if j == 5 else "normal",
@@ -308,16 +314,6 @@ def plot(show: bool = True) -> None:
         bbox_to_anchor=(0.99, 0.01),
     )
 
-    ax.set_title(
-        "Figure S1 (spec also captions this Figure 3) / Table S4 — "
-        "APGI Twelve-Prediction Matrix by Tier\n"
-        "(Paper 4, §7.4; predictions P1–P12 verbatim from "
-        "\"Testable Predictions by Tier\")\n"
-        r"Canonical equation: $S_t = \Pi^e |z^e| + \Pi^i_{\mathrm{eff}} |z^i| > \theta_t$",
-        fontsize=10,
-        fontweight="bold",
-        y=0.995,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS1_twelve_prediction_matrix.pdf")
     if show:

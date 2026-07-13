@@ -48,15 +48,18 @@ PAIRS = [
     },
 ]
 
-ARCHITECTURES = ["Feedforward", "Attractor\nnetwork", "Transformer", "LSM/LNN\n(APGI)"]
+# Bottom-to-top order for barh (matplotlib plots index 0 at the bottom), chosen
+# so the rendered top-to-bottom order matches the PDF spec exactly: LSM/LNN,
+# Attractor network, Transformer, Feedforward.
+ARCHITECTURES = ["Feedforward", "Transformer", "Attractor\nnetwork", "LSM/LNN\n(APGI)"]
 # Number of constraints satisfied out of 4
-ARCH_SCORES = [2, 3, 2, 4]
+ARCH_SCORES = [2, 2, 3, 4]
 # Constraint number(s) each alternative architecture FAILS (1-indexed, matching
 # PAIRS / the quadrant numbering). Supports the §1 mechanistic argument, not just
 # the satisfied-count claim.
 #   C1 high-dimensional transient dynamics, C2 fading memory,
 #   C3 nonlinear separability, C4 sparse event-driven activity
-ARCH_FAILS = [[1, 2], [2], [2, 4], []]
+ARCH_FAILS = [[1, 2], [2, 4], [2], []]
 
 
 def plot(show: bool = True) -> None:
@@ -274,13 +277,16 @@ def plot(show: bool = True) -> None:
     )
 
     label_axes([ax_main, ax_comp])
-    fig.suptitle(
-        "Figure 1 — Four Biological Constraints × Four APGI Computational Requirements: The LSM Substrate\n"
-        "(Paper 2, §1)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
+
+    # Abbreviation key (per prompt: "Include abbreviation key").
+    abbrev = (
+        "Abbreviation key —  LSM, liquid state machine;  LNN, liquid neural network;  "
+        "APGI, Allostatic Precision-Gated Ignition;  "
+        r"$\varepsilon^e/\varepsilon^i$, excitatory/inhibitory prediction errors;  "
+        r"$\tau_S$, decay/accumulation time constant."
     )
+    fig.text(0.5, -0.03, abbrev, ha="center", va="top", fontsize=8, color="#444444")
+
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig1_biological_constraints_lsm.pdf")
     if show:

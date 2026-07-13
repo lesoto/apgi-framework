@@ -34,60 +34,136 @@ LAYER_COLORS = {
 LAYER_H = 0.13
 LAYER_Y = {"L1": 0.83, "L2/3": 0.68, "L4": 0.53, "L5": 0.38, "L6": 0.23}
 
+# Arrowhead key (used throughout Panel A): three connection types per the
+# Fig. 2 prompt ("Three arrowhead types for excitatory/inhibitory/modulatory").
+_EXC, _INH, _MOD = "#2166ac", "#d6604d", "#8c8c00"
+
+
+def _arrow(ax, xy, xytext, kind, color=None, lw=1.4):
+    """Draw one of the three canonical arrow types (excitatory/inhibitory/modulatory)."""
+    style = {
+        "exc": dict(arrowstyle="-|>", color=color or _EXC, lw=lw, linestyle="solid"),
+        "inh": dict(arrowstyle="-|>", color=color or _INH, lw=lw, linestyle=(0, (3, 2))),
+        "mod": dict(arrowstyle="-|>", color=color or _MOD, lw=lw, linestyle=(0, (1, 1.5))),
+    }[kind]
+    ax.annotate("", xy=xy, xytext=xytext, arrowprops=style, zorder=6)
+
 
 def draw_laminar_column(ax):
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0.1, 1.0)
+    ax.set_xlim(0, 1.42)
+    ax.set_ylim(0.02, 1.14)
     ax.axis("off")
     ax.set_title(
-        "A — Laminar column\n(receptor assignments)", fontsize=9, fontweight="bold"
+        "A — Laminar column\n(receptor/afferent assignments)",
+        fontsize=9,
+        fontweight="bold",
     )
 
     for name, y in LAYER_Y.items():
         rect = mpatches.FancyBboxPatch(
             (0.15, y),
-            0.5,
+            0.42,
             LAYER_H,
             boxstyle="square,pad=0.01",
             facecolor=LAYER_COLORS[name],
             edgecolor="#555555",
             lw=1.0,
-            zorder=3,
+            zorder=2,
         )
         ax.add_patch(rect)
         ax.text(0.11, y + LAYER_H / 2, name, ha="right", va="center", fontsize=8)
 
-    # Receptor annotations
-    annotations = [
-        ("L1", "Interoceptive input\n(apical dendrites)", 0.80, "#7b3294"),
-        ("L2/3", "ACh/M1 → PV+\nVIP+ ← vmPFC", 0.80, "#2166ac"),
-        ("L4", "Exteroceptive input\n(thalamus → L4)", 0.80, "#4dac26"),
-        ("L5", "NE/α2 → SST+\nL5 thick-tufted", 0.80, "#d6604d"),
-        ("L6", "Thalamic feedback", 0.80, "#888888"),
-    ]
-    for layer, text, x, color in annotations:
-        y = LAYER_Y[layer]
-        ax.text(
-            x,
-            y + LAYER_H / 2,
-            text,
-            ha="left",
-            va="center",
-            fontsize=6.5,
-            color=color,
-            style="italic",
+    def cell(x, y, label, facecolor, r=0.032):
+        circ = mpatches.Circle(
+            (x, y), r, facecolor=facecolor, edgecolor="#333333", lw=1.1, zorder=5
         )
-        ax.plot(
-            [0.65, x - 0.02],
-            [y + LAYER_H / 2, y + LAYER_H / 2],
-            lw=0.8,
-            color=color,
-            alpha=0.5,
-        )
+        ax.add_patch(circ)
+        ax.text(x, y, label, ha="center", va="center", fontsize=5.3, zorder=6)
+
+    def receptor_text(x, y, text, color):
+        ax.text(x, y, text, ha="left", va="center", fontsize=6.2, color=color, style="italic")
+
+    # ── L1: apical dendrites, interoceptive (visceral) afferents ───────────
+    y1 = LAYER_Y["L1"] + LAYER_H / 2
+    cell(0.57, y1, "Apical\ndendrites", "#f4cccc", r=0.045)
+    _arrow(ax, (0.545, y1 + 0.035), (0.42, y1 + 0.075), "mod", color="#c0392b")
+    ax.text(0.40, y1 + 0.09, "Interoceptive\n(visceral afferents)", ha="center",
+            va="bottom", fontsize=6.0, color="#c0392b", style="italic")
+    receptor_text(0.63, y1, "5-HT$_{2A}$, HCN,\nmGluR$_5$", "#c0392b")
+
+    # ── L2/3: PV+ and VIP+ interneurons ─────────────────────────────────────
+    # CRITICAL: the ONLY inputs to the VIP+ node below are (1) the
+    # vmPFC -> VIP+ projection and (2) ACh/M1 modulation -- no other
+    # node/arrow is connected to it.
+    y23 = LAYER_Y["L2/3"] + LAYER_H / 2
+    cell(0.50, y23 + 0.035, "PV+", "#a6cee3")
+    cell(0.50, y23 - 0.035, "VIP+", "#fdd835")
+
+    # vmPFC source node (top-down, distal) -> VIP+ only.
+    vmpfc_xy = (0.30, y23 + 0.16)
+    ax.add_patch(mpatches.FancyBboxPatch(
+        (vmpfc_xy[0] - 0.075, vmpfc_xy[1] - 0.028), 0.15, 0.056,
+        boxstyle="round,pad=0.01", facecolor="#cce5ff", edgecolor=_EXC, lw=1.2, zorder=5,
+    ))
+    ax.text(vmpfc_xy[0], vmpfc_xy[1], "vmPFC", ha="center", va="center", fontsize=6.5,
+            fontweight="bold", color="#0b3d78", zorder=6)
+    _arrow(ax, (0.485, y23 - 0.01), (vmpfc_xy[0] + 0.02, vmpfc_xy[1] - 0.03), "exc")
+
+    # ACh/M1 modulatory source -> VIP+ only (second and last input to VIP+).
+    ach_xy = (0.66, y23 - 0.06)
+    ax.text(ach_xy[0], ach_xy[1], "ACh / M1", ha="left", va="center", fontsize=6.3,
+            color=_MOD, fontweight="bold", zorder=6)
+    _arrow(ax, (0.525, y23 - 0.035), (ach_xy[0] - 0.01, ach_xy[1]), "mod")
+
+    # ACh/M1 also modulates PV+ (a separate arrow -- does not touch VIP+).
+    _arrow(ax, (0.525, y23 + 0.035), (ach_xy[0] - 0.01, ach_xy[1] + 0.09), "mod")
+    ax.text(ach_xy[0], ach_xy[1] + 0.09, "ACh / M1", ha="left", va="center", fontsize=6.3,
+            color=_MOD, fontweight="bold", zorder=6)
+
+    receptor_text(0.63, y23 + 0.035 + 0.045, "nAChR ($\\alpha7,\\beta2$)", "#2166ac")
+    receptor_text(0.94, y23 - 0.035, "mGluR$_{2/3}$, D$_1$\n(top-down gating)", "#8c8c00")
+
+    # ── L4: spiny stellate, exteroceptive thalamic drive ────────────────────
+    y4 = LAYER_Y["L4"] + LAYER_H / 2
+    cell(0.50, y4, "L4 spiny\nstellate", "#9ecae1", r=0.042)
+    _arrow(ax, (0.465, y4), (0.34, y4), "exc")
+    ax.text(0.30, y4, "Exteroceptive\n(thalamus)", ha="right", va="center",
+            fontsize=6.2, color=_EXC, style="italic")
+    receptor_text(0.63, y4, "AMPA, NMDA,\nmGluR$_5$", "#4dac26")
+
+    # ── L5: SST+ interneuron and thick-tufted pyramidal ─────────────────────
+    y5 = LAYER_Y["L5"] + LAYER_H / 2
+    cell(0.50, y5 + 0.035, "SST+", "#fdb863")
+    cell(0.50, y5 - 0.035, "L5 thick-\ntufted", "#8073ac", r=0.038)
+    ne_xy = (0.30, y5 + 0.045)
+    ax.text(ne_xy[0], ne_xy[1], "NE / LC", ha="center", va="center", fontsize=6.3,
+            color="#a6611a", fontweight="bold", zorder=6)
+    _arrow(ax, (0.475, y5 + 0.035), (ne_xy[0] + 0.03, ne_xy[1] + 0.005), "mod", color="#a6611a")
+    receptor_text(0.63, y5 + 0.035, r"$\alpha_{2A}$-AR, GABA$_A$", "#d6604d")
+    receptor_text(0.63, y5 - 0.035, r"$\alpha_2$-AR, D$_1$" + "\n(NE-gated output)", "#7b3294")
+
+    # ── L6: pyramidal cells, thalamic feedback ──────────────────────────────
+    y6 = LAYER_Y["L6"] + LAYER_H / 2
+    cell(0.50, y6, "L6\npyramidal", "#9ecae1", r=0.038)
+    _arrow(ax, (0.465, y6), (0.34, y6), "exc", color="#41ab5d")
+    ax.text(0.30, y6, "Thalamic\nfeedback", ha="right", va="center",
+            fontsize=6.2, color="#41ab5d", style="italic")
+    receptor_text(0.63, y6, "AMPA, NMDA, mGluR$_5$\n(thalamic feedback/coord.)", "#41ab5d")
+
+    # ── Arrowhead key (excitatory / inhibitory / modulatory) ────────────────
+    kx0, ky0, dky = 1.00, 1.10, 0.055
+    for i, (kind, text, color) in enumerate([
+        ("exc", "Excitatory (glutamatergic)", _EXC),
+        ("inh", "Inhibitory (GABAergic)", _INH),
+        ("mod", "Modulatory (neuromodulator/receptor)", _MOD),
+    ]):
+        yk = ky0 - i * dky
+        _arrow(ax, (kx0 + 0.09, yk), (kx0, yk), kind, color=color, lw=1.3)
+        ax.text(kx0 + 0.12, yk, text, ha="left", va="center", fontsize=5.6, color=color)
 
     ax.text(
         0.40,
-        0.16,
+        0.055,
         "Proposed circuit — causal dissociation requires\n"
         "optogenetic/chemogenetic validation (§6.2, Gap 1)",
         ha="center",
@@ -281,18 +357,21 @@ def draw_pyramidal_panel(ax):
 
 
 def plot(show: bool = True) -> None:
-    fig, axes = plt.subplots(1, 3, figsize=(15, 6.5))
+    fig, axes = plt.subplots(1, 3, figsize=(16.5, 6.8))
     draw_laminar_column(axes[0])
     draw_pathway_panel(axes[1])
     draw_pyramidal_panel(axes[2])
     label_axes(list(axes))
-    fig.suptitle(
-        "Figure 2 — Cortical Microcircuit: Precision Implementation and Somatic-Marker Pathway\n"
-        "(Paper 2, §3.1 and §3.3)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
+
+    # Abbreviation key (figure-level, per prompt: "Include an abbreviation key").
+    abbrev = (
+        "Abbreviation key —  vmPFC, ventromedial prefrontal cortex;  PV$^+$/SST$^+$/VIP$^+$, "
+        "parvalbumin/somatostatin/vasoactive intestinal peptide-positive interneurons;  "
+        "ACh, acetylcholine;  NE, norepinephrine;  $\\hat{M}(c,a)$, somatic-marker estimate;  "
+        r"$\varepsilon^e/\varepsilon^i$, exteroceptive/interoceptive prediction error."
     )
+    fig.text(0.5, -0.045, abbrev, ha="center", va="top", fontsize=7.2, color="#444444")
+
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig2_cortical_microcircuit.pdf")
     if show:

@@ -46,6 +46,30 @@ LEVEL_COLORS = {
 }
 
 
+def _human_tau(tau_s: float) -> str:
+    """Format a time constant in the same mixed units as the manuscript
+    caption (ms, s, min, d, mo), so the legend and caption can never drift
+    apart (CRITICAL: L2 must read '15 min', never '15 s'; L3 must read
+    '1.4 d')."""
+    if tau_s < 1.0:
+        return f"{tau_s * 1000:.0f} ms"
+    if tau_s < 100:
+        # Truncate (not round) to 1 decimal: the manuscript's canonical
+        # "6.6 s" is a truncation of the ratio-133 value 6.65 s, and
+        # standard rounding would flip it to "6.7 s", breaking the
+        # legend/caption identity the CRITICAL correction requires.
+        import math
+
+        return f"{math.floor(tau_s * 10) / 10:.1f} s"
+    if tau_s < 3 * 3600:
+        return f"{tau_s / 60:.0f} min"
+    if tau_s < 86400:
+        return f"{tau_s / 3600:.1f} h"
+    if tau_s < 45 * 86400:
+        return f"{tau_s / 86400:.1f} d"
+    return f"{tau_s / (365.25 * 86400 / 12):.0f} mo"
+
+
 def lorentzian(f, tau, sigma2=1.0):
     """Single-level OU spectrum per spec §2.4: S_l(f) = sigma^2 * tau / (1 + (2*pi*f*tau)^2).
 
@@ -75,7 +99,7 @@ def plot(show: bool = True) -> None:
             color=LEVEL_COLORS[name],
             linestyle="--",
             alpha=0.7,
-            label=f"{name} (τ≈{tau:.3g} s)",
+            label=f"{name} (τ≈{_human_tau(tau)})",
         )
         # Corner freq label
         fc = 1 / (2 * np.pi * tau)
@@ -182,12 +206,6 @@ def plot(show: bool = True) -> None:
 
     ax.set_xlabel("Frequency (Hz)", fontsize=11)
     ax.set_ylabel("Power Spectral Density (a.u.)", fontsize=11)
-    ax.set_title(
-        "Figure 2 — 1/f Power Spectrum from OU Superposition\n"
-        "Five Lorentzians + Composite + Partial-Hierarchy Overlay (§2.4, Paper 3)",
-        fontsize=11,
-        fontweight="bold",
-    )
     ax.legend(fontsize=8, loc="lower left", framealpha=0.85)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)

@@ -30,16 +30,40 @@ N_SIMS = 1000
 PARAMS = [
     # Well-identified (r > 0.80; §4.7): theta_0, tau_S.
     # theta_0 range per Table S1 / THETA_0_DEFAULT docstring: [0.25, 0.85] AU.
-    {"name": r"$\theta_0$", "key": "theta0", "r_true": 0.91, "lo": 0.25, "hi": 0.85},
-    {"name": r"$\tau_S$", "key": "tau_S", "r_true": 0.88, "lo": 50, "hi": 500},
+    # r targets match the source-data & statistics box exactly: r = 0.82
+    # (theta_0), 0.83 (tau_S), 0.73 (Pi_i), 0.72 (beta_SM), 0.60 (gamma_sig).
+    {
+        "name": r"$\theta_0$",
+        "key": "theta0",
+        "r_true": 0.82,
+        "lo": 0.25,
+        "hi": 0.85,
+        "color": "#2166ac",
+    },
+    {
+        "name": r"$\tau_S$",
+        "key": "tau_S",
+        "r_true": 0.83,
+        "lo": 50,
+        "hi": 500,
+        "color": "#e6a817",
+    },
     # Moderately identified (r ~ 0.70-0.75 per §4.7): Pi_i, beta_SM.
-    {"name": r"$\Pi^i$", "key": "pi_i", "r_true": 0.72, "lo": 0.3, "hi": 1.8},
+    {
+        "name": r"$\Pi^i$",
+        "key": "pi_i",
+        "r_true": 0.73,
+        "lo": 0.3,
+        "hi": 1.8,
+        "color": "#4dac26",
+    },
     {
         "name": r"$\beta_{\mathrm{SM}}$",
         "key": "beta_sm",
-        "r_true": 0.73,
+        "r_true": 0.72,
         "lo": 0.0,
         "hi": 3.0,
+        "color": "#7b3294",
     },
     # Poorly identified at the individual level (r ~ 0.55-0.65 per §4.7): gamma_sig.
     {
@@ -48,6 +72,7 @@ PARAMS = [
         "r_true": 0.60,
         "lo": 1.0,
         "hi": 15.0,
+        "color": "#6baed6",
     },
 ]
 
@@ -83,7 +108,9 @@ def plot(show: bool = True) -> None:
         r, _ = stats.pearsonr(true_v, rec_v)
         pearson_rs.append(r)
 
-        ax.scatter(true_v, rec_v, s=6, alpha=0.35, color="#2166ac", rasterized=True)
+        ax.scatter(
+            true_v, rec_v, s=6, alpha=0.35, color=param["color"], rasterized=True
+        )
         add_identity_line(ax, param["lo"], param["hi"])
         annotate_pearson_r(ax, r)
         ax.set_xlabel(f"True {param['name']}", fontsize=10)
@@ -91,40 +118,63 @@ def plot(show: bool = True) -> None:
         ax.set_title(param["name"], fontsize=11, fontweight="bold")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        if i == 0:  # name the identity line once
-            ax.legend(loc="lower right", fontsize=8, framealpha=0.85)
 
     # Sixth panel: collinearity reduction.
-    # Appendix A.4: "Without pre-session M(c,a) estimation, beta_SM and Pi_i
-    # show collinearity r > 0.90 in recovered values; the pre-session
-    # protocol reduces this to r ~= 0.45." So joint (no pre-session M)
-    # estimation is the *problematic*, high-collinearity condition, and
-    # pre-session M estimation is the *reduced*-collinearity condition.
+    # Source data & statistics box + Appendix A.4: without pre-session
+    # M(c,a) estimation, beta_SM and Pi_i show collinearity r = 0.90 in
+    # recovered values; the pre-session protocol reduces this to r = 0.45.
     ax6 = axes_flat[5]
     labels = [
-        r"Joint estimation" + "\n" + r"($\beta_{SM} \times \Pi^i$)",
+        "Without pre-session\nestimation",
         "Pre-session M\nestimation",
     ]
-    r_vals = [0.92, 0.45]
+    r_vals = [0.90, 0.45]
     # Flag the problematic (above-threshold) bar in red; the resolved bar in green.
     colors = ["#d6604d", "#4dac26"]
-    ax6.bar(labels, r_vals, color=colors, width=0.5, edgecolor="#333333", lw=1.2)
+    bars = ax6.bar(labels, r_vals, color=colors, width=0.5, edgecolor="#333333", lw=1.2)
+    for bar, v in zip(bars, r_vals):
+        ax6.text(
+            bar.get_x() + bar.get_width() / 2,
+            v + 0.02,
+            f"r = {v:.2f}",
+            ha="center",
+            fontsize=8,
+            fontweight="bold",
+        )
     ax6.axhline(0.90, lw=1.2, ls="--", color="#888888")
     ax6.text(1.05, 0.91, "r > 0.90\n(collinearity)", fontsize=7.5, color="#888888")
     ax6.set_ylim(0, 1.05)
     ax6.set_ylabel("Pearson r", fontsize=10)
-    ax6.set_title("Collinearity reduction\n(β_SM × Πⁱ)", fontsize=10, fontweight="bold")
+    ax6.set_title(
+        r"$\beta_{\mathrm{SM}} \times \Pi^i$ Collinearity" "\n(Pearson r)",
+        fontsize=10,
+        fontweight="bold",
+    )
     ax6.spines["top"].set_visible(False)
     ax6.spines["right"].set_visible(False)
 
-    label_axes(list(axes_flat[:5]) + [ax6])
-    fig.suptitle(
-        "Figure S1 — Parameter Recovery Scatter Plots (N = 1,000 simulation runs)\n"
-        "Appendix A.4, following Table S2",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
+    # Combined bottom legend: identity line + one swatch per parameter colour
+    # actually used in the scatter panels (no unlabeled/duplicate swatches).
+    handles = [
+        plt.Line2D([], [], ls="--", color="black", lw=1.2, label="Identity line (y = x)")
+    ]
+    for p in PARAMS:
+        handles.append(
+            plt.Line2D(
+                [], [], marker="o", ls="", color=p["color"], label=f"{p['name']}"
+            )
+        )
+    fig.legend(
+        handles=handles,
+        loc="lower center",
+        ncol=6,
+        fontsize=8,
+        frameon=True,
+        bbox_to_anchor=(0.5, -0.03),
     )
+
+    label_axes(list(axes_flat[:5]) + [ax6])
+    # No baked figure title/number per the shared rendering specification.
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS1_parameter_recovery.pdf")
     if show:

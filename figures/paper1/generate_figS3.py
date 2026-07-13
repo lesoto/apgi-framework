@@ -212,12 +212,6 @@ def plot(show: bool = True) -> None:
         style="italic",
     )
 
-    ax.set_title(
-        "Figure S3 — Protocol 1 Trial-Timeline Schematic (Cardiac-Phase EEG)\n"
-        "Appendix D.1, before Table S4",
-        fontsize=11,
-        fontweight="bold",
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS3_protocol1_trial_timeline.pdf")
     if show:

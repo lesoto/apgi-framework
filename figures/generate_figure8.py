@@ -94,11 +94,20 @@ def load_data(path: pathlib.Path | None = None) -> dict:
 
 def subject_level_summary(data: dict) -> dict:
     """Collapse trial-level sim5 data to one (hep, pci, group) row per
-    subject (N=110)."""
+    subject (N=110).
+
+    Uses the clinical-scale calibrated fields (`pci`, `hep_amplitude_uv`),
+    NOT the raw `pci_proxy`/`hep_proxy` fields -- the raw proxies live on an
+    internal, uncalibrated precision scale (VS/UWS PCI proxy is exactly 0.0;
+    HEP proxy is sub-1 "a.u."), which is exactly the cross-tier scale
+    conflation the Protocol 7 figure spec's CRITICAL correction warns
+    against (PCI must never be 0 or exceed ~0.8; HEP must be in realistic
+    microvolts, not a sub-1 scale).
+    """
     sub = data["subject_id"]
     gl = data["group_labels"]
-    hep = data["hep_proxy"]
-    pci = data["pci_proxy"]
+    hep = data["hep_amplitude_uv"]
+    pci = data["pci"]
 
     subj_ids = np.unique(sub)
     out_group, out_hep, out_pci = [], [], []
@@ -131,6 +140,15 @@ def _draw_confidence_ellipse(ax, x: np.ndarray, y: np.ndarray, color: str, label
                linewidths=0.3, label=label, zorder=3)
 
 
+# Axis bounds fixed per the Protocol 7 figure spec's CRITICAL correction:
+# PCI is a bounded 0-1 metric and must be shown over 0-0.8 (not extended to
+# 1.0), and HEP amplitude must be shown in realistic microvolts (0-~14 uV),
+# not compressed to a sub-1 scale.
+PCI_AXIS_MAX = 0.8
+HEP_AXIS_MAX_UV = 14.0
+PCI_STAR = 0.31  # canonical PCI consciousness threshold
+
+
 def plot_joint_scatter(ax, summary: dict) -> None:
     for g in GROUP_ORDER:
         mask = summary["group"] == g
@@ -139,26 +157,27 @@ def plot_joint_scatter(ax, summary: dict) -> None:
             f"{GROUP_DISPLAY[g]} (N={GROUP_N[g]})",
         )
 
-    # Pre-registered joint-classifier decision boundary (illustrative
-    # diagonal separating low-consciousness from high-consciousness
-    # biomarker space; target joint AUC >= 0.80).
-    pci_all, hep_all = summary["pci"], summary["hep"]
-    lo = min(pci_all.min(), hep_all.min()) - 0.05
-    hi = max(pci_all.max(), hep_all.max()) + 0.05
-    # Diagonal boundary roughly separating VS/UWS+MCS from EMCS+Controls.
-    intercept = (
-        np.median(summary["hep"][summary["group"] == "MCS"])
-        + np.median(summary["hep"][summary["group"] == "EMCS"])
-    ) / 2 - 0.5 * (
-        np.median(summary["pci"][summary["group"] == "MCS"])
-        + np.median(summary["pci"][summary["group"] == "EMCS"])
-    ) / 2
-    x_line = np.linspace(lo, hi, 100)
-    ax.plot(x_line, 0.5 * x_line + intercept, ls="--", lw=1.5, color="#333333",
-             label="Decision boundary\n(target joint AUC ≥ 0.80)", zorder=1)
+    ax.set_xlim(0, PCI_AXIS_MAX)
+    ax.set_ylim(0, HEP_AXIS_MAX_UV)
+
+    # PCI* = 0.31 canonical consciousness threshold (vertical reference line).
+    ax.axvline(PCI_STAR, ls=":", lw=1.3, color="#333333", alpha=0.7,
+               label=f"PCI* = {PCI_STAR} threshold")
+
+    # Pre-registered joint-classifier decision boundary: an illustrative
+    # diagonal separating low-consciousness (VS/UWS, MCS) from
+    # high-consciousness (EMCS, Controls) biomarker space (target joint
+    # AUC >= 0.80). Drawn in axes-fraction coordinates so it renders as a
+    # clean corner-to-corner diagonal regardless of the very different PCI
+    # vs. HEP(uV) numeric ranges.
+    ax.plot(
+        [0.05, 0.95], [0.05, 0.95], transform=ax.transAxes,
+        ls="--", lw=1.5, color="#333333",
+        label="Decision boundary\n(target joint AUC ≥ 0.80)", zorder=1,
+    )
 
     ax.set_xlabel("PCI (perturbational complexity index)", fontsize=9.5)
-    ax.set_ylabel("HEP amplitude (a.u.)", fontsize=9.5)
+    ax.set_ylabel("HEP amplitude (µV)", fontsize=9.5)
     ax.set_title(
         "Pred 7.A — Joint PCI–HEP space separates\nfour DoC groups (N=110)", fontsize=10
     )
@@ -219,11 +238,6 @@ def plot(data: dict, show: bool = True) -> None:
     plot_longitudinal(axes[1], summary)
 
     label_axes(axes)
-    fig.suptitle(
-        "Figure 8 — Protocol 7 — DoC-Biomarker: Joint Ignition-Capacity and Interoceptive-Precision Biomarkers (Pred 7.A)",
-        fontsize=11,
-        y=1.03,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure8.pdf")
 

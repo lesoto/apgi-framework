@@ -22,48 +22,54 @@ from figures.utils import save_figure
 
 OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 
+# Substrate, τ_int and dominant-neuromodulator assignments follow the PDF
+# ground-truth Fig 1 table exactly (Paper 3 §2.3). The "Neuromod." column
+# records the carrier ARRIVING at that level from the next-outer level
+# (i.e. the top-down cross-level carrier), per the caption: cortisol
+# (L4→L3), phasic NE (L3→L2), ACh (L2→L1), fast NE (L1→L0) — so L4 itself
+# receives nothing from further out ("—") and L0 receives fast NE from L1.
 LEVELS = [
     {
         "name": "L4",
-        "tau": "months–years",
-        "substrate": "Neuroendocrine / HPA",
-        "neuromod": "cortisol",
+        "tau": "10²–10⁴ s\n(min–hours)",
+        "substrate": "Neuroendocrine (HPA axis)",
+        "neuromod": "—",
         "color": "#a50f15",
         "r": 0.44,
         "apgi": r"$\Pi_4, \theta_4, \tau_{\mathrm{ign},4}$",
     },
     {
         "name": "L3",
-        "tau": "minutes–hours",
-        "substrate": "Prefrontal–limbic",
-        "neuromod": "NE (phasic)",
+        "tau": "10–10² s\n(s–min)",
+        "substrate": "Association cortex\n(limbic, parietal)",
+        "neuromod": "cortisol",
         "color": "#de2d26",
         "r": 0.34,
         "apgi": r"$\Pi_3, \theta_3, \tau_{\mathrm{ign},3}$",
     },
     {
         "name": "L2",
-        "tau": "seconds",
-        "substrate": "Cortical reservoir",
-        "neuromod": "ACh",
+        "tau": "0.3–2 s\n(~2 s)",
+        "substrate": "Cortical reservoirs\n(~2 s memory)",
+        "neuromod": "phasic NE",
         "color": "#fc8d59",
         "r": 0.24,
         "apgi": r"$\Pi_2, \theta_2, \tau_{\mathrm{ign},2}$",
     },
     {
         "name": "L1",
-        "tau": "200–500 ms",
-        "substrate": "Cortical reservoir",
-        "neuromod": "NE (fast)",
+        "tau": "50–300 ms",
+        "substrate": "Local cortical\nmicrocircuits",
+        "neuromod": "ACh",
         "color": "#fdcc8a",
         "r": 0.14,
         "apgi": r"$\Pi_1, \theta_1, \tau_{\mathrm{ign},1}$",
     },
     {
         "name": "L0\n(sub-APGI)",
-        "tau": "~10–50 ms",
-        "substrate": "Reflexive (spinal/brainstem)",
-        "neuromod": "—",
+        "tau": "1–20 ms",
+        "substrate": "Brainstem, spinal reflex",
+        "neuromod": "fast NE",
         "color": "#f0f0f0",
         "r": 0.06,
         "apgi": "no Π/θ/τ_ign",
@@ -83,7 +89,7 @@ def plot(show: bool = True) -> None:
 
     # ── Concentric rings ──────────────────────────────────────────────────
     ax_rings.set_xlim(-0.85, 1.25)
-    ax_rings.set_ylim(-0.75, 0.85)
+    ax_rings.set_ylim(-0.72, 0.68)
     ax_rings.set_aspect("equal")
     ax_rings.axis("off")
 
@@ -133,14 +139,16 @@ def plot(show: bool = True) -> None:
             zorder=31,
         )
 
-    # ── Neuromodulatory boundary carriers, derived from each outer level's
-    #    own neuromodulator so they can never contradict the parameter table
-    #    (fixes the prior L2 'NE (fast)' vs ACh inconsistency). ──────────────
+    # ── Neuromodulatory boundary carriers, derived from each INNER level's
+    #    own neuromodulator field (the "Neuromod." column records the carrier
+    #    arriving at that level from the next-outer level), so the carrier
+    #    list can never contradict the parameter table: cortisol (L4→L3),
+    #    phasic NE (L3→L2), ACh (L2→L1), fast NE (L1→L0). ───────────────────
     CARRIERS = [
         (
             LEVELS[i]["name"].split("\n")[0],
             LEVELS[i + 1]["name"].split("\n")[0],
-            LEVELS[i]["neuromod"],
+            LEVELS[i + 1]["neuromod"],
         )
         for i in range(len(LEVELS) - 1)
     ]
@@ -282,14 +290,16 @@ def plot(show: bool = True) -> None:
         colLabels=col_labels,
         loc="center",
         cellLoc="center",
+        colWidths=[0.11, 0.16, 0.34, 0.16, 0.23],
     )
     tbl.auto_set_font_size(False)
-    tbl.set_fontsize(7)
-    tbl.scale(1.0, 1.45)
+    tbl.set_fontsize(6.5)
+    tbl.scale(1.0, 2.6)
     for (row, col), cell in tbl.get_celld().items():
+        cell.set_text_props(wrap=True)
         if row == 0:
             cell.set_facecolor("#333333")
-            cell.set_text_props(color="white", fontweight="bold")
+            cell.set_text_props(color="white", fontweight="bold", wrap=True)
         elif row <= len(LEVELS):
             cell.set_facecolor(LEVELS[row - 1]["color"] + "44")
     ax_table.set_title("Level parameters (summary)", fontsize=9, fontweight="bold")
@@ -304,14 +314,7 @@ def plot(show: bool = True) -> None:
         style="italic",
     )
 
-    fig.suptitle(
-        "Figure 1 — Five-Level Russian Doll Hierarchical Architecture (§2.3)\n"
-        "Paper 3",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
-    )
-    fig.tight_layout()
+    fig.tight_layout(rect=[0, 0, 1, 0.90])
     save_figure(fig, OUTPUT_DIR / "fig1_russian_doll_hierarchy.pdf")
     if show:
         plt.show()

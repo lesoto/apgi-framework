@@ -170,9 +170,16 @@ def plot(show: bool = True) -> None:
     # ── Panel B: Critical ISI parameter sensitivity ────────────────────────
     param_range = np.linspace(0.5, 1.5, 100)
 
+    # Note: this panel's "spectral radius" quantity is named ρ_crit
+    # throughout Fig. 4 (per its own abbreviation key / source-data box:
+    # "ρ_crit, critical spectral radius (control parameter near
+    # saddle-node), normalised by ρ_ref"), distinct from Fig. 3's ρ_res
+    # (the swept reservoir spectral-radius value whose bifurcation-point
+    # estimate is ρ_res_crit ≈ 0.95). Labels below use ρ_crit to match this
+    # figure's own spec.
     crit_ISI_pi = 80 + 60 * (1.0 - param_range)  # higher Π → shorter ISI
     crit_ISI_theta = 50 + 100 * (param_range - 0.5)  # higher θ → longer ISI
-    crit_ISI_rho = 40 + 110 * (param_range - 0.5)  # higher ρ_res → longer ISI
+    crit_ISI_rho = 40 + 110 * (param_range - 0.5)  # higher ρ_crit → longer ISI
 
     ax2.plot(
         param_range,
@@ -193,20 +200,42 @@ def plot(show: bool = True) -> None:
         crit_ISI_rho,
         lw=2,
         color="#4dac26",
-        label=r"$\rho_{\mathrm{res}}$ ↑ → critical ISI ↑",
+        label=r"$\rho_{\mathrm{crit}}$ ↑ → critical ISI ↑↑ (distinguishing)",
     )
 
-    ax2.set_xlabel("Parameter value (normalised)", fontsize=10)
+    # Up-arrow annotations near each curve's right end (matches PDF layout).
+    # theta and rho curves happen to coincide at x=1.5 (both -> 150 ms), so
+    # their labels are offset in opposite vertical directions to avoid
+    # overlapping each other or the legend.
+    ax2.annotate(r"↑$\theta_t$" + "\n(longer ISI)", xy=(1.5, crit_ISI_theta[-1]),
+                 xytext=(1.58, crit_ISI_theta[-1] + 22), fontsize=7.2, color="#d6604d")
+    ax2.annotate(r"↑$\Pi_{\mathrm{target}}$" + "\n(shorter ISI)", xy=(1.5, crit_ISI_pi[-1]),
+                 xytext=(1.58, crit_ISI_pi[-1] - 10), fontsize=7.2, color="#2166ac")
+    ax2.annotate(r"↑$\rho_{\mathrm{crit}}$" + "\n(much longer ISI)", xy=(1.5, crit_ISI_rho[-1]),
+                 xytext=(1.58, crit_ISI_rho[-1] - 28), fontsize=7.2, color="#4dac26")
+
+    ax2.set_xlabel("Normalised parameter value", fontsize=10)
     ax2.set_ylabel("Critical ISI (ms, indicative)", fontsize=10)
     ax2.set_title(
-        "Critical ISI parameter sensitivity\n"
-        "(distinguishing prediction: masking ∝ ρ_res)",
+        "Critical ISI vs. normalised parameter value\n"
+        "(distinguishing prediction: masking ∝ ρ_crit)",
         fontsize=10,
         fontweight="bold",
     )
-    ax2.legend(fontsize=8)
+    ax2.set_xlim(0.5, 2.05)
+    ax2.legend(fontsize=7.5, loc="upper left")
     ax2.spines["top"].set_visible(False)
     ax2.spines["right"].set_visible(False)
+
+    # Distinguishing-prediction callout box (per prompt/PDF layout).
+    ax2.text(
+        0.97, 0.03,
+        "APGI-LNN prediction: critical ISI\ndepends strongly on "
+        r"$\rho_{\mathrm{crit}}$" + "\n(the distinguishing prediction)",
+        transform=ax2.transAxes, ha="right", va="bottom", fontsize=6.8,
+        color="#2c6b2f", style="italic",
+        bbox=dict(facecolor="#eef7ee", edgecolor="#4dac26", alpha=0.9, pad=3),
+    )
 
     label_axes([ax1, ax2])
     caption = (
@@ -215,13 +244,6 @@ def plot(show: bool = True) -> None:
     )
     fig.text(
         0.5, -0.03, caption, ha="center", fontsize=7.5, color="#666666", style="italic"
-    )
-    fig.suptitle(
-        "Figure 4 — Visual Masking in APGI-LNN: Reservoir State Trajectories\n"
-        "(Paper 2, §4.10)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
     )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig4_visual_masking_trajectories.pdf")

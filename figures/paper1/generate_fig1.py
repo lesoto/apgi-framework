@@ -264,11 +264,19 @@ def plot(show: bool = True) -> None:
         framealpha=0.8,
     )
 
-    ax_main.set_title(
-        "Figure 1 — APGI Architecture: Five-Stage Processing Pipeline",
-        fontsize=9,
-        fontweight="bold",
-        pad=8,
+    # Canonical access criterion (source data & statistics box, §4.1):
+    # S_t = Pi^e . |z^e| + Pi^i_eff . |z^i| > theta_t. No baked figure
+    # title/number per the shared rendering specification.
+    ax_main.text(
+        0.5,
+        0.995,
+        r"Canonical access criterion:  $S_t = \Pi^e\!\cdot\!|z^e| + \Pi^i_{\mathrm{eff}}\!\cdot\!|z^i| > \theta_t$",
+        ha="center",
+        va="top",
+        fontsize=8,
+        style="italic",
+        color="#333333",
+        transform=ax_main.transAxes,
     )
 
     draw_sigmoid_inset(ax_sig)

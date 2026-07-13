@@ -51,9 +51,9 @@ def _box(ax, x, y, w, h, label, color, fontsize=8, edge="#333333", lw=1.5):
 
 
 def plot(show: bool = True) -> None:
-    fig, ax = plt.subplots(figsize=(13, 7))
+    fig, ax = plt.subplots(figsize=(13, 7.6))
     ax.set_xlim(0, 1.0)
-    ax.set_ylim(0, 1.0)
+    ax.set_ylim(-0.12, 1.0)
     ax.axis("off")
 
     # ── Level column (left) ───────────────────────────────────────────────
@@ -83,7 +83,7 @@ def plot(show: bool = True) -> None:
     for xy, label, color in [
         (node_acc, "ACC\n(L3 node)", "#cce5ff"),
         (node_lc, "Locus\nCoeruleus", "#d0e4ff"),
-        (node_theta1, r"$\theta_1 \downarrow$ (L1)" + "\ngain ↑ (L0)", "#e8f4fd"),
+        (node_theta1, r"$\theta_1\downarrow$(L1)" + "\ngain↑(L0)", "#e8f4fd"),
     ]:
         circ = mpatches.Circle(
             xy, 0.07, facecolor=color, edgecolor=NE_COLOR, lw=1.8, zorder=5
@@ -129,16 +129,16 @@ def plot(show: bool = True) -> None:
 
     ax.text(
         0.55,
-        0.88,
-        r"Pathway A — Fast NE  ($\kappa_{3,2}\!\cdot\!\kappa_{2,1}$, net L3→L1)",
-        fontsize=9,
+        0.90,
+        r"Pathway A — Fast NE (nearest-neighbour cascade, net L3→L1)",
+        fontsize=8.5,
         fontweight="bold",
         color=NE_COLOR,
         ha="center",
     )
     ax.text(
         0.55,
-        0.84,
+        0.865,
         "(ACC→LC→L1; milliseconds)",
         fontsize=7.5,
         color=NE_COLOR,
@@ -206,18 +206,18 @@ def plot(show: bool = True) -> None:
     )
 
     ax.text(
-        0.55,
-        0.50,
-        r"Pathway B — Slow Cortisol  ($\kappa_{4,3}\!\cdot\!\kappa_{3,2}\!\cdot\!\kappa_{2,1}$, net L4→L1)",
-        fontsize=9,
+        0.30,
+        0.585,
+        r"Pathway B — Slow Cortisol (nearest-neighbour cascade, net L4→L1)",
+        fontsize=8.5,
         fontweight="bold",
         color=CRT_COLOR,
         ha="center",
     )
     ax.text(
+        0.30,
         0.55,
-        0.46,
-        "(L3/L4→PVN→HPA→L1/L0; minutes–hours)",
+        "(PVN→HPA→L1/L0; minutes–hours)",
         fontsize=7.5,
         color=CRT_COLOR,
         ha="center",
@@ -226,7 +226,7 @@ def plot(show: bool = True) -> None:
     # Caveat
     ax.text(
         0.50,
-        0.01,
+        -0.08,
         "Causal evidence for specific projection strengths is limited; "
         "pathway assignments follow anatomical and pharmacological literature (§3).",
         ha="center",
@@ -236,12 +236,6 @@ def plot(show: bool = True) -> None:
         style="italic",
     )
 
-    ax.set_title(
-        "Figure 3 — Cross-Level Neuromodulatory Coupling Pathways (Paper 3, §3)\n"
-        "Pathway A: Fast NE  |  Pathway B: Slow Cortisol",
-        fontsize=11,
-        fontweight="bold",
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig3_neuromodulatory_coupling.pdf")
     if show:

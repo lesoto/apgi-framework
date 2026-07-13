@@ -65,10 +65,10 @@ SITE_COLORS = {"vertex": "#AAAAAA", "dlPFC": PALETTE["theta"], "aINS": PALETTE["
 
 # MNI coordinates for the montage panel (Protocol 5 spec)
 MONTAGE_SITES = {
-    "dlPFC": {"mni": "(-44, 36, 24)", "xy": (0.30, 0.72), "color": PALETTE["theta"]},
-    "PPC": {"mni": "(-40, -60, 44)", "xy": (0.58, 0.66), "color": "#9966FF"},
+    "dlPFC": {"mni": "(-44, 36, 20)", "xy": (0.30, 0.72), "color": PALETTE["theta"]},
+    "PPC": {"mni": "(±28, -60, 46)", "xy": (0.58, 0.66), "color": "#7B3FE4"},
     "aINS": {"mni": "(±34, 14, 0)", "xy": (0.46, 0.42), "color": PALETTE["S_t"]},
-    "Vertex\n(sham)": {"mni": "(0, 0, 80)", "xy": (0.44, 0.94), "color": "#AAAAAA"},
+    "Vertex\n(sham)": {"mni": "(0, -30, 70)", "xy": (0.44, 0.94), "color": "#AAAAAA"},
 }
 
 
@@ -186,11 +186,6 @@ def plot(data: dict, show: bool = True) -> None:
     ax.legend(fontsize=7)
 
     label_axes(axes)
-    fig.suptitle(
-        "Figure 6 — Protocol 5 — Insula-TMS: Causal Dissociation of Interoceptive and Workspace Gating (Pred 5.A–Pred 5.D)",
-        fontsize=11,
-        y=1.03,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figure6.pdf")
 

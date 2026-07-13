@@ -26,6 +26,18 @@ OUTPUT_DIR = pathlib.Path(__file__).parent / "output"
 LEVEL_BASE_COLORS = ["#a50f15", "#de2d26", "#fc8d59", "#fdcc8a", "#f0f0f0"]
 LEVEL_NAMES = ["L4", "L3", "L2", "L1", "L0"]
 
+# Shared left-hand key: IDENTICAL Level 0-4 hierarchy/substrate definitions as
+# Paper 3 Figure 1 (generate_fig1.py), paired with the functional/active-
+# inference read-out for each level (CRITICAL correction: one hierarchy, two
+# descriptions — not a second, differently-defined Level 0-4 scheme).
+LEVEL_KEY = [
+    ("L4", "Neuroendocrine\n(HPA axis)", "Policies"),
+    ("L3", "Association cortex\n(limbic, parietal)", "Perceptual models"),
+    ("L2", "Cortical reservoirs\n(~2 s memory)", "Percepts"),
+    ("L1", "Local cortical\nmicrocircuits", "Sensory signals"),
+    ("L0", "Brainstem,\nspinal reflex", "Environmental states"),
+]
+
 # Dysregulation specs per disorder
 # dir: +1=elevated, -1=reduced; size: 0–2
 DISORDERS = [
@@ -346,9 +358,62 @@ def draw_disorder_column(ax, disorder):
     )
 
 
+def draw_shared_key(ax):
+    """Shared left-hand key: same row geometry as draw_disorder_column
+    (top_y=0.88, spacing=0.175, box_h=0.13) so rows line up with the three
+    disorder columns. Each row shows BOTH the Fig-1 substrate name and the
+    active-inference functional read-out for that level."""
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.1, 1.05)
+    ax.axis("off")
+    ax.set_title("Level key\n(Fig. 1 hierarchy)", fontsize=10, fontweight="bold")
+
+    BOX_H = 0.13
+    SPACING = 0.175
+    for i, ((lv_name, substrate, functional), base_color) in enumerate(
+        zip(LEVEL_KEY, LEVEL_BASE_COLORS)
+    ):
+        y = 0.88 - i * SPACING
+        rect = mpatches.FancyBboxPatch(
+            (0.05, y),
+            0.90,
+            BOX_H,
+            boxstyle="round,pad=0.01",
+            facecolor=base_color,
+            edgecolor="#888888",
+            lw=1.0,
+            alpha=0.55,
+            zorder=3,
+        )
+        ax.add_patch(rect)
+        ax.text(
+            0.10,
+            y + BOX_H * 0.68,
+            f"{lv_name} — {substrate}",
+            ha="left",
+            va="center",
+            fontsize=6.3,
+            fontweight="bold",
+            color="#222222",
+        )
+        ax.text(
+            0.10,
+            y + BOX_H * 0.24,
+            f"active-inference: {functional}",
+            ha="left",
+            va="center",
+            fontsize=6.0,
+            color="#555555",
+            style="italic",
+        )
+
+
 def plot(show: bool = True) -> None:
-    fig, axes = plt.subplots(1, 3, figsize=(14, 7))
-    for ax, disorder in zip(axes, DISORDERS):
+    fig, axes = plt.subplots(
+        1, 4, figsize=(17, 7), gridspec_kw={"width_ratios": [0.62, 1, 1, 1]}
+    )
+    draw_shared_key(axes[0])
+    for ax, disorder in zip(axes[1:], DISORDERS):
         draw_disorder_column(ax, disorder)
 
     # Legend
@@ -369,13 +434,6 @@ def plot(show: bool = True) -> None:
         bbox_to_anchor=(0.5, -0.04),
     )
 
-    fig.suptitle(
-        "Figure 4 — Psychiatric Disorder Profiles as Level-Cascade Dysregulation\n"
-        "(Paper 3, §4.1 — primary vs. propagated dysregulation)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "fig4_psychiatric_disorder_profiles.pdf")
     if show:

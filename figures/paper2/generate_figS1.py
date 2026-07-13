@@ -1,6 +1,6 @@
-"""Paper 2 — Figure S1: EP-2 and EP-6 Protocol Schematics.
+"""Paper 2 — Figure S1: EP-5 and EP-6 Protocol Schematics.
 
-Panel A: Brain-surface rendering with TMS targets (EP-2).
+Panel A: Brain-surface rendering with TMS targets (EP-5).
 Panel B: iEEG trial timeline for ρ_res estimation (EP-6).
 
 Run:
@@ -32,7 +32,7 @@ def draw_brain_panel(ax):
     ax.set_ylim(0, 1.12)
     ax.axis("off")
     ax.set_title(
-        "A — EP-2: TMS Targets\n(lateral brain surface)", fontsize=9, fontweight="bold"
+        "A — EP-5: TMS Targets\n(lateral brain surface)", fontsize=9, fontweight="bold"
     )
 
     # Brain outline (simplified ellipse)
@@ -69,11 +69,17 @@ def draw_brain_panel(ax):
     # ellipse) and given a small white halo behind its label so all four
     # TMS conditions remain legible regardless of z-order with the brain
     # patches.
+    # CRITICAL fix: this panel previously showed "aINS [34,14,0]" -- the
+    # anterior-insula tFUS/deep-TMS target from a *different* paper's
+    # protocol (see figures/generate_figure6.py). Paper 2's EP-5 protocol
+    # targets the RIGHT POSTERIOR insula (pIC), MNI [40,-6,-4], as the
+    # interoceptive-precision gating node -- corrected below, along with
+    # explicit vertex-sham coordinates [0,54,56].
     targets = [
-        (0.48, 0.38, "#d6604d", "aINS\n[34,14,0]", "right anterior insula"),
+        (0.48, 0.38, "#d6604d", "pIC\n[40,−6,−4]", "right posterior insula"),
         (0.28, 0.72, "#2166ac", "dlPFC\n[−44,36,20]", "left dlPFC"),
         (0.68, 0.68, "#4dac26", "PPC (bilateral)\n[±28,−60,46]", "bilateral PPC"),
-        (0.50, 0.97, "#666666", "Vertex\nsham", "vertex sham"),
+        (0.50, 0.97, "#666666", "Vertex sham\n[0,54,56]", "vertex sham"),
     ]
     for x, y, color, short, long_name in targets:
         # Bilateral PPC: show a faint contralateral (out-of-plane) homolog marker
@@ -131,7 +137,8 @@ def draw_brain_panel(ax):
     ax.text(
         0.50,
         0.05,
-        "aINS → HEP/P3b dissociation\ndlPFC/PPC → global ignition reduction",
+        "pIC stimulation → ↑ HEP/P3b (interoceptive precision gain)\n"
+        "dlPFC & PPC stimulation → ↓ global ignition (reduced high-γ spread)",
         ha="center",
         va="bottom",
         fontsize=7,
@@ -142,7 +149,7 @@ def draw_brain_panel(ax):
         0.50,
         -0.02,
         "Deeper substrates including thalamic and claustral contributions are not directly testable\n"
-        "by transcranial stimulation; EP-2 constrains only the cortically accessible nodes of the gating network. (§5.3)",
+        "by transcranial stimulation; EP-5 constrains only the cortically accessible nodes of the gating network. (§5.3)",
         ha="center",
         va="bottom",
         fontsize=5.5,
@@ -301,13 +308,6 @@ def plot(show: bool = True) -> None:
     draw_brain_panel(ax1)
     draw_ieeg_panel(ax2)
     label_axes([ax1, ax2])
-    fig.suptitle(
-        "Figure S1 — EP-2 (TMS Protocol) and EP-6 (iEEG Protocol) Schematics\n"
-        "(Paper 2, supplementary; cross-referenced from §5.3 and §5.4)",
-        fontsize=11,
-        fontweight="bold",
-        y=1.01,
-    )
     fig.tight_layout()
     save_figure(fig, OUTPUT_DIR / "figS1_ep2_ep6_protocol_schematics.pdf")
     if show:
