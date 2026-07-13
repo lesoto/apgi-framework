@@ -113,6 +113,16 @@ def plot(show: bool = True) -> None:
         )
         add_identity_line(ax, param["lo"], param["hi"])
         annotate_pearson_r(ax, r)
+        # N annotation per panel, matching the reference figure.
+        ax.text(
+            0.05,
+            0.83,
+            f"N = {N_SIMS:,}\nsimulation runs",
+            transform=ax.transAxes,
+            fontsize=8,
+            va="top",
+            color="#444444",
+        )
         ax.set_xlabel(f"True {param['name']}", fontsize=10)
         ax.set_ylabel(f"Recovered {param['name']}", fontsize=10)
         ax.set_title(param["name"], fontsize=11, fontweight="bold")

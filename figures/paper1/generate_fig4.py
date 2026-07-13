@@ -100,7 +100,11 @@ def plot(show: bool = True) -> None:
             (ph["t_start"], CHEVRON_Y),
             ph["t_end"] - ph["t_start"],
             CHEVRON_H,
-            boxstyle="round,pad=2",
+            # pad is in *data units* here — a large value balloons the box far
+            # beyond the intended chevron band and bleeds colour down over the
+            # annotation rows below. Keep it small so each chevron stays a clean
+            # top-row block and the annotation rows render on white background.
+            boxstyle="round,pad=0.02",
             linewidth=1.2,
             edgecolor="#333333",
             facecolor=ph["color"],

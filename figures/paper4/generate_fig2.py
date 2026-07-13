@@ -92,8 +92,11 @@ FAL_GAPS = [
 
 
 def plot(show: bool = True) -> None:
-    fig = plt.figure(figsize=(15, 6.5))
-    gs = fig.add_gridspec(2, 1, height_ratios=[3.5, 1], hspace=0.10)
+    fig = plt.figure(figsize=(15, 7.6))
+    # Generous vertical gap: the bar panel's two-line x-tick labels plus the
+    # italic self-audit note need clearance from the falsification-gap strip
+    # below, otherwise Panel B's boxes collide with Panel A's tick labels.
+    gs = fig.add_gridspec(2, 1, height_ratios=[3.2, 1.1], hspace=0.55)
     ax_bars = fig.add_subplot(gs[0])
     ax_gap = fig.add_subplot(gs[1])
 
@@ -162,7 +165,7 @@ def plot(show: bool = True) -> None:
     )
     ax_bars.text(
         0.5,
-        -0.065,
+        -0.135,
         "APGI scores are self-audit values (§3.4, §7.2–7.3), "
         "applied with identical standards as competitor audits.",
         ha="center",

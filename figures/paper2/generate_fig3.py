@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import pathlib
 import sys
+import textwrap
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -275,11 +276,16 @@ def plot(show: bool = True) -> None:
         "related but NOT interchangeable (§4.2); curves are parameterised "
         "by precision Π(t), illustrative pre-data predictions."
     )
+    # Wrap the note: as a single unbroken line it forces bbox_inches="tight"
+    # to expand the saved figure to the full text width (~5:1 aspect); wrapping
+    # keeps the exported figure at its intended ~2.4:1 panel aspect.
+    caption_note = textwrap.fill(caption_note, width=100)
     fig.text(
         0.5,
         -0.05,
         caption_note,
         ha="center",
+        va="top",
         fontsize=7.5,
         color="#666666",
         style="italic",

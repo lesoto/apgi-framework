@@ -87,7 +87,11 @@ def plot(show: bool = True) -> None:
     )
     ax1.spines["top"].set_visible(False)
     ax1.spines["right"].set_visible(False)
-    ax1.legend(fontsize=8, loc="lower right")
+    # Legend goes upper-right: the dominant θ_0 bars sit at the bottom and
+    # their ±34% value labels extend to the lower-right corner, so a
+    # lower-right legend would obscure them. The top rows (λ_Π, ±2%) leave the
+    # upper-right corner empty.
+    ax1.legend(fontsize=8, loc="upper right")
 
     # annotate values
     for i, v in enumerate(vals):

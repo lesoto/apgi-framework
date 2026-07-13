@@ -223,6 +223,11 @@ def plot(show: bool = True) -> None:
         fontweight="bold",
     )
     ax2.set_xlim(0.5, 2.05)
+    # Explicit y-limits with headroom for the right-hand ↑ annotations. Without
+    # this, the auto-scaled axis stops at the curve maximum (~150) and the
+    # θ_t label (placed at ~172) is drawn above the axes, floating at the very
+    # top of the figure detached from its curve.
+    ax2.set_ylim(20, 185)
     ax2.legend(fontsize=7.5, loc="upper left")
     ax2.spines["top"].set_visible(False)
     ax2.spines["right"].set_visible(False)

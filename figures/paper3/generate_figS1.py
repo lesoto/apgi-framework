@@ -225,10 +225,12 @@ def draw_timeline(ax):
         # Horizontal connector
         ax.plot(tp_x, [y] * len(tp_x), lw=1.2, color=g["color"], alpha=0.40, zorder=2)
 
-    # Assessment legend
+    # Assessment legend — placed below the group rows (the bottom "Controls"
+    # row's per-timepoint bullet list extends down to ~0.05, so a summary line
+    # at 0.05 collided with it; the axis y-limits leave room down to -0.1).
     ax.text(
         0.50,
-        0.05,
+        -0.07,
         "Assessments at each timepoint: " + " | ".join(ASSESSMENTS),
         ha="center",
         fontsize=7,
